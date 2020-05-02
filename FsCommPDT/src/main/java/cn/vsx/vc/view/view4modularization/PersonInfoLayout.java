@@ -21,6 +21,7 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeNameHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.UserInfoActivity;
@@ -79,11 +80,13 @@ public class PersonInfoLayout extends LinearLayout {
     private void initListener () {
 //        MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
     }
 
     public void unInitListener () {
 //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
     }
 
 
@@ -103,10 +106,23 @@ public class PersonInfoLayout extends LinearLayout {
     private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
         @Override
         public void handler(final MemberChangeType memberChangeType) {
-            myHandler.post(() -> userName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
+            myHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    userName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
+                }
+            },1000);
+//            myHandler.post(() -> userName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
         }
     };
+    /**更新所有成员列表*/
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
+        @Override
+        public void handler() {
+            myHandler.post(() -> userName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
+        }
 
+    };
 
     public void toUserInfoActivity (View view) {
         int i = view.getId();

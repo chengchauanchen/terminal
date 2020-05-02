@@ -1,5 +1,6 @@
 package cn.vsx.vc.search;
 
+import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.vc.R;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -22,7 +24,7 @@ import ptt.terminalsdk.manager.search.SearchUtil;
 public class SearchTabGroupFragment extends BaseSearchFragment {
 
     private RecyclerView group_recyclerView;
-
+    private Handler mHandler = new Handler();
     @Override
     public int getContentViewId() {
         return R.layout.fragment_search_group;
@@ -49,6 +51,8 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
     @Override
     public void initListener() {
         TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+
         /*---------------------------*/
         registReceiveHandler();
     }
@@ -57,6 +61,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
     public void onDestroyView() {
         super.onDestroyView();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
 
         /*---------------------------*/
         unregistReceiveHandler();
@@ -94,7 +99,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
 
                     @Override
                     protected void onSuccess(List<GroupSearchBean> allRowSize) {
-                        logger.info(allRowSize);
+                        logger.info("获取本地数据库 组数据"+allRowSize);
                         datas.clear();
                         datas.addAll(allRowSize);
                         searchAdapter.notifyDataSetChanged();
@@ -102,5 +107,21 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
                 });
     }
 
+    /**
+     * 收到強制转组
+     */
+    private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
+        @Override
+        public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType) {
+            if (!forceSwitchGroup) {
+                return;
+            }
+            mHandler.post(() -> {
+                getDbAllGroup();
+                logger.info("SearchTabGroupFragment搜做界面收到强制切组消息"+memberId+toGroupId);
+//                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
+            });
+        }
+    };
 
 }
