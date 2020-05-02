@@ -1848,7 +1848,7 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
 
         if(!NetworkUtil.isConnected(this)){
-            updateLoginStateView(0);
+            updateLoginStateView(0,R.string.net_work_disconnect);
         }
     }
 
@@ -2891,12 +2891,12 @@ public abstract class ChatBaseActivity extends BaseActivity
         @Override
         public void handler(boolean connected){
             if (!connected) {
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.net_work_disconnect);
             }else{
                 if(TerminalFactory.getSDK().isServerConnected()){
-                    updateLoginStateView(-1);
+                    updateLoginStateView(-1,0);
                 }else {
-                    updateLoginStateView(0);
+                    updateLoginStateView(0,R.string.authing);
                 }
             }
         }
@@ -2912,7 +2912,7 @@ public abstract class ChatBaseActivity extends BaseActivity
         public void handler(final boolean connected) {
             logger.info("个人会话页面收到服务是否连接的通知" + connected);
             if (!connected) {
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.net_work_disconnect);
             }
         }
     };
@@ -2920,7 +2920,7 @@ public abstract class ChatBaseActivity extends BaseActivity
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
         @Override
         public void handler(boolean connected){
-            updateLoginStateView(0);
+            updateLoginStateView(0,connected?R.string.logining:R.string.text_disconnection_of_network_connection);
         }
     };
 
@@ -2932,13 +2932,14 @@ public abstract class ChatBaseActivity extends BaseActivity
         public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 if (isRegisted) {//注册过，在后台登录，session超时也走这
-                    updateLoginStateView(0);
+                    updateLoginStateView(0,R.string.connecting_server);
                 }
             }else if(resultCode == TerminalErrorCode.REGISTER_DEVICE_KILL.getErrorCode()){
             }else if(resultCode == TerminalErrorCode.REGISTER_ACCOUNT_DELETE.getErrorCode()
                     ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()){
             }else {
-                updateLoginStateView(0);
+                boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
+                updateLoginStateView(0,hasCompleteData?R.string.connecting_server:R.string.auth_fail);
             }
         }
     };
@@ -2950,13 +2951,13 @@ public abstract class ChatBaseActivity extends BaseActivity
         @Override
         public void handler(int code, LoginState state){
             if(code == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.logining);
             }else if(state!=null&&state == LoginState.IDLE){
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.authing);
             }else if(state!=null&&state == LoginState.LOGIN){
                 //正在登录时，再次登录不修改UI
             }else{
-                updateLoginStateView(-1);
+                updateLoginStateView(-1,0);
             }
         }
     };
@@ -2965,9 +2966,9 @@ public abstract class ChatBaseActivity extends BaseActivity
         @Override
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(1);
+                updateLoginStateView(1,R.string.login_success);
             }else {
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.login_fail);
             }
         }
     };
@@ -2987,7 +2988,7 @@ public abstract class ChatBaseActivity extends BaseActivity
      * 更新登录的状态
      * @param type -1：Gone 0：离线中  1：登录成功
      */
-    private void updateLoginStateView(int type){
+    private void updateLoginStateView(int type,int stringId){
         try{
             myHandler.post(()->{
                 if(type == 0){
@@ -2995,11 +2996,11 @@ public abstract class ChatBaseActivity extends BaseActivity
                         noNetWork.setVisibility(View.VISIBLE);
                     }
                     if(tv_status!=null){
-                        tv_status.setText(R.string.text_use_in_offline);
+                        tv_status.setText(stringId);
                     }
                 }else if(type == 1){
                     if(tv_status!=null){
-                        tv_status.setText(R.string.login_success);
+                        tv_status.setText(stringId);
                     }
                     myHandler.postDelayed(()-> {
                         if(noNetWork!=null){

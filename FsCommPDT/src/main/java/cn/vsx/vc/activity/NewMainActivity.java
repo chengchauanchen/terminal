@@ -190,10 +190,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(1);
+                updateLoginStateView(1,R.string.login_success);
                 MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
             }else {
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.login_fail);
             }
         }
     };
@@ -205,13 +205,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int code,LoginState state){
             if(code == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.logining);
             }else if(state!=null&&state == LoginState.IDLE){
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.authing);
             }else if(state!=null&&state == LoginState.LOGIN){
                 //正在登录时，再次登录不修改UI
             }else{
-                updateLoginStateView(-1);
+                updateLoginStateView(-1,0);
             }
         }
     };
@@ -219,7 +219,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
         @Override
         public void handler(boolean connected){
-            updateLoginStateView(0);
+            updateLoginStateView(0,connected?R.string.logining:R.string.text_disconnection_of_network_connection);
         }
     };
 
@@ -232,7 +232,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 myHandler.post(()->{
                     if (isRegisted) {//注册过，在后台登录，session超时也走这
-                        updateLoginStateView(0);
+                        updateLoginStateView(0,R.string.connecting_server);
                     } else {//没注册过，关掉主界面，去注册界面
                         startActivity(new Intent(NewMainActivity.this, RegistActivity.class));
                         NewMainActivity.this.finish();
@@ -247,7 +247,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 //账号不存在
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExitHandler.class, getString(R.string.accunt_no_exist),true);
             }else {
-                updateLoginStateView(0);
+                boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
+                updateLoginStateView(0,hasCompleteData?R.string.connecting_server:R.string.auth_fail);
             }
         }
     };
@@ -290,7 +291,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handler(boolean connected){
             if (!connected) {
                 myHandler.post(() -> {
-                    updateLoginStateView(0);
+                    updateLoginStateView(0,R.string.net_work_disconnect);
                     if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
                         ll_emergency_prompt.setVisibility(View.GONE);
                         ICTV_emergency_time.onStop();
@@ -302,9 +303,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 });
             }else{
                 if(TerminalFactory.getSDK().isServerConnected()){
-                    updateLoginStateView(-1);
+                    updateLoginStateView(-1,0);
                 }else {
-                    updateLoginStateView(0);
+                    updateLoginStateView(0,R.string.authing);
                 }
             }
         }
@@ -319,7 +320,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             logger.info("主界面收到服务是否连接的通知ReceiveOnLineStatusChangedHandler" + connected);
             if (!connected) {
                 myHandler.post(() -> {
-                    updateLoginStateView(0);
+                    updateLoginStateView(0,R.string.net_work_disconnect);
                     if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
                         ll_emergency_prompt.setVisibility(View.GONE);
                         ICTV_emergency_time.onStop();
@@ -1073,7 +1074,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     TerminalFactory.getSDK().disConnectToServer();
                 }
                 TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.authing);
             }
         });
         if(null != callManager){
@@ -1201,7 +1202,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     TerminalFactory.getSDK().disConnectToServer();
                 }
                 TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
-                updateLoginStateView(0);
+                updateLoginStateView(0,R.string.authing);
             }
         }
     }
@@ -1442,7 +1443,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //        }
 
         if(!NetworkUtil.isConnected(this)){
-            updateLoginStateView(0);
+            updateLoginStateView(0,R.string.net_work_disconnect);
         }
     }
 
@@ -1762,14 +1763,14 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
      * 更新登录的状态
      * @param type -1：Gone 0：离线中  1：登录成功
      */
-    private void updateLoginStateView(int type){
+    private void updateLoginStateView(int type,int stringId){
         try{
             myHandler.post(()->{
                 if(type == 0){
                     noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText(R.string.text_use_in_offline);
+                    tv_status.setText(stringId);
                 }else if(type == 1){
-                    tv_status.setText(R.string.login_success);
+                    tv_status.setText(stringId);
                     myHandler.postDelayed(()-> noNetWork.setVisibility(View.GONE),1000);
                 }else {
                     noNetWork.setVisibility(View.GONE);
