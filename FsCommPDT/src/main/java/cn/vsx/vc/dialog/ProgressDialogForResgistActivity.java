@@ -79,6 +79,15 @@ public class ProgressDialogForResgistActivity extends Dialog {
         img.setAnimation(anim);
     }
 
+
+    public void onDismiss(){
+        try{
+            dismiss();
+            progressDialogForResgistActivity = null;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     public void setMsg(String msg) {
         txt.setText(msg);
     }

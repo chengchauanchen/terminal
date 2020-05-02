@@ -39,6 +39,7 @@ import java.util.List;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
@@ -244,6 +245,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         if(TerminalFactory.getSDK().isServerConnected()){
             TerminalFactory.getSDK().getAuthManagerTwo().logout();
         }
+        LoginStateMachine loginStateMachine = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine();
+        if(loginStateMachine!=null){
+            loginStateMachine.stop();
+        }
+        TerminalFactory.getSDK().getClientChannel().stop();
+        MyTerminalFactory.getSDK().stop();
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         OperateReceiveHandlerUtil.getInstance().clear();

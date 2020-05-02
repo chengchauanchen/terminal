@@ -99,7 +99,6 @@ import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoByNoRegistHandler;
-import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
@@ -206,6 +205,14 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         super.onResume();
         showDialog = true;
         KeyboarUtils.getKeyBoardHeight(this);
+//        try{
+//            int type =  getIntent().getIntExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_DEFLAT);
+//            if(type == Constants.GO_TO_REGIST_TYPE_CLEAR){
+//                ActivityCollector.removeAllActivityExcept(RegistActivity.class);
+//            }
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
     }
 
     private String company = "添加单位";
@@ -1454,18 +1461,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     public void initData() {
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        try{
-            int type =  getIntent().getIntExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_DEFLAT);
-            if(type == 1){
-                ActivityCollector.removeAllActivityExcept(RegistActivity.class);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void onPause() {
@@ -1487,7 +1482,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCanUpdateHandler);
             myHandler.removeCallbacksAndMessages(null);
-            ProgressDialogForResgistActivity.getInstance(this).dismiss();
+            ProgressDialogForResgistActivity.getInstance(this).onDismiss();
             reAuthCount = 0;
 
             viewHolder = null;

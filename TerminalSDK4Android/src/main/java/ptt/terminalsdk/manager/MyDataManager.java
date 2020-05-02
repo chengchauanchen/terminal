@@ -49,6 +49,12 @@ public class MyDataManager extends DataManager{
     private boolean uavVoiceOpen = true;
 
     @Override
+    public void stop() {
+        super.stop();
+        depAllGroup.clear();
+    }
+
+    @Override
     protected void setUrl(JSONObject resultJsonObject){
         super.setUrl(resultJsonObject);
         // TODO: 2019/8/5 海康摄像头地址暂时写在build.gradle 里
