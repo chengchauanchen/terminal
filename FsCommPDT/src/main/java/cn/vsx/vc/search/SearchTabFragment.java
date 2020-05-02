@@ -20,6 +20,7 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -51,6 +52,7 @@ public class SearchTabFragment extends BaseSearchFragment {
     private SearchKeyboardView search_keyboard;
     private RecyclerView group_recyclerView;
     private ImageView iv_hint_search;
+    private Handler mHandler = new Handler();
 
     private boolean searchKeyboardIsVisible = true;
     private ImageView iv_call;
@@ -163,7 +165,7 @@ public class SearchTabFragment extends BaseSearchFragment {
     public void initListener() {
         TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
-
+        TerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);//强制切组
         /*---------------------------*/
         registReceiveHandler();
     }
@@ -173,6 +175,7 @@ public class SearchTabFragment extends BaseSearchFragment {
         super.onDestroyView();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);//强制切组
 
         /*---------------------------*/
         unregistReceiveHandler();
@@ -286,7 +289,6 @@ public class SearchTabFragment extends BaseSearchFragment {
     }
 
     private void getListenedGroup() {
-        //取出所有组信息
         getDbAllGroup();
         //当前没有监听组的数据，说明没有显示监听组，或显示的是搜索的结果,则不需要更新监听组
         if (datas.size() > 0) {
@@ -319,13 +321,15 @@ public class SearchTabFragment extends BaseSearchFragment {
                         ListenedGroupDatas = groupSearchBeans;
                         datas.clear();
                         if (ListenedGroupDatas != null) {
-                            GroupSearchBean currentGroupBean=TerminalFactory.getSDK().getBean(Params.CURRENT_GROUP_BEAN,new GroupSearchBean(),GroupSearchBean.class);
                             SearchTitleBean titleBean = new SearchTitleBean("监听组");
                             datas.add(titleBean);
                             datas.addAll(ListenedGroupDatas);
-                            if (!datas.contains(currentGroupBean)&&currentGroupBean!=null){
-                                datas.add(currentGroupBean);
-                            }
+                            //如果是收到强制转组的信令则不再去查询本地数据
+                                GroupSearchBean currentGroupBean=TerminalFactory.getSDK().getBean(Params.CURRENT_GROUP_BEAN,new GroupSearchBean(),GroupSearchBean.class);
+                                if (currentGroupBean!=null&&!datas.contains(currentGroupBean)){
+                                    datas.add(currentGroupBean);
+                                }
+
                             searchAdapter.notifyDataSetChanged();
                         }
                     }
@@ -403,5 +407,21 @@ public class SearchTabFragment extends BaseSearchFragment {
         }
     }
 
+    /**
+     * 收到強制转组
+     */
+    private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
+        @Override
+        public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType) {
+            if (!forceSwitchGroup) {
+                return;
+            }
+            mHandler.post(() -> {
+                getListenedGroup();
+                logger.info("SearchTabFragment搜做界面收到强制切组消息"+"memberId="+memberId+"    toGroupId="+toGroupId);
+//                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
+            });
+        }
+    };
 
 }
