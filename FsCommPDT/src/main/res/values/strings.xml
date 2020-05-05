@@ -699,5 +699,6 @@
     <string name="text_call_length_error">只能输入1~8位长度的数字</string>
     <string name="text_call_zero_error">输入的编号不能全是0</string>
     <string name="text_account_data_change_please_relogin">您的账号数据有更新，请重新登录</string>
+    <string name="already_remove">已失效</string>
 
 </resources>

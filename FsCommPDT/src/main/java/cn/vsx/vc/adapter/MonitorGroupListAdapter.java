@@ -29,6 +29,7 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private static final int COMMON = 0;
     private static final int SPECIL = 1;
+    private static final int REMOVE = 2;
     private List<Group> data;
     private final LayoutInflater inflater;
 
@@ -41,9 +42,12 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
         if(viewType == COMMON){
             View view = inflater.inflate(R.layout.common_monitor_list_item,parent,false);
             return new CommonViewHolder(view);
-        }else {
+        }else if (viewType == SPECIL){
             View view = inflater.inflate(R.layout.specil_monitor_list_item,parent,false);
             return new SpecilViewHolder(view);
+        }else {
+            View view = inflater.inflate(R.layout.remove_list_item,parent,false);
+            return new RemoveViewHolder(view);
         }
     }
 
@@ -58,6 +62,9 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
 //        }
         if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
             return SPECIL;
+        }
+        if (group.isRemove()){
+            return REMOVE;
         }
         return COMMON;
     }
@@ -84,6 +91,10 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
             }else if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
                 specilViewHolder.mTvDescribe.setText(R.string.response_group_cannot_remove);
             }
+        }else{
+            RemoveViewHolder removeViewHolder = (RemoveViewHolder) holder;
+            removeViewHolder.mTvName.setText(group.getName());
+            removeViewHolder.mTvDescribe.setText(R.string.already_remove);
         }
     }
 
@@ -114,6 +125,19 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
         private View mBottomDiver;
 
         public SpecilViewHolder(View itemView){
+            super(itemView);
+            mTvName = (TextView) itemView.findViewById(R.id.tv_name);
+            mTvDescribe = (TextView) itemView.findViewById(R.id.tv_describe);
+            mBottomDiver = (View) itemView.findViewById(R.id.bottom_diver);
+        }
+    }
+
+    private class RemoveViewHolder extends RecyclerView.ViewHolder {
+        private TextView mTvName;
+        private TextView mTvDescribe;
+        private View mBottomDiver;
+
+        public RemoveViewHolder(View itemView){
             super(itemView);
             mTvName = (TextView) itemView.findViewById(R.id.tv_name);
             mTvDescribe = (TextView) itemView.findViewById(R.id.tv_describe);
