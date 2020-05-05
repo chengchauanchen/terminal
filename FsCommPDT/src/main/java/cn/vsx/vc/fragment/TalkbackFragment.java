@@ -28,9 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import cn.vsx.hamster.common.GroupType;
-import cn.vsx.hamster.common.TempGroupType;
-import cn.vsx.hamster.terminalsdk.tools.Util;
 import com.baidu.speechsynthesizer.SpeechSynthesizer;
 import com.baidu.speechsynthesizer.SpeechSynthesizerListener;
 import com.baidu.speechsynthesizer.publicutility.SpeechError;
@@ -48,9 +45,11 @@ import java.util.TimerTask;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.GroupScanType;
+import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.UserStatus;
@@ -85,12 +84,14 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ResponseSetUserStatusMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.BindEquipmentListActivity;
@@ -1334,6 +1335,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTestGroupCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(responseSetUserStatusMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllGroupHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverBindDeviceHandler);
@@ -1363,12 +1365,14 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
             rl_uav_push.setVisibility(View.GONE);
         }
 //        setScanGroupIcon();//设置组扫描相关图标
-
+        //获取当前组在线成员人数
+        TerminalFactory.getSDK().getConfigManager().updateCurrentGroupOnlineMembers();
     }
 
     private void setPttText() {
         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
+        logger.info("setPttText---groupByGroupNo:"+groupByGroupNo);
         //响应组  普通用户  不在响应状态
         if (ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
                 !groupByGroupNo.isHighUser() &&
@@ -1732,6 +1736,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTestGroupCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(responseSetUserStatusMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllGroupHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverBindDeviceHandler);
@@ -2010,5 +2015,18 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         }
     };
 
-
+    /**
+     * 所有组的数据已更新
+     */
+    private ReceiveUpdateAllGroupHandler receiveUpdateAllGroupHandler = new ReceiveUpdateAllGroupHandler() {
+        @Override
+        public void handler(List<Group> phoneMember) {
+            if(phoneMember!=null&&!phoneMember.isEmpty()){
+                myHandler.post(() -> {
+                    setCurrentGroupView();
+                    setPttText();
+                });
+            }
+        }
+    };
 }

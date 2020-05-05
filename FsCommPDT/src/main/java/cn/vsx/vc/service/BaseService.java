@@ -320,8 +320,10 @@ public abstract class BaseService extends Service{
      * 服务端通知强制重新认证登陆
      */
     private ReceiveForceReloginHandler receiveForceReloginHandler = version -> {
-        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
-        mHandler.post(() -> removeView());
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
+            mHandler.post(() -> stopBusiness());
+        }
     };
 
     /**
@@ -345,7 +347,9 @@ public abstract class BaseService extends Service{
      */
     private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
         if(resultCode != BaseCommonCode.SUCCESS_CODE){
-            removeView();
+            if(MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE){
+                stopBusiness();
+            }
         }
     });
 

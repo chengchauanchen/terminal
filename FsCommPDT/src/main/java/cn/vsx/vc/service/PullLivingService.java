@@ -117,6 +117,8 @@ public class PullLivingService extends BaseService{
     //callId
     public long callId;
 
+    private static final int HIDELIVINGVIEW = 1;
+
     public PullLivingService(){}
 
     @Override
@@ -138,6 +140,7 @@ public class PullLivingService extends BaseService{
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
+        mSvLive.setOnClickListener(svOnClickListener);
         mBtnLiveLookPtt.setOnTouchListener(pttOnTouchListener);
         mLlLiveLookHangup.setOnClickListener(hangUpOnClickListener);
         mIvLiveRetract.setOnClickListener(retractOnClickListener);
@@ -160,6 +163,8 @@ public class PullLivingService extends BaseService{
         mPopupMiniLive.setVisibility(View.GONE);
         setAuthorityView();
         String watchType = intent.getStringExtra(Constants.WATCH_TYPE);
+        mHandler.removeMessages(HIDELIVINGVIEW);
+        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
         if(Constants.ACTIVE_WATCH.equals(watchType)){
             TerminalMessage terminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
             requestToWatchLiving(terminalMessage);
@@ -204,6 +209,10 @@ public class PullLivingService extends BaseService{
             case OFF_LINE:
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
                 stopBusiness();
+                break;
+            case HIDELIVINGVIEW:
+                mHandler.removeMessages(HIDELIVINGVIEW);
+                hideLivingView();
                 break;
         }
     }
@@ -591,18 +600,28 @@ public class PullLivingService extends BaseService{
         }
     };
 
+    private View.OnClickListener svOnClickListener = v->{
+        showLivingView();
+        mHandler.removeMessages(HIDELIVINGVIEW);
+        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
+    };
+
     @SuppressLint("ClickableViewAccessibility")
     private View.OnTouchListener pttOnTouchListener = (v, event) -> {
         switch(event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 if(!MyApplication.instance.folatWindowPress && !MyApplication.instance.volumePress){
                     pttDownDoThing();
+                    showLivingView();
+                    mHandler.removeMessages(HIDELIVINGVIEW);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if(event.getX() + v.getWidth() / 4 < 0 || event.getX() - v.getWidth() * 1.25 > 0 || event.getY() + v.getHeight() / 8 < 0 || event.getY() - v.getHeight() * 1.125 > 0){
                     if(MyApplication.instance.isPttPress){
                         pttUpDoThing();
+                        mHandler.removeMessages(HIDELIVINGVIEW);
+                        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
                     }
                 }
                 break;
@@ -611,6 +630,8 @@ public class PullLivingService extends BaseService{
             case MotionEvent.ACTION_CANCEL:
                 if(MyApplication.instance.isPttPress){
                     pttUpDoThing();
+                    mHandler.removeMessages(HIDELIVINGVIEW);
+                    mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
                 }
                 break;
             default:
@@ -669,7 +690,7 @@ public class PullLivingService extends BaseService{
             }else if(resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE){
                 mLiveWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
-                onVideoSizeChange();
+//                onVideoSizeChange();
             }else if(resultCode == EasyRTSPClient.RESULT_TIMEOUT){
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.time_up));
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO){
@@ -859,5 +880,31 @@ public class PullLivingService extends BaseService{
             mSvLive.getLayoutParams().width = (int) (mRlLiveGeneralView.getHeight() * ratio + 0.5f);
         }
         mSvLive.requestLayout();
+    }
+
+    private void showLivingView() {
+        try{
+            mIvLiveRetract.setVisibility(View.VISIBLE);
+            mLlLiveLookHangup.setVisibility(View.VISIBLE);
+            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
+                mLlLiveLookInviteMember.setVisibility(View.VISIBLE);
+            }else{
+                mLlLiveLookInviteMember.setVisibility(View.GONE);
+            }
+            mBtnLiveLookPtt.setVisibility(View.VISIBLE);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void hideLivingView() {
+        try{
+            mIvLiveRetract.setVisibility(View.GONE);
+            mLlLiveLookHangup.setVisibility(View.GONE);
+            mLlLiveLookInviteMember.setVisibility(View.GONE);
+            mBtnLiveLookPtt.setVisibility(View.GONE);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

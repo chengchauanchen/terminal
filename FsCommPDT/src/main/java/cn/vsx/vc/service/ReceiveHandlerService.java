@@ -1208,7 +1208,7 @@ public class ReceiveHandlerService extends Service{
             return;
         }
         logger.error("上报给：" + uniqueNoAndType);
-        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
+        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
             AppKeyUtils.setAppKey(null);
             return;

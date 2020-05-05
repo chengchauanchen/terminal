@@ -144,7 +144,13 @@ public class FileTransferOperation {
                 if (list != null && list.size() > 0) {
                     logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:list:" + list);
                     //从数据库中获取文件的信息,并上传
-                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), false);
+                    CopyOnWriteArrayList<BitStarFileRecord> records = getRecordsByNames(list);
+                    if(!records.isEmpty()){
+                        uploadFileByPaths(records, message.getRequestMemberId(),message.getRequestUniqueNo(), false);
+                    }else{
+                        //本地没有这条数据时，通知PC没有
+                        notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
+                    }
                     //推送视频文件到流媒体服务器
                     //                    pushStreamOfVideoFile(list);
                 }
@@ -287,9 +293,9 @@ public class FileTransferOperation {
                                 if (RESULT_SUCCESS_TRUE.equals(success)) {
                                     //判断是否是执法记录仪，是的话就自动上传文件
                                     //判断是否是自动上传文件,随后要改成服务配置参数
-//                                    if(isRecorderDevice()){
-                                        uploadFileByPath(path, 0, 0L,isPhoneDevice());
-//                                    }
+                                    if(isRecorderDevice()){
+                                        uploadFileByPath(path, 0, 0L,false);
+                                    }
                                     deleteBITFileTreeBean(list);
                                 } else {
                                     logger.error(TAG + "uploadFileTreeBean:result;" + object.getString(RESULT_MSG));
@@ -605,7 +611,7 @@ public class FileTransferOperation {
     public CopyOnWriteArrayList<BitStarFileRecord> getRecordsByNames(List<String> fileNames) {
         CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
         String[] array = fileNames.toArray(new String[fileNames.size()]);
-        if (fileNames != null && fileNames.size() > 0 && array != null && array.length > 0) {
+        if (fileNames != null && fileNames.size() > 0 && array.length > 0) {
             list.addAll(TerminalFactory.getSDK().getSQLiteDBManager().getBitStarFileRecords(array));
             logger.info(TAG + "getRecordByName:fileNames：" + fileNames + "--list--" + list);
         }

@@ -62,7 +62,7 @@ public class PullOutGB28181Service extends BaseService{
     private String gb28181Url;
     private Logger logger = Logger.getLogger(this.getClass());
     private static final int CURRENTTIME = 1;
-
+    private static final int HIDELIVINGVIEW = 2;
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
@@ -121,6 +121,7 @@ public class PullOutGB28181Service extends BaseService{
     protected void initListener(){
         mIvLiveLookAddmember.setOnClickListener(inviteMemberOnClickListener);
         mSvGb28181.setSurfaceTextureListener(GB28181SurfaceTextureListener);
+        mSvGb28181.setOnClickListener(svOnClickListener);
         mIvClose.setOnClickListener(closeOnClickListener);
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
@@ -132,7 +133,8 @@ public class PullOutGB28181Service extends BaseService{
     @Override
     protected void initView(Intent intent){
         terminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
-
+        mHandler.removeMessages(HIDELIVINGVIEW);
+        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
         if(terminalMessage!=null){
             setPushAuthority();
             final String deviceId = terminalMessage.messageBody.getString(JsonParam.DEVICE_ID);
@@ -159,6 +161,10 @@ public class PullOutGB28181Service extends BaseService{
             case OFF_LINE:
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
                 stopBusiness();
+                break;
+            case HIDELIVINGVIEW:
+                mHandler.removeMessages(HIDELIVINGVIEW);
+                hideLivingView();
                 break;
         }
     }
@@ -246,6 +252,12 @@ public class PullOutGB28181Service extends BaseService{
 
     private View.OnClickListener inviteMemberOnClickListener = v -> {
         pushToUser();
+    };
+
+    private View.OnClickListener svOnClickListener = v->{
+        showLivingView();
+        mHandler.removeMessages(HIDELIVINGVIEW);
+        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
     };
 
     private View.OnClickListener closeOnClickListener = v -> {
@@ -449,6 +461,26 @@ public class PullOutGB28181Service extends BaseService{
             startService(intent);
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
+        }
+    }
+
+    private void showLivingView() {
+        try{
+            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
+                mLlInviteMember.setVisibility(View.VISIBLE);
+            }else{
+                mLlInviteMember.setVisibility(View.GONE);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void hideLivingView() {
+        try{
+            mLlInviteMember.setVisibility(View.GONE);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }
