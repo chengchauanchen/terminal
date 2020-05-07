@@ -169,6 +169,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean isBindBleService;
 	private boolean isBindedUVCCameraService;
 	private VPNConnectionChangeReceiver vpnConnectionChangeReceiver;
+	private TimerTask timerTask;
 
 	public TerminalSDK4Android(Application mApplication, String terminalMemberType){
 		application = mApplication;
@@ -1180,14 +1181,38 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			logger.error("MessageServiceon----onServiceDisconnected");
-			TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
-				@Override
-				public void run() {
-					connectToServer();
-				}
-			},15*1000);
+//			disConnectToServer();
+//			reTryConnectToServer();
+
 		}
 	};
+
+	/**
+	 * 重新尝试再连接MessageServer
+	 */
+	private void reTryConnectToServer() {
+		try{
+			if(timerTask != null){
+				timerTask.cancel();
+				timerTask = null;
+			}
+		}catch (Exception ef){
+			logger.error("onServiceDisconnected  Exception f:"+ef);
+			timerTask = null;
+		}finally {
+			try{
+				timerTask = new TimerTask() {
+					@Override
+					public void run() {
+						connectToServer();
+					}
+				};
+				TerminalFactory.getSDK().getTimer().schedule(timerTask,5*1000);
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
 
 	/**
 	 * 如果messageService不为空把Service先unbind,再bindService，保证onServiceConnected可以正常被调用

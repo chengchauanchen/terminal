@@ -520,7 +520,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateMessageList(List<TerminalMessage> terminalMessages) {
-        logger.info("保存消息列表数据:" + terminalMessages);
+//        logger.info("保存消息列表数据:" + terminalMessages);
         SQLiteDatabase db = null;
         try {
             db = helper.getWritableDatabase();

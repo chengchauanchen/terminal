@@ -379,6 +379,8 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
                     setCurrentGroupView();
                     setPttText();
                 });
+                //获取当前组在线成员人数
+                TerminalFactory.getSDK().getConfigManager().updateCurrentGroupOnlineMembers();
             }
         }
     };

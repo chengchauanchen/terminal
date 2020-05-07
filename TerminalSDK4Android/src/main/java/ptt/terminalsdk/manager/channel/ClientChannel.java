@@ -31,6 +31,7 @@ public class ClientChannel extends AbsClientChannel {
 
 	private Logger logger = LoggerFactory.getLogger(ClientChannel.class);
 	private IMessageService messageService;
+	private TimerTask timerTask;
 	public ClientChannel(IMessageService messageService){
 		this.messageService = messageService;
 	}
@@ -152,14 +153,37 @@ public class ClientChannel extends AbsClientChannel {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("ClientChannel  Exception:"+e);
 			//start失败，重新start，直到成功
-			TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
-				@Override
-				public void run() {
-					start();
-				}
-			},15*1000);
+			reTryStart();
 
+		}
+	}
+
+	/**
+	 * 重新尝试
+	 */
+	private void reTryStart(){
+		try{
+			if(timerTask != null){
+				timerTask.cancel();
+				timerTask = null;
+			}
+		}catch (Exception ef){
+			logger.error("ClientChannel  Exception f:"+ef);
+			timerTask = null;
+		}finally {
+			try{
+				timerTask = new TimerTask() {
+					@Override
+					public void run() {
+						start();
+					}
+				};
+				TerminalFactory.getSDK().getTimer().schedule(timerTask,5*1000);
+			}catch (Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 
