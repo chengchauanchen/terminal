@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
     private static final int REMOVE = 2;
     private List<Group> data;
     private final LayoutInflater inflater;
-
+    protected Logger logger = Logger.getLogger(getClass().getSimpleName());
     public MonitorGroupListAdapter(List<Group> data, Context context){
         this.data = data;
         inflater = LayoutInflater.from(context);
@@ -79,7 +81,22 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
             commonViewHolder.mIvDelete.setOnClickListener(v -> {
                 List<Integer> monitorGroups = new ArrayList<>();
                 monitorGroups.add(group.getNo());
+                //////////////////////////////////////////////////////////////////
+                List<Integer> integers = TerminalFactory.getSDK().getList(Params.TEMP_MONITOR_REMOVE_ID_LIST, new ArrayList<Integer>(), Integer.class);
+                //临时组的监听组
+                List<Integer> tempMonitorGroupNos = TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos();
+                for (Integer integer : monitorGroups) {
+                    //如果取消监听的组是临时组 则存起来
+                   if (tempMonitorGroupNos.contains(integer)){
+                       logger.info("被添加的临时组id="+integer);
+                       if (!integers.contains(integer)){
+                           integers.add(integer);
+                       }
+                    }
+                }
+                TerminalFactory.getSDK().putList(Params.TEMP_MONITOR_REMOVE_ID_LIST,integers);
                 TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+
             });
         }else if(itemViewType == SPECIL){
             SpecilViewHolder specilViewHolder = (SpecilViewHolder) holder;

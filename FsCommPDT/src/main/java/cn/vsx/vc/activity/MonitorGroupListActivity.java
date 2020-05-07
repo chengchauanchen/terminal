@@ -1,6 +1,6 @@
 package cn.vsx.vc.activity;
 
-import android.os.Bundle;
+import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,6 +33,7 @@ import cn.vsx.vc.adapter.MonitorGroupListAdapter;
  */
 public class MonitorGroupListActivity extends BaseActivity implements View.OnClickListener{
 
+    public static final String ACTION ="receive_remove_list" ;
     private RecyclerView recyclerview;
     private ImageView barBack;
     private List<Group> data = new ArrayList<>();
@@ -101,15 +102,28 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
     private void setData(){
         data.clear();
         List<Group> groups = TerminalFactory.getSDK().getConfigManager().getAllListenerGroup();
+        logger.info("获取所有监听组列表-----groups="+groups);
         data.addAll(groups);
-        //失效列表可能包含当前监听列表的id  因为当前监听列表之前可能失效过  存储在本地的失效列表无法判断
+
+
         //监听组
         List<Group> monitorGroup = TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
         logger.info("获取监听组列表-----monitorGroup="+monitorGroup);
         //移除总列表
         List<Group> removelists = TerminalFactory.getSDK().getList(Params.TOTAL_REMOVE_GROUP_LIST, new ArrayList<Group>(), Group.class);
         logger.info("失效的监听组列表-----removelists="+removelists);
+
+        //去除临时组监听列表中被取消监听的
+        List<Integer> temp_monitor_remove_id_list = TerminalFactory.getSDK().getList(Params.TEMP_MONITOR_REMOVE_ID_LIST, new ArrayList<Integer>(), Integer.class);
+        logger.info("临时组监听列表中被取消监听的监听组列表-----groups="+temp_monitor_remove_id_list);
+        for (Integer grouid:temp_monitor_remove_id_list) {
+//            removelists.remove(TerminalFactory.getSDK().getGroupByGroupNo(grouid));
+            data.remove(TerminalFactory.getSDK().getGroupByGroupNo(grouid));
+        }
+        //失效列表可能包含当前监听列表的id  因为当前监听列表之前可能失效过  存储在本地的失效列表无法判断
         removelists.remove(monitorGroup);
+
+
         data.addAll(removelists);
         //所有需要移除的监听组列表中如果包含了此时的监听组，需要将这些正被监听的组剔除出来
 
@@ -128,10 +142,11 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
                     Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupnNo);
                     builder.append(group.name).append(",");
                 }
-                ToastUtils.showShort("管理员远程指定了您的监听组"+builder.toString()+"监听状态设置已失效");
+                Intent intent=new Intent(MonitorGroupListActivity.ACTION);
+                intent.putExtra("removelist","管理员远程指定了您的监听组"+builder.toString()+"监听状态设置已失效");
+                sendBroadcast(intent);
+//                ToastUtils.showShort("管理员远程指定了您的监听组"+builder.toString()+"监听状态设置已失效");
             });
-
-
 
         }
     };

@@ -137,10 +137,26 @@ public abstract class BaseSearchFragment extends BaseFragment {
                 if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
                     //是临时组
                     if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+                        logger.info("将临时组取消监听");
                         currentMonitorGroup.put(groupNo,false);
                         MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
                     }else {
+                        logger.info("将临时组设置监听");
                         currentMonitorGroup.put(groupNo,true);
+                        //////////////////////////////////////////////////////////////////
+                        List<Integer> integers = TerminalFactory.getSDK().getList(Params.TEMP_MONITOR_REMOVE_ID_LIST, new ArrayList<Integer>(), Integer.class);
+                        //临时组的监听组
+                        List<Integer> tempMonitorGroupNos = TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos();
+                        for (Integer integer : monitorGroups) {
+                            //如果取消监听的组是临时组 则存起来
+                            if (tempMonitorGroupNos.contains(integer)){
+                                logger.info("被移除的临时组id="+integer);
+                                if (integers.contains(integer)){
+                                    integers.remove(integer);
+                                }
+                            }
+                        }
+                        TerminalFactory.getSDK().putList(Params.TEMP_MONITOR_REMOVE_ID_LIST,integers);
                         MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
                     }
                 }else {

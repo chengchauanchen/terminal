@@ -13,11 +13,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.vc.utils.SpaceFilter;
 import com.bigkoo.pickerview.OptionsPickerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.common.TerminalMemberType;
@@ -220,12 +225,61 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 //            }
 //        }
 
-        //从1开始判断
-        int sign = getSign(1);
+//        //从1开始判断
+//        int sign = getSign(1);
+//        logger.info("sign="+sign);
+        //临时组列表
+        List<Group> tempList = TerminalFactory.getSDK().getConfigManager().getAllTempGroup();
+        logger.info("tempList="+tempList);
+        HashMap<String, String> tempMap = TerminalFactory.getSDK().getHashMap(Params.TEMP_GROUP_NO, new HashMap<String, String>());
+        Iterator<Map.Entry<String, String>> iterator = tempMap.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry<String, String> next = iterator.next();
+            String key = next.getKey();
+            String value = next.getValue();
+            logger.info("临时组列表:"+key +value+"\n");
+        }
         int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        String s = String.valueOf(memberId);
-        create_temporary_group_name.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_name), sign, s.substring(s.length() - 4)));
+        String stringid = String.valueOf(memberId);
+        List<String> nameList=new ArrayList<>();
+        for (Group group:tempList) {
+            //默认组名
+            if (group.name.startsWith("临时组")&&group.name.endsWith("-"+stringid.substring(stringid.length() - 4)))
+                nameList.add(group.name);
+        }
+        if (tempList.size()>0){
+            //超过一个
+            if (tempList.size()>1){
+                    for (int i = tempList.size()-1; i >=0 ; i--) {
+                        //拿到最后一个临时组
+                        if (tempList.get(i).name.startsWith("临时组")&&tempList.get(i).name.endsWith("-"+stringid.substring(stringid.length() - 4))){
+                            String name = tempList.get(i).name;
+                            String substring = name.substring(3, name.indexOf("-"));
+                            logger.info("substring="+substring);
+                            create_temporary_group_name.setText("临时组"+(Integer.parseInt(substring)+1)+"-"+stringid.substring(stringid.length() - 4));
+                            break;
+                        }
+                    }
+            }else{
+            //有只有一个且还是临时组
+                if (tempList.get(0).name.startsWith("临时组")&&tempList.get(0).name.endsWith("-"+stringid.substring(stringid.length() - 4))){
+                    String name = tempList.get(0).name;
+                    String substring = name.substring(3, name.indexOf("-"));
+                    logger.info("substring="+substring);
+                    create_temporary_group_name.setText("临时组"+(Integer.parseInt(substring)+1)+"-"+stringid.substring(stringid.length() - 4));
+                }else{
+                    //有只有一个且非临时组
+                    create_temporary_group_name.setText("临时组1-"+stringid.substring(stringid.length() - 4));
+                }
+            }
+        }else{
+            create_temporary_group_name.setText("临时组1-"+stringid.substring(stringid.length() - 4));
+        }
+       create_temporary_group_name.setSelection( create_temporary_group_name.getText().toString().length());
+
+//        create_temporary_group_name.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_name), sign, s.substring(s.length() - 4)));
         exist_time.setText(R.string.activity_create_temporary_groups_tempts_exist_time);
+
     }
 
     //获取临时组名字里的编号
@@ -250,7 +304,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private ReceiveResponseCreateTempGroup4PCHandler receiveResponseCreateTempGroup4PCHandler = new ReceiveResponseCreateTempGroup4PCHandler() {
         @Override
         public void handler(int tempGroupNo, String alarmNo, String tempGroupType, long uniqueNo, int resultCode, String resultDesc) {
-
+            logger.info("》》》》》》收到创建临时组回调"+ System.currentTimeMillis());
             myHandler.post(() -> {
                 checkDialogIsNotNull();
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
@@ -262,6 +316,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                         //刷新通讯录组群列表
 //                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
                         dismissTemporaryGroupDialog();
+                        logger.info("》》》》》》关闭弹窗"+ System.currentTimeMillis());
                         try{
                             Class clazz;
                             String type = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
@@ -276,7 +331,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                         }catch(ClassNotFoundException e){
                             e.printStackTrace();
                         }
-                    }, 2000);
+                    }, 1000);
                 } else {
                     if(AppUtil.checkActivityIsRun(CreateTemporaryGroupsActivity.this)){
                         createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL, resultDesc, scanGroup);
@@ -378,7 +433,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                     MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(false, temporaryGroupsName, memberNos, existTime, false, 0, scanGroup, "", uniqueNoList);
                 }
             };
-            MyTerminalFactory.getSDK().getTimer().schedule(timerTaskLock, 2000);
+            MyTerminalFactory.getSDK().getTimer().schedule(timerTaskLock, 0);
         }
     }
 
