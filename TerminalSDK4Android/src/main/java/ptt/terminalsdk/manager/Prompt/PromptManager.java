@@ -91,7 +91,7 @@ public class PromptManager {
 			if(methodResult == BaseCommonCode.SUCCESS_CODE){
 				//组呼成功，发出提示音
 				if (vibrator != null){
-					vibrator.vibrate(requestCall,-1);
+					vibrator.vibrate(requestGroupCallOk,-1);
 				}
 				if(soundPool != null){
 					soundPool.play(soundMap.get(R.raw.request_call_ok_new), 0.5f, 0.5f, 0, 0, 1);

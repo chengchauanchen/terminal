@@ -1,14 +1,10 @@
 package cn.vsx.vc.activity;
 
-import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-
-import com.blankj.utilcode.util.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +18,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandl
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MonitorGroupListAdapter;
+import cn.vsx.vc.utils.ToastUtil;
 
 
 /**
@@ -104,8 +101,6 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
         List<Group> groups = TerminalFactory.getSDK().getConfigManager().getAllListenerGroup();
         logger.info("获取所有监听组列表-----groups="+groups);
         data.addAll(groups);
-
-
         //监听组
         List<Group> monitorGroup = TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
         logger.info("获取监听组列表-----monitorGroup="+monitorGroup);
@@ -114,16 +109,14 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
         logger.info("失效的监听组列表-----removelists="+removelists);
 
         //去除临时组监听列表中被取消监听的
-        List<Integer> temp_monitor_remove_id_list = TerminalFactory.getSDK().getList(Params.TEMP_MONITOR_REMOVE_ID_LIST, new ArrayList<Integer>(), Integer.class);
-        logger.info("临时组监听列表中被取消监听的监听组列表-----groups="+temp_monitor_remove_id_list);
-        for (Integer grouid:temp_monitor_remove_id_list) {
+        List<Integer> tempMonitorRemoveIdList = TerminalFactory.getSDK().getList(Params.TEMP_MONITOR_REMOVE_ID_LIST, new ArrayList<Integer>(), Integer.class);
+        logger.info("临时组监听列表中被取消监听的监听组列表-----groups="+tempMonitorRemoveIdList);
+        for (Integer grouid:tempMonitorRemoveIdList) {
 //            removelists.remove(TerminalFactory.getSDK().getGroupByGroupNo(grouid));
             data.remove(TerminalFactory.getSDK().getGroupByGroupNo(grouid));
         }
         //失效列表可能包含当前监听列表的id  因为当前监听列表之前可能失效过  存储在本地的失效列表无法判断
         removelists.remove(monitorGroup);
-
-
         data.addAll(removelists);
         //所有需要移除的监听组列表中如果包含了此时的监听组，需要将这些正被监听的组剔除出来
 
@@ -135,19 +128,12 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
     ReceiveRemoveMonitorGroupListHandler receiveRemoveMonitorGroupListHandler=new ReceiveRemoveMonitorGroupListHandler() {
         @Override
         public void handler(List<Integer> removeScanGroupList) {
-            logger.info("在监听组界面收到回调");
-            mHandler.post(()->{
-                StringBuilder builder=new StringBuilder();
-                for (Integer groupnNo:removeScanGroupList) {
-                    Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupnNo);
-                    builder.append(group.name).append(",");
-                }
-                Intent intent=new Intent(MonitorGroupListActivity.ACTION);
-                intent.putExtra("removelist","管理员远程指定了您的监听组"+builder.toString()+"监听状态设置已失效");
-                sendBroadcast(intent);
-//                ToastUtils.showShort("管理员远程指定了您的监听组"+builder.toString()+"监听状态设置已失效");
-            });
-
+            StringBuilder builder=new StringBuilder();
+            for (Integer groupnNo:removeScanGroupList) {
+                Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupnNo);
+                builder.append(group.name).append(",");
+            }
+            ToastUtil.showToast("管理员远程指定了您的监听组"+builder.toString()+"监听状态设置已失效");
         }
     };
     /**
@@ -161,9 +147,9 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
                 return;
             }
             logger.info("TalkbackFragment收到强制切组： toGroupId：" + toGroupId);
+            setData();
             myHandler.post(() -> {
-                setData();
-                if(!isFinishing()){
+                if(monitorGroupListAdapter!=null&&!isFinishing()){
                     monitorGroupListAdapter.notifyDataSetChanged();
                 }
             });

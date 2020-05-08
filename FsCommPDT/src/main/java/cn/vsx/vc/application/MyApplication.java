@@ -5,7 +5,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -41,10 +40,8 @@ import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.util.StateMachine.IState;
-import cn.vsx.vc.activity.MonitorGroupListActivity;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.receive.MyBroaddCoastReceiver;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.service.VideoMeetingInvitationService;
 import cn.vsx.vc.service.VideoMeetingService;
@@ -121,13 +118,11 @@ public class MyApplication extends BaseApplication{
 		//上报图像可以不走信令
 		TerminalFactory.getSDK().putParam(Params.PUSH_LIVE_NO_SINGLE,true);
 
-		CrashReport.initCrashReport(getApplicationContext(), "3ebac89656", false);
+		//建议在测试阶段建议设置成true，发布时设置为false
+		CrashReport.initCrashReport(getApplicationContext(), "3ebac89656", true);
 		int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
 		CrashReport.setUserId(memberId+"");
 
-		IntentFilter filter=new IntentFilter(MonitorGroupListActivity.ACTION);
-		MyBroaddCoastReceiver receiver=new MyBroaddCoastReceiver();
-		registerReceiver(receiver,filter);
 	}
 
 	protected void initSdk(){

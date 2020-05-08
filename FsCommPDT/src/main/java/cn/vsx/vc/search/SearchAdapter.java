@@ -177,11 +177,15 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
         holder.tv_department_name.setText(data.getDepartmentName());
 //        holder.tv_group_no.setText(data.getNo()+"");
-        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
-            holder.iv_response_group_icon.setVisibility(View.VISIBLE);
-        }else {
-            holder.iv_response_group_icon.setVisibility(View.GONE);
-        }
+//        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
+//            holder.iv_response_group_icon.setVisibility(View.VISIBLE);
+//        }else {
+//            holder.iv_response_group_icon.setVisibility(View.GONE);
+//        }
+        //是否是响应组通过组图标来区分
+        holder.iv_group_logo.setImageResource(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())
+                ?R.drawable.response_group_photo:R.drawable.group_photo);
+
 
         if(checkIsMonitorGroup(data)){
             holder.ivMonitor.setImageResource(R.drawable.monitor_open);
