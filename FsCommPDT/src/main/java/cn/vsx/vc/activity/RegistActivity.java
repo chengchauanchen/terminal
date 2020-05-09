@@ -1004,6 +1004,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         initUpdate();
         judgePermission();
         showDefultServerIPAndPort();
+
     }
 
     /**
@@ -1144,30 +1145,35 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
      * 根据是否有网络连接去登录或者打开设置
      */
     private void checkIfAuthorize() {
-        if (NetworkUtil.isConnected(MyApplication.instance.getApplicationContext())) {
-            if (netWorkDialog != null) {
-                netWorkDialog.dismiss();
-            }
-            changeProgressMsg(getString(R.string.text_get_info_now));
-            //襄阳、武铁包启动安全VPN服务
-            if(TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANG,apkType)
-                || TextUtils.equals(AuthManagerTwo.WUTIE,apkType)){
-                startVPNService();
-            }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
+        //初始化uuid
+        MyTerminalFactory.getSDK().initUuid(() -> {
+            myHandler.post(() -> {
+                if (NetworkUtil.isConnected(MyApplication.instance.getApplicationContext())) {
+                    if (netWorkDialog != null) {
+                        netWorkDialog.dismiss();
+                    }
+                    changeProgressMsg(getString(R.string.text_get_info_now));
+                    //襄阳、武铁包启动安全VPN服务
+                    if(TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANG,apkType)
+                            || TextUtils.equals(AuthManagerTwo.WUTIE,apkType)){
+                        startVPNService();
+                    }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
 //                TerminalFactory.getSDK().getTianJinStringToken();
-                requestDrawOverLays();
-            }else if(TextUtils.equals(AuthManagerTwo.LANGFANG,apkType)){
-                authorizeByLangFang();//认证并获取User信息
-                requestDrawOverLays();
-            }else {
-                authorize();//认证并获取user信息
-                requestDrawOverLays();
-            }
-        } else {
-            if (netWorkDialog != null && !netWorkDialog.isShowing()) {
-                netWorkDialog.show();
-            }
-        }
+                        requestDrawOverLays();
+                    }else if(TextUtils.equals(AuthManagerTwo.LANGFANG,apkType)){
+                        authorizeByLangFang();//认证并获取User信息
+                        requestDrawOverLays();
+                    }else {
+                        authorize();//认证并获取user信息
+                        requestDrawOverLays();
+                    }
+                } else {
+                    if (netWorkDialog != null && !netWorkDialog.isShowing()) {
+                        netWorkDialog.show();
+                    }
+                }
+            });
+        });
     }
 
     /**

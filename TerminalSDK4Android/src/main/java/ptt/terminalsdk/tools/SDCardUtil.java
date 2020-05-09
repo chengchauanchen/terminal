@@ -8,6 +8,13 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * author: zjx.
@@ -55,4 +62,72 @@ public class SDCardUtil {
             fileScan(context, paths[co]);
         }
     }
+
+    /**
+     * 保存文件到sdcard
+     * @param fileName
+     * @param content
+     */
+    public static void saveUuidToSdCard(String path,String fileName,String content){
+        try {
+            File file = new File(path);
+            if(!file.exists()){
+                file.mkdirs();
+            }
+            File fileTxt = new File(path+fileName);
+            if(fileTxt.exists()){
+                fileTxt.delete();
+            }
+            FileOutputStream fos = new FileOutputStream(fileTxt);
+            //FileOutputStream是字节流，如果是写文本的话，需要进一步把FileOutputStream包装 UTF-8是编码
+            OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+            //写
+            osw.write(content);
+            osw.flush();
+            fos.flush();
+            osw.close();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 读取uuid文件中的uuid
+     * @param path
+     * @return
+     */
+    public static String readUuidFromSdCard(String path){
+        String result = "";
+        try {
+            File file = new File(path);
+            if(!file.exists()){
+                return result;
+            }
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+            //获取文件的可用长度，构建一个字符数组
+            char[] input = new char[fis.available()];
+            isr.read(input);
+            isr.close();
+            fis.close();
+            result = new String(input);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 }
