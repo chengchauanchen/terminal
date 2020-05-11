@@ -207,11 +207,7 @@ public class SearchAdapter2 extends RecyclerView.Adapter<RecyclerView.ViewHolder
         });
 
         holder.ivMonitor.setOnClickListener(v -> {
-            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == data.getNo()){
-                ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
-            }else {
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,data.getNo());
-            }
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,data.getNo());
         });
     }
 

@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.GroupType;
@@ -19,6 +18,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 
 /**
  * 作者：ly-xuxiaolong
@@ -79,23 +79,7 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
             CommonViewHolder commonViewHolder = (CommonViewHolder) holder;
             commonViewHolder.mTvName.setText(group.getName());
             commonViewHolder.mIvDelete.setOnClickListener(v -> {
-                List<Integer> monitorGroups = new ArrayList<>();
-                monitorGroups.add(group.getNo());
-                //////////////////////////////////////////////////////////////////
-                List<Integer> integers = TerminalFactory.getSDK().getList(Params.TEMP_MONITOR_REMOVE_ID_LIST, new ArrayList<Integer>(), Integer.class);
-                //临时组的监听组
-                List<Integer> tempMonitorGroupNos = TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos();
-                for (Integer integer : monitorGroups) {
-                    //如果取消监听的组是临时组 则存起来
-                   if (tempMonitorGroupNos.contains(integer)){
-                       logger.info("被添加的临时组id="+integer);
-                       if (!integers.contains(integer)){
-                           integers.add(integer);
-                       }
-                    }
-                }
-                TerminalFactory.getSDK().putList(Params.TEMP_MONITOR_REMOVE_ID_LIST,integers);
-                TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class, group.getNo());
 
             });
         }else if(itemViewType == SPECIL){

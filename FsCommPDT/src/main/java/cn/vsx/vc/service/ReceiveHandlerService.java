@@ -23,6 +23,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +54,7 @@ import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.Remark;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -63,6 +65,7 @@ import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
@@ -80,7 +83,10 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHan
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReStartVoipHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRemoveMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponNotifyWatchHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -108,6 +114,7 @@ import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
 import cn.vsx.vc.receiveHandle.ReceiveWarningReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoByNoRegistHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
+import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoMeetingHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
@@ -250,6 +257,9 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeByNoRegistHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveRemoveMonitorGroupListHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverMonitorViewClickHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
 
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
@@ -612,6 +622,9 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeByNoRegistHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveMonitorGroupListHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverMonitorViewClickHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoByNoRegistHandler);//上报图像（没有注册）
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
@@ -1473,6 +1486,124 @@ public class ReceiveHandlerService extends Service{
             }
         }
     };
+
+    /**
+     * 移除监听组
+     */
+    private ReceiveRemoveMonitorGroupListHandler receiveRemoveMonitorGroupListHandler=new ReceiveRemoveMonitorGroupListHandler() {
+        @Override
+        public void handler(List<Integer> removeScanGroupList) {
+            if(removeScanGroupList!=null&&!removeScanGroupList.isEmpty()){
+                int size = removeScanGroupList.size();
+                StringBuilder builder=new StringBuilder();
+                builder.append("\n");
+                for (Integer groupnNo:removeScanGroupList) {
+                    Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupnNo);
+                    builder.append(group.name);
+                    if(size>1){
+                        builder.append(",");
+                    }
+                    builder.append("\n");
+                }
+                cn.vsx.vc.utils.ToastUtil.showToast(String.format(getString(R.string.notify_invalid_listener_group),builder.toString()),true);
+            }
+        }
+    };
+
+    private SparseBooleanArray currentMonitorGroup = new SparseBooleanArray();
+    private int monitorGroupNo;
+
+    private ReceiverMonitorViewClickHandler receiverMonitorViewClickHandler = new ReceiverMonitorViewClickHandler(){
+        @Override
+        public void handler(int groupNo){
+            //响应组不能取消监听
+            Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
+            if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
+                ToastUtils.showShort(R.string.response_group_cannot_cancel_monitor);
+                return;
+            }
+            //如果是当前组，取消当前组
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
+                ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
+                return;
+            }
+            List<Integer> monitorGroups = new ArrayList<>();
+            monitorGroups.add(groupNo);
+            ReceiveHandlerService.this.monitorGroupNo = groupNo;
+            if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
+                //是临时组
+                if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+                    logger.info("将临时组取消监听");
+                    currentMonitorGroup.put(groupNo,false);
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                }else {
+                    logger.info("将临时组设置监听");
+                    currentMonitorGroup.put(groupNo,true);
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                }
+            }else {
+                //不是临时组
+                if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
+                    currentMonitorGroup.put(groupNo,false);
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                }else {
+                    //判断有没有超过5个监听组
+                    if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>=5){
+                        logger.info(getResources().getString(R.string.monitor_more_than_five));
+                        ToastUtil.showToast(getResources().getString(R.string.monitor_more_than_five));
+                    }else {
+                        currentMonitorGroup.put(groupNo,true);
+                        MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                    }
+                }
+            }
+        }
+    };
+
+    private ReceiveSetMonitorGroupListHandler receiveSetMonitorGroupListHandler = new ReceiveSetMonitorGroupListHandler(){
+        @Override
+        public void handler(int errorCode, String errorDesc){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                //加入监听
+                if(currentMonitorGroup.get(monitorGroupNo)){
+//                    TerminalFactory.getSDK().getGroupManager().changeGroup(monitorGroupNo);
+                    if(null != DataUtil.getTempGroupByGroupNo(monitorGroupNo)&&!TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
+                        TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().add(monitorGroupNo);
+                        TerminalFactory.getSDK().getConfigManager().updateTempMonitorGroup();
+                    }
+                }else {
+                    //移除监听
+                    if(monitorGroupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
+                        //当前组被移除监听了切换到主组去
+                        if(monitorGroupNo != TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)){
+//                            TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                        }
+                    }
+                    if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
+                        TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().remove((Integer)monitorGroupNo);
+                        TerminalFactory.getSDK().getConfigManager().updateTempMonitorGroup();
+                    }else if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(monitorGroupNo)){
+                        TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().remove((Integer)monitorGroupNo);
+                        TerminalFactory.getSDK().getConfigManager().saveMonitorGroup();
+                    }
+                }
+                //监听的组，从本地的失效列表中移除
+                List<Group> removelists = TerminalFactory.getSDK().getList(Params.TOTAL_REMOVE_GROUP_LIST, new ArrayList<Group>(), Group.class);
+                Group group = new Group(monitorGroupNo);
+                if(removelists.contains(group)){
+                    removelists.remove(group);
+                }
+                TerminalFactory.getSDK().putList(Params.TOTAL_REMOVE_GROUP_LIST,removelists);
+                //更新UI
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSetMonitorGroupViewHandler.class);
+                monitorGroupNo = 0;
+            }else {
+                monitorGroupNo = 0;
+                ToastUtil.showToast(errorDesc);
+            }
+        }
+    };
+
     private void showWarningDialog(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(ReceiveHandlerService.this)) {

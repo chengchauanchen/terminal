@@ -9,16 +9,13 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRemoveMonitorGroupListHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MonitorGroupListAdapter;
-import cn.vsx.vc.utils.ToastUtil;
 
 
 /**
@@ -51,9 +48,8 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
     @Override
     public void initListener(){
         barBack.setOnClickListener(this);
-        TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
-        TerminalFactory.getSDK().registReceiveHandler(receiveRemoveMonitorGroupListHandler);
 
     }
 
@@ -68,9 +64,8 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
 
     @Override
     public void doOtherDestroy(){
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveMonitorGroupListHandler);
     }
 
     @Override
@@ -81,17 +76,18 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
         }
     }
 
-    private ReceiveSetMonitorGroupListHandler receiveSetMonitorGroupListHandler = new ReceiveSetMonitorGroupListHandler(){
+    /**
+     * 设置监听组之后更新UI
+     */
+    private ReceiveSetMonitorGroupViewHandler receiveSetMonitorGroupViewHandler = new ReceiveSetMonitorGroupViewHandler(){
         @Override
-        public void handler(int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                mHandler.post(()-> {
-                    setData();
-                    if(!isFinishing()){
-                        monitorGroupListAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
+        public void handler(){
+            setData();
+            mHandler.post(()-> {
+                if(monitorGroupListAdapter!=null&&!isFinishing()){
+                    monitorGroupListAdapter.notifyDataSetChanged();
+                }
+            });
         }
     };
 
@@ -107,35 +103,16 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
         //移除总列表
         List<Group> removelists = TerminalFactory.getSDK().getList(Params.TOTAL_REMOVE_GROUP_LIST, new ArrayList<Group>(), Group.class);
         logger.info("失效的监听组列表-----removelists="+removelists);
-
-        //去除临时组监听列表中被取消监听的
-        List<Integer> tempMonitorRemoveIdList = TerminalFactory.getSDK().getList(Params.TEMP_MONITOR_REMOVE_ID_LIST, new ArrayList<Integer>(), Integer.class);
-        logger.info("临时组监听列表中被取消监听的监听组列表-----groups="+tempMonitorRemoveIdList);
-        for (Integer grouid:tempMonitorRemoveIdList) {
-//            removelists.remove(TerminalFactory.getSDK().getGroupByGroupNo(grouid));
-            data.remove(TerminalFactory.getSDK().getGroupByGroupNo(grouid));
+        //失效列表可能包含当前监听列表的id
+        for (Group group:monitorGroup){
+            if(group!=null){
+                removelists.remove(group);
+            }
         }
-        //失效列表可能包含当前监听列表的id  因为当前监听列表之前可能失效过  存储在本地的失效列表无法判断
-        removelists.remove(monitorGroup);
+        TerminalFactory.getSDK().putList(Params.TOTAL_REMOVE_GROUP_LIST,removelists);
         data.addAll(removelists);
-        //所有需要移除的监听组列表中如果包含了此时的监听组，需要将这些正被监听的组剔除出来
-
     }
 
-    /**
-     * 移除监听组
-     */
-    ReceiveRemoveMonitorGroupListHandler receiveRemoveMonitorGroupListHandler=new ReceiveRemoveMonitorGroupListHandler() {
-        @Override
-        public void handler(List<Integer> removeScanGroupList) {
-            StringBuilder builder=new StringBuilder();
-            for (Integer groupnNo:removeScanGroupList) {
-                Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupnNo);
-                builder.append(group.name).append(",");
-            }
-            ToastUtil.showToast("管理员远程指定了您的监听组"+builder.toString()+"监听状态设置已失效");
-        }
-    };
     /**
      * 强制切组
      */

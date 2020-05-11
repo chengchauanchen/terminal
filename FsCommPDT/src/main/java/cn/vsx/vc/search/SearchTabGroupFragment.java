@@ -13,6 +13,7 @@ import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.vc.R;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -52,6 +53,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
     public void initListener() {
         TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
 
         /*---------------------------*/
         registReceiveHandler();
@@ -62,6 +64,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
         super.onDestroyView();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
 
         /*---------------------------*/
         unregistReceiveHandler();
@@ -121,6 +124,20 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
                 logger.info("SearchTabGroupFragment搜做界面收到强制切组消息"+memberId+toGroupId);
 //                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
             });
+        }
+    };
+
+    /**
+     * 取消和监听通知
+     */
+    private ReceiveSetMonitorGroupViewHandler receiveSetMonitorGroupViewHandler = new ReceiveSetMonitorGroupViewHandler() {
+        @Override
+        public void handler() {
+            if(searchAdapter !=null){
+                mHandler.post(()->{
+                    searchAdapter.notifyDataSetChanged();
+                });
+            }
         }
     };
 
