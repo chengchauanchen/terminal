@@ -8,11 +8,13 @@ import android.widget.LinearLayout;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
@@ -71,6 +73,13 @@ public class TranspondDialog  extends Dialog {
                 terminalMessage.messageType == MessageType.GB28181_RECORD.getCode())||!DataUtil.isSendedMessage(terminalMessage)){
             tv_forward_more.setVisibility(View.GONE);
         }
+        //判断是否有发消息的权限，没有发消息的权限时，不能转发，撤回，合并转发
+        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
+            ptt.terminalsdk.tools.ToastUtil.showToast(MyApplication.instance.getString(R.string.text_has_no_send_message_authority));
+            tv_forward.setVisibility(View.GONE);
+            tv_withdraw.setVisibility(View.GONE);
+            tv_forward_more.setVisibility(View.GONE);
+        }
         //复制
         tv_copy.setOnClickListener(v -> {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowCopyPopupHandler.class,terminalMessage);
@@ -95,6 +104,10 @@ public class TranspondDialog  extends Dialog {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowForwardMoreHandler.class);
             dismiss();
         });
+        if(tv_copy.getVisibility() == View.GONE && tv_forward.getVisibility() == View.GONE
+                && tv_withdraw.getVisibility() == View.GONE && tv_forward_more.getVisibility() == View.GONE){
+            return;
+        }
 
         setContentView(view);
     }
