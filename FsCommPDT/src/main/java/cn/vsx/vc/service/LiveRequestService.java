@@ -26,6 +26,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 public class LiveRequestService extends BaseService{
 
@@ -96,6 +97,10 @@ public class LiveRequestService extends BaseService{
             ptt.terminalsdk.tools.ToastUtil.livingFailToast(LiveRequestService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
             stopBusiness();
         }
+
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+memberId);
+        SearchUtil.setUpdateUseTimeTag(memberId);
     }
 
     @Override

@@ -61,6 +61,7 @@ import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 
 /**
@@ -200,6 +201,9 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.initData();
         mFromId = userId;
         logger.info("userId：" + userId);
+        //设置常用联系人 的Tag
+        SearchUtil.setUpdateUseTimeTag(userId);
+
         type = getIntent().getIntExtra("type",0);
         funcation.setFunction(false, userId);
         funcation.setMemberFunction(type);

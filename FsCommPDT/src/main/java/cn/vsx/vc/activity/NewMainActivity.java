@@ -1,7 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -107,7 +106,6 @@ import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiveMoveTaskToBackHandler;
 import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
@@ -116,7 +114,6 @@ import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.service.CardService;
 import cn.vsx.vc.service.LockScreenService;
-import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HongHuUtils;
@@ -243,7 +240,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 //设备被遥毙
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyMemberKilledHandler.class, true);
             }else if(resultCode == TerminalErrorCode.REGISTER_ACCOUNT_DELETE.getErrorCode()
-                    ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()){
+                    ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()
+                    ||resultCode == TerminalErrorCode.UNKNOWN_ERROR.getErrorCode()){
                 //账号不存在
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExitHandler.class, getString(R.string.accunt_no_exist),true);
             }else {
@@ -370,21 +368,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handle(String msg,boolean isExit){
             if(isExit){
-                cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this,msg);
                 myHandler.postDelayed(() -> {
-                    Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-                    stoppedCallIntent.putExtra("stoppedResult","0");
-                    SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
+                    cn.vsx.vc.utils.ToastUtil.showToast(msg);
+                },3000);
 
-                    for (Activity activity : ActivityCollector.getAllActivity().values()) {
-                        activity.finish();
-                    }
-//                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-//                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-                    MyApplication.instance.isClickVolumeToCall = false;
-                    MyApplication.instance.isPttPress = false;
-                    MyApplication.instance.stopHandlerService();
-                },2000);
+                myHandler.postDelayed(() -> {
+                    exitApp();
+                },5000);
             }
         }
     };
@@ -631,6 +621,30 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             });
         }
     };
+
+//    /**
+//     *认证失败（终端被遥闭（错误码1201）或账号不存在（错误码1202）或者1040）
+//     */
+//    private ReceiveAuthFailToExitHandler receiveAuthFailToExitHandler = new ReceiveAuthFailToExitHandler(){
+//        @Override
+//        public void handler(int resultCode, String resultDesc) {
+//            String showContent = resultDesc;
+//            if(TextUtils.isEmpty(resultDesc)){
+//                if(resultCode == TerminalErrorCode.REGISTER_DEVICE_KILL.getErrorCode()){
+//                    showContent = getString(R.string.terminal_is_remotely_closed);
+//                }else if(resultCode == TerminalErrorCode.REGISTER_ACCOUNT_DELETE.getErrorCode()||
+//                        resultCode == TerminalErrorCode.UNKNOWN_ERROR.getErrorCode()){
+//                    showContent = getString(R.string.accunt_no_exist);
+//                }
+//            }
+//            String finalShowContent = showContent;
+//            myHandler.postDelayed(() -> {
+//                cn.vsx.vc.utils.ToastUtil.showToast(finalShowContent,true);
+//            },2000);
+//
+//            myHandler.postDelayed(() -> exitApp(),5000);
+//        }
+//    };
 
     /**=====================================================================================================Listener================================================================================================================================**/
     private CallManager callManager;

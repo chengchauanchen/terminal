@@ -1764,6 +1764,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("dept_id", account.getDeptId());
                 values.put("members", MyGsonUtil.list2String(true, account.getMembers()));
                 values.put("department_name", account.getDepartmentName());
+                values.put("update_time", 0);//默认记录当前时间为 0
                 db.replace(ALL_ACCOUNT, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
@@ -1827,6 +1828,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
                 String members = cursor.getString(cursor.getColumnIndex("members"));
                 account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
+                account.setUpdateTime(cursor.getLong(cursor.getColumnIndex("update_time")));
 
                 account.getLabelPinyinSearchUnit().setBaseData(account.getName() + account.getNo());
                 PinyinUtil.parse(account.getLabelPinyinSearchUnit());
@@ -1856,11 +1858,67 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override public void updateAccountUseTime(int accountNo) {
+        logger.info("记录此联系人的 使用时间:" + accountNo);
+        SQLiteDatabase db = null;
+        try {
+            db = helper.getWritableDatabase();
+            //开始事务
+            db.beginTransaction();
 
+            ContentValues cv = new ContentValues();
+            cv.put("update_time", System.currentTimeMillis());
+            String[] args = {accountNo + ""};
+            db.update(ALL_ACCOUNT, cv, "account_no=?", args);
+            db.setTransactionSuccessful();  //设置事务成功完成
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            //结束事务
+            try{
+                if(db!=null){
+                    db.endTransaction();
+                }
+            }catch (Exception e){
+                logger.error(e.toString());
+            }
+        }
     }
 
     @Override public List<MemberSearchBean> getTop5ContactsAccount() {
-        return null;
+        List<MemberSearchBean> memberList = new ArrayList<>();
+        try{
+            SQLiteDatabase db = helper.getReadableDatabase();
+            String sql = "SELECT * FROM allAccount WHERE update_time<>0 ORDER BY update_time desc LIMIT 5 ";
+            Cursor cursor = db.rawQuery(sql, new String[]{});
+
+            while (cursor.moveToNext()) {
+                MemberSearchBean account = null;
+                account = new MemberSearchBean();
+                account.setId(cursor.getInt(cursor.getColumnIndex("account_id")));
+                account.setNo(cursor.getInt(cursor.getColumnIndex("account_no")));
+                account.setName(cursor.getString(cursor.getColumnIndex("account_name")));
+                account.setPhone(cursor.getString(cursor.getColumnIndex("account_phone")));
+                account.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
+                account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
+                String members = cursor.getString(cursor.getColumnIndex("members"));
+                account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
+                //记录时间
+                account.setUpdateTime(cursor.getLong(cursor.getColumnIndex("update_time")));
+//            account.getLabelPinyinSearchUnit().setBaseData(account.getName() + account.getNo());
+//            PinyinUtil.parse(account.getLabelPinyinSearchUnit());
+//            String sortKey = PinyinUtil.getSortKey(account.getLabelPinyinSearchUnit()).toUpperCase();
+//            account.setSortKey(praseSortKey(sortKey));
+
+                if (account != null) {
+                    memberList.add(account);
+                }
+            }
+            cursor.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        logger.info("常用联系人前5条查询结果：" + memberList);
+        return memberList;
     }
 
     @Override public Long addBindDevice(TianjinDeviceBean device) {
@@ -1894,6 +1952,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
                     String members = cursor.getString(cursor.getColumnIndex("members"));
                     account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
+
+                    account.setUpdateTime(cursor.getLong(cursor.getColumnIndex("update_time")));
 
                     String no = handleId(account.getNo());//去掉88 86
 

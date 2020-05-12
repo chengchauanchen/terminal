@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
@@ -121,4 +123,23 @@ public class SearchDataManager {
   public List<MemberSearchBean>  getAccountSreachDatas(){
     return  memberDatas;
   }
+
+  public GroupSearchBean getSearchGroupByNo(int groupNo){
+        GroupSearchBean result = null;
+        for(GroupSearchBean groupSearchBean : groupDatas){
+            if(groupSearchBean.getNo() == groupNo){
+                result = groupSearchBean;
+                break;
+            }
+        }
+        if (result == null) {
+            result = new GroupSearchBean();
+            result.id = groupNo;
+            result.no = groupNo;
+            result.name = groupNo+"";
+            result.setGroupType(GroupType.BROADBAND.toString());
+            result.setResponseGroupType(ResponseGroupType.RESPONSE_FALSE.toString());
+        }
+        return result;
+    }
 }

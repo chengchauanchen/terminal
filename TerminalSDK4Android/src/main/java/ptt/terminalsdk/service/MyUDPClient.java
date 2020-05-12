@@ -192,7 +192,7 @@ public class MyUDPClient extends UDPClientBase implements IConnectionClient{
         public void handler(boolean connected) {
             try {
                 handler.handler(connected);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

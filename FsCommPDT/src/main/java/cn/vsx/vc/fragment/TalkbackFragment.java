@@ -50,6 +50,7 @@ import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TempGroupType;
+import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.UserStatus;
@@ -61,6 +62,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -81,6 +83,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllGroupHandler;
@@ -379,7 +382,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
                     setPttText();
                 });
                 //获取当前组在线成员人数
-                TerminalFactory.getSDK().getConfigManager().updateCurrentGroupOnlineMembers();
+                getCurrentGroupOnlineMembers();
             }
         }
     };
@@ -916,6 +919,21 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         }
     };
 
+    /**
+     * 获取临时组的成员列表
+     */
+    private ReceiveTempGroupMembersHandler receiveTempGroupMembersHandler = new ReceiveTempGroupMembersHandler(){
+        @Override
+        public void handler(int groupId, List<Member> members, int total, int onlineNumber, int offlineNumber){
+            //判断是否是当前组，并且是临时组
+            int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+            if(currentGroupId == groupId && DataUtil.isTemporaryGroup(groupId)&& members!=null){
+                online_number = onlineNumber;
+                myHandler.postDelayed(() -> tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members), online_number)),1000);
+            }
+        }
+    };
+
     private ReceivePTTUpHandler receivePTTUpHandler = new ReceivePTTUpHandler() {
         @Override
         public void handler() {
@@ -1317,6 +1335,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTestGroupCallHandler);
@@ -1353,7 +1372,19 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         }
 //        setScanGroupIcon();//设置组扫描相关图标
         //获取当前组在线成员人数
-        TerminalFactory.getSDK().getConfigManager().updateCurrentGroupOnlineMembers();
+        getCurrentGroupOnlineMembers();
+    }
+
+    /**
+     * 获取当前组的在线人数
+     */
+    private void getCurrentGroupOnlineMembers(){
+        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        if(DataUtil.isTemporaryGroup(currentGroupId)){
+            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getDataManager().getMemberByTempNo(currentGroupId));
+        }else{
+            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(currentGroupId, TerminalMemberStatusEnum.ONLINE.toString());
+        }
     }
 
     private void setPttText() {
@@ -1715,6 +1746,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);

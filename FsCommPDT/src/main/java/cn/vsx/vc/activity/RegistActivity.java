@@ -357,14 +357,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     });
 
     private void exit() {
-        finish();
-        Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-        stoppedCallIntent.putExtra("stoppedResult", "0");
-        SendRecvHelper.send(getApplicationContext(), stoppedCallIntent);
+        try{
+            Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+            stoppedCallIntent.putExtra("stoppedResult", "0");
+            SendRecvHelper.send(getApplicationContext(), stoppedCallIntent);
 
-        MyApplication.instance.isClickVolumeToCall = false;
-        MyApplication.instance.isPttPress = false;
-        MyApplication.instance.stopHandlerService();
+            MyApplication.instance.isClickVolumeToCall = false;
+            MyApplication.instance.isPttPress = false;
+            MyApplication.instance.stopHandlerService();
+
+            finish();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
@@ -389,7 +394,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             //判断是否已经登录成功过（数据已经更新过）
             boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
             if(hasCompleteData){
-                TerminalFactory.getSDK().getDataManager().initFunctionFromAuth();
                 changeProgressMsg(getString(R.string.text_start_success));
                 myHandler.postDelayed(() -> goOn(),1000);
                 return;
@@ -1478,13 +1482,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     public void doOtherDestroy() {
         try{
             unregistNetworkChangeHandler();
-            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
-            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
-            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
-            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
-            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetNameByOrgHandler);
-            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCanUpdateHandler);
             myHandler.removeCallbacksAndMessages(null);
@@ -1514,11 +1512,18 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
 
     private void goOn() {
-        myHandler.removeCallbacksAndMessages(null);
-        //第三方app包名
-        String third_app_package_name = getIntent().getStringExtra(UrlParams.THIRD_APP_PACKAGE_NAME);
-
         try{
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+            myHandler.removeCallbacksAndMessages(null);
+        //第三方app包名
+           String third_app_package_name = getIntent().getStringExtra(UrlParams.THIRD_APP_PACKAGE_NAME);
+
+
             Class clazz;
             String type = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
             if(type.equals(TerminalMemberType.TERMINAL_UAV.toString())){
@@ -1533,8 +1538,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             TerminalFactory.getSDK().putParam(Params.HAS_COMPLETE_DATA,true);
         }catch(ClassNotFoundException e){
             e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            finish();
         }
-        finish();
     }
 
     private void changeProgressMsg(final String msg) {

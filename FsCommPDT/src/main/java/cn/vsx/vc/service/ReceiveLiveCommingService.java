@@ -22,6 +22,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 /**
  * 作者：xuxiaolong
@@ -93,6 +94,10 @@ public class ReceiveLiveCommingService extends BaseService{
         mTvLiveReportId.setText(HandleIdUtil.handleId(memberId));
         PromptManager.getInstance().VideoLiveInCommimgRing();
         wakeLock.acquire(10 * 1000);
+
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+memberId);
+        SearchUtil.setUpdateUseTimeTag(memberId);
     }
 
     @Override

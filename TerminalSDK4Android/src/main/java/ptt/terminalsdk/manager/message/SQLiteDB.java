@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 23);
+        super(context, "4gptt.db", null, 24);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS allGroup (_id INTEGER primary key autoincrement, current_member_id INTEGER,group_id INTEGER, group_no INTEGER, group_name_py varchar,group_name_first_py varchar,group_name varchar,department_name varchar,temp_group_type varchar,business_id varchar,group_type varcha,unique_no INTEGER,dept_id INTEGER,created_member_unique_no INTEGER ,response_group_type varcha ,high_user INTEGER,processing_state varcha,created_member_name varcha,created_member_no INTEGER, unique(group_id))");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS allAccount (_id INTEGER primary key autoincrement,current_member_id INTEGER, account_id INTEGER, account_name varchar, account_no INTEGER, " +
-                "name_pinyin varchar,name_first_pinyin varchar, account_phone varchar, department_name varchar,members TEXT,dept_id INTEGER, unique(account_id))");
+                "name_pinyin varchar,name_first_pinyin varchar, account_phone varchar, department_name varchar,members TEXT,dept_id INTEGER, update_time INTEGER, unique(account_id))");
 
         //视频会商
         db.execSQL("CREATE TABLE IF NOT EXISTS videoMeetingMessage (_id INTEGER primary key autoincrement, current_member_id INTEGER,room_id INTEGER,create_terminal_unqieno INTEGER, create_terminal_no INTEGER, " +

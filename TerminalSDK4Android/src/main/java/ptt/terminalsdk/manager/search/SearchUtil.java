@@ -25,6 +25,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.bean.SearchTitleBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiverUpdateTopContactsHandler;
 
 public class SearchUtil {
 
@@ -330,6 +331,30 @@ public class SearchUtil {
             result.add(value);
         }
         return result;
+    }
+
+    /**
+     * 获取常用联系人 前5位
+     *
+     * @return
+     */
+    public static Observable<List<MemberSearchBean>> getTop5ContactsAccount() {
+        return Observable.fromCallable(() -> {
+            List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getTop5ContactsAccount();
+            Log.e("SearchUtil", "获取常用联系人.size:" + search.size());
+            return search;
+        }).subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * 常用联系人 应用打 Tag
+     *
+     * @param accountNo
+     */
+    public static void setUpdateUseTimeTag(int accountNo) {
+        TerminalFactory.getSDK().getSQLiteDBManager().updateAccountUseTime(accountNo);
+        //发送 常用联系人更新通知
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateTopContactsHandler.class);
     }
 
 }
