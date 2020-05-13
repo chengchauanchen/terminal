@@ -22,6 +22,11 @@ public class RTSPClient implements Closeable {
     private static final Handler h = new Handler(Looper.getMainLooper());
     private static Set<Integer> _channelPause = new HashSet<>();
     private int _channel;
+    private String _url;
+    private int _type;
+    private int _mediaType;
+    private String _user;
+    private String _pwd;
     private volatile int paused = 0;
     private final Runnable closeTask = new Runnable() {
         @Override
@@ -170,6 +175,16 @@ public class RTSPClient implements Closeable {
         return getErrorCode(mCtx);
     }
 
+    private int openStream() {
+        if (null == _url) {
+            throw new NullPointerException();
+        }
+        if (mCtx == 0){
+            throw new IllegalStateException("初始化失败，KEY不合法");
+        }
+        return openStream(mCtx, _channel, _url, _type, _mediaType, _user, _pwd, 1000, 0);
+    }
+
     public int openStream(int channel, String url, int type, int mediaType, String user, String pwd) {
         return openStream(mCtx, channel, url, type, mediaType, user, pwd);
     }
@@ -189,6 +204,12 @@ public class RTSPClient implements Closeable {
             throw new NullPointerException();
         }
         _channel = channel;
+        _url = url;
+        _type = trans_type;
+        _mediaType = mediaType;
+        _user = user;
+        _pwd = pwd;
+//        _sendOption = sendOption;
         return openStream(context, channel, url, trans_type, mediaType, user, pwd, 1000, 0);
     }
 
@@ -322,7 +343,7 @@ public class RTSPClient implements Closeable {
         h.removeCallbacks(closeTask);
         if (paused == 2){
             Log.i(TAG,"resume:=" + 0);
-//            openStream();
+            openStream();
         }
         Log.i(TAG,"resume:=" + 0);
         paused = 0;

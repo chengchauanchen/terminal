@@ -115,6 +115,7 @@
     <string name="no_pull_authority">没有图像请求权限</string>
     <string name="pushing_stream">推流中…</string>
     <string name="push_stoped">上报已结束</string>
+    <string name="living_hang_up">对方已挂断</string>
     <string name="push_failed">图像上传失败</string>
     <string name="theme_cannot_empty">输入主题不能为空</string>
     <string name="i_pushing_video">我正在上报视频</string>

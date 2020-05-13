@@ -63,6 +63,9 @@ public class PullOutGB28181Service extends BaseService{
     private Logger logger = Logger.getLogger(this.getClass());
     private static final int CURRENTTIME = 1;
     private static final int HIDELIVINGVIEW = 2;
+    private static final int SHOW_LOADING_VIEW = 3;
+    private static final int HIDE_LOADING_VIEW = 4;
+    private static final int HIDE_LOADING_VIEW_TIME = 2*1000;
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
@@ -158,14 +161,23 @@ public class PullOutGB28181Service extends BaseService{
             case CURRENTTIME:
                 setCurrentTime();
                 break;
-            case OFF_LINE:
-                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
-                stopBusiness();
-                break;
+//            case OFF_LINE:
+//                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
+//                stopBusiness();
+//                break;
             case HIDELIVINGVIEW:
                 mHandler.removeMessages(HIDELIVINGVIEW);
                 hideLivingView();
                 break;
+            case SHOW_LOADING_VIEW:
+                mHandler.removeMessages(SHOW_LOADING_VIEW);
+                showLoadingView(mLlRefreshing,mRefreshingIcon);
+                break;
+            case HIDE_LOADING_VIEW:
+                mHandler.removeMessages(HIDE_LOADING_VIEW);
+                dismissLoadingView(mLlRefreshing,mRefreshingIcon);
+                break;
+                default:break;
         }
     }
 
@@ -337,8 +349,7 @@ public class PullOutGB28181Service extends BaseService{
         protected void onReceiveResult(int resultCode, Bundle resultData){
             super.onReceiveResult(resultCode, resultData);
             if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
-                pullcount = 0;
-                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
+                mHandler.sendEmptyMessage(HIDE_LOADING_VIEW);
             } else if (resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE) {
                 //                if(isPulling){
                 //                    return;
@@ -356,41 +367,14 @@ public class PullOutGB28181Service extends BaseService{
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.video_not_support));
                 finishVideoLive();
             } else if (resultCode == EasyRTSPClient.RESULT_EVENT) {
-                mHandler.post(() -> showLoadingView(mLlRefreshing,mRefreshingIcon));
-                int errorcode = resultData.getInt("errorcode");
-                String resultDataString = resultData.getString("event-msg");
-                logger.error("视频流播放状态：" + errorcode + "=========" + resultDataString+"-----count:"+ pullcount);
-
-                if (errorcode != 0) {
-                    stopPull();
-                }
-                if (errorcode == 500 || errorcode == 404 ||errorcode ==-32 || errorcode == -101) {
-                    if (pullcount < 10) {
-                        try {
-                            Thread.sleep(300);
-                            logger.error("请求第" + pullcount + "次");
-                            if (mSvGb28181 != null && mSvGb28181.getVisibility() == View.VISIBLE && mSvGb28181.getSurfaceTexture() != null) {
-                                startPullGB28121(mSvGb28181.getSurfaceTexture());
-                                pullcount++;
-
-                            }else{
-                                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
-                                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
-                                finishVideoLive();
-                            }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
-                        mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
-                        finishVideoLive();
-                    }
-                } else if(errorcode !=0){
-                    ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
-                    mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
-                    finishVideoLive();
+                int state = resultData.getInt("state");
+                if(state == 1){
+                    //延时发送取消显示加载布局
+                    mHandler.sendEmptyMessage(SHOW_LOADING_VIEW);
+                    mHandler.sendEmptyMessageDelayed(HIDE_LOADING_VIEW,HIDE_LOADING_VIEW_TIME);
+                }else{
+                    //如果在state == 1状态下延时发送取消显示加载布局之前，收到state!=1的状态时，就把取消显示加载布局的message去掉
+                    mHandler.removeMessages(HIDE_LOADING_VIEW);
                 }
             }
         }
