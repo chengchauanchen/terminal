@@ -61,6 +61,7 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
@@ -578,6 +579,12 @@ public class ReceiveHandlerService extends Service{
         }
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_private_call));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
+
+        if(MyApplication.instance.getGroupListenenState() != GroupCallListenState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_group_call_listener_can_not_private_call));
             AppKeyUtils.setAppKey(null);
             return;
         }

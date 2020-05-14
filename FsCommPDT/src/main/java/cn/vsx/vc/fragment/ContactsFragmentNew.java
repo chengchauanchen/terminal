@@ -300,7 +300,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         //同步通讯录数据
         synchronousData();
     }
-
     private void setVideoIcon() {
         MyTopRightMenu.offerObject().initview(add_icon, activity);
         //没有上报和回传图像的权限

@@ -18,6 +18,7 @@ import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.BiFunction;
@@ -103,7 +104,7 @@ public class SearchUtil {
             @Override
             public List<Group> call() throws Exception {
                 Log.i("SearchUtil", "更新通讯录组数据 没有缓存正在网络同步");
-                return TerminalFactory.getSDK().getConfigManager().getGroupsAllSync(false);
+                return TerminalFactory.getSDK().getConfigManager().getGroupsAllSync(true);
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -118,7 +119,7 @@ public class SearchUtil {
             @Override
             public List<Account> call() throws Exception {
                 Log.i("SearchUtil", "更新通讯录人数据 没有缓存正在网络同步");
-                return TerminalFactory.getSDK().getConfigManager().getDeptAllDataSync(false);
+                return TerminalFactory.getSDK().getConfigManager().getDeptAllDataSync(true);
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -188,7 +189,7 @@ public class SearchUtil {
     public static Observable<List<MemberSearchBean>> getDbAllAccount() {
         return Observable.fromCallable(() -> {
             List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllAccount(new ArrayList<>(),0);
-            Log.e("SearchUtil", "成员数据.size:" + search.size());
+            Log.e("SearchUtil", "getDbAllAccount-成员数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -201,7 +202,7 @@ public class SearchUtil {
     public static Observable<List<MemberSearchBean>> getAllAccountFirst() {
         return Observable.fromCallable(() -> {
             List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllAccountFirst();
-            Log.e("SearchUtil", "成员数据.size:" + search.size());
+            Log.e("SearchUtil", "getDbAllAccount-成员数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -210,6 +211,45 @@ public class SearchUtil {
     /*----------------组-----------------------*/
 
     /**
+     * 获取当前组的信息
+     * @return
+     */
+    public static GroupSearchBean getCurrentGroupInfo() {
+        int groupNo = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0);
+        GroupSearchBean bean = null;
+        //判断内存中是否有组的数据
+        int size = MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas().size();
+        if(size>0){
+            //有数据就从内存中取
+            bean = MyTerminalFactory.getSDK().getSearchDataManager().getSearchGroupByNo(groupNo);
+        }
+        if(size<=0 || bean == null){
+            //如果内存中没有，就从数据库中取
+            bean = TerminalFactory.getSDK().getSQLiteDBManager().getGroupByNo(groupNo);
+        }
+        //如果数据库中没有，就从服务器获取
+        if(bean == null){
+            bean = TerminalFactory.getSDK().getDataManager().getGroupSearchBeanByNoWithNoThread(groupNo);
+        }
+        //如果服务器获取失败，就自己new一个名字和编号一样的GroupSearchBean
+        if(bean == null){
+            bean =  DataUtil.newGroupSearchBeanByNo(groupNo);
+        }
+        return bean;
+    }
+
+    /**
+     * 获取本地数据库 根据组编号获取组信息
+     *
+     * @return
+     */
+    public static Observable<GroupSearchBean> getGroupByGroupNo(int groupNo) {
+        return Observable.fromCallable(() -> {
+            GroupSearchBean search = TerminalFactory.getSDK().getSQLiteDBManager().getGroupByNo(groupNo);
+            return search;
+        }).subscribeOn(Schedulers.io());
+    }
+    /**
      * 获取本地数据库 组数据
      *
      * @return
@@ -217,7 +257,7 @@ public class SearchUtil {
     public static Observable<List<GroupSearchBean>> getDbAllGroup() {
         return Observable.fromCallable(() -> {
             List<GroupSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllGroup(new ArrayList<>(),0);
-            Log.e("SearchUtil", "组数据.size:" + search.size());
+            Log.e("SearchUtil", "getDbAllGroup-组数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -230,7 +270,7 @@ public class SearchUtil {
     public static Observable<List<GroupSearchBean>> getAllGroupFirst() {
         return Observable.fromCallable(() -> {
             List<GroupSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllGroupFirst();
-            Log.e("SearchUtil", "组数据.size:" + search.size());
+            Log.e("SearchUtil", "getAllGroupFirst-组数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }

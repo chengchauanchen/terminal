@@ -88,7 +88,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                         searchAdapter.loadMoreComplete();
                     }
 
-                    if(page == 0){
+                    if(page <= 1){
                         mData.clear();
                     }
 
@@ -137,7 +137,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                         searchAdapter.loadMoreComplete();
                     }
 
-                    if(page == 0){
+                    if(page <= 1){
                         mData.clear();
                     }
 

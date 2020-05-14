@@ -25,7 +25,7 @@ public class ServiceRelativeLayout extends RelativeLayout {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getKeyCode() == KeyEvent.KEYCODE_BACK||event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP||event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_DOWN){
+        if(event.getKeyCode() == KeyEvent.KEYCODE_BACK){
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiverEntityKeyEventInServiceHandler.class, event);
             return true;
         }

@@ -1617,8 +1617,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         List<GroupSearchBean> groups = new ArrayList<>();
         try{
             SQLiteDatabase db = helper.getReadableDatabase();
-
-            String sql = "SELECT * FROM allGroup WHERE 1 = 1 LIMIT 1";
+            int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+            String sql = "SELECT * FROM allGroup WHERE current_member_id = "+memberId+ " LIMIT 1";
             Cursor cursor = db.rawQuery(sql, new String[]{});
             GroupSearchBean group = null;
             while (cursor.moveToNext()) {
@@ -1700,6 +1700,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         try {
             SQLiteDatabase db = helper.getReadableDatabase();
             Cursor cursor = db.query(ALL_GROUP, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "group_no ASC LIMIT " + pageSize + " offset " + index);
+//            Cursor cursor = db.query(ALL_GROUP, null, null,null, null, null, "group_no ASC LIMIT " + pageSize + " offset " + index);
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
                     index++;
@@ -1720,6 +1721,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
                     group.setTempGroupType(cursor.getString(cursor.getColumnIndex("temp_group_type")));
                     group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+                    group.setCurrentMemberId(cursor.getInt(cursor.getColumnIndex("current_member_id")));
 
                     //T9搜索
                     group.getLabelPinyinSearchUnit().setBaseData(group.getName()+ group.getNo());
@@ -1741,6 +1743,47 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             getAllGroup(groups, index);
         }
         return groups;
+    }
+
+    @Override
+    public GroupSearchBean getGroupByNo(int groupNo) {
+        GroupSearchBean group = null;
+        try {
+            SQLiteDatabase db = helper.getReadableDatabase();
+            Cursor cursor = db.query(ALL_GROUP, null, "group_no = ?", new String[]{groupNo + ""}, null, null, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    group = new GroupSearchBean();
+                    group.setId(cursor.getInt(cursor.getColumnIndex("group_id")));
+                    group.setNo(cursor.getInt(cursor.getColumnIndex("group_no")));
+                    group.setBusinessId(cursor.getString(cursor.getColumnIndex("business_id")));
+                    group.setCreatedMemberName(cursor.getString(cursor.getColumnIndex("created_member_name")));
+                    group.setCreatedMemberNo(cursor.getInt(cursor.getColumnIndex("created_member_no")));
+                    group.setCreatedMemberUniqueNo(cursor.getLong(cursor.getColumnIndex("created_member_unique_no")));
+                    group.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
+                    group.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
+                    group.setGroupType(cursor.getString(cursor.getColumnIndex("group_type")));
+                    group.setHighUser(cursor.getInt(cursor.getColumnIndex("high_user")) == 1);
+                    group.setName(cursor.getString(cursor.getColumnIndex("group_name")));
+                    group.setProcessingState(cursor.getString(cursor.getColumnIndex("processing_state")));
+                    group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
+                    group.setTempGroupType(cursor.getString(cursor.getColumnIndex("temp_group_type")));
+                    group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+
+                    //T9搜索
+                    group.getLabelPinyinSearchUnit().setBaseData(group.getName()+ group.getNo());
+                    PinyinUtil.parse(group.getLabelPinyinSearchUnit());
+                    String sortKey = PinyinUtil.getSortKey(group.getLabelPinyinSearchUnit()).toUpperCase();
+                    group.setSortKey(praseSortKey(sortKey));
+                }
+                cursor.close();
+
+            }
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        logger.info("getGroupByNo--groupNo:" + groupNo+"--group:"+group);
+        return group;
     }
 
     @Override
@@ -1815,7 +1858,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         List<MemberSearchBean> memberList = new ArrayList<>();
         try{
             SQLiteDatabase db = helper.getReadableDatabase();
-            String sql = "SELECT * FROM allAccount WHERE 1 = 1 LIMIT 1";
+            int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+            String sql = "SELECT * FROM allAccount WHERE current_member_id = "+memberId+ " LIMIT 1";
             Cursor cursor = db.rawQuery(sql, new String[]{});
             MemberSearchBean account = null;
             while (cursor.moveToNext()) {
@@ -1933,8 +1977,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public List<MemberSearchBean> getAllAccount(List<MemberSearchBean> accounts, int index) {
-        logger.info("分页查询 Account index:" + index);
-        long start = System.currentTimeMillis();
+//        logger.info("分页查询 Account index:" + index);
+//        long start = System.currentTimeMillis();
         int cursorSize = 0;
         try {
             SQLiteDatabase db = helper.getReadableDatabase();
@@ -1968,8 +2012,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 }
                 cursor.close();
 
-                long end = System.currentTimeMillis();
-                logger.info("获取数据库数据所耗时间getAllAccount：" + (end - start));
+//                long end = System.currentTimeMillis();
+//                logger.info("获取数据库数据所耗时间getAllAccount：" + (end - start));
             }
         } catch (Exception e) {
             logger.error(e.toString());

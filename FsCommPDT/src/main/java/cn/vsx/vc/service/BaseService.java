@@ -48,6 +48,7 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
@@ -118,6 +119,7 @@ public abstract class BaseService extends Service{
         initHomeBroadCastReceiver();
         initBroadCastReceiver();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -240,6 +242,7 @@ public abstract class BaseService extends Service{
         super.onDestroy();
         logger.info(TAG+":onDestroy");
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -300,6 +303,18 @@ public abstract class BaseService extends Service{
 
     private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> {
         mHandler.post(this::stopBusiness);
+    };
+
+    //成员被删除了
+    private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
+        @Override
+        public void handler() {
+            mHandler.post(() -> {
+                PromptManager.getInstance().stopRing();
+                revertStateMachine();
+                removeView();
+            });
+        }
     };
 
     /**

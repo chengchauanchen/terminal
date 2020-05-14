@@ -4,20 +4,15 @@ import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.allen.library.observer.CommonObserver;
-
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
-import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.vc.R;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import ptt.terminalsdk.manager.search.SearchUtil;
+import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiverSearchGroupDataCompleteHandler;
 
 /**
  * 通讯录 搜索
@@ -46,12 +41,21 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
 
     @Override
     public void initData() {
-        getDbAllGroup();
+        List<GroupSearchBean> list = MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas();
+        if(list.size()>0){
+            datas.clear();
+            datas.addAll(list);
+            if (searchAdapter!=null) {
+                searchAdapter.notifyDataSetChanged();
+            }
+        }else{
+            MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup();
+        }
     }
 
     @Override
     public void initListener() {
-        TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiverSearchGroupDataCompleteHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
 
@@ -62,53 +66,27 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiverSearchGroupDataCompleteHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
 
         /*---------------------------*/
         unregistReceiveHandler();
     }
-
-    //所有组
-    private ReceiveGetAllGroupHandler receiveGetAllGroupHandler = new ReceiveGetAllGroupHandler() {
+    //刷新UI
+    private ReceiverSearchGroupDataCompleteHandler receiverSearchGroupDataCompleteHandler = new ReceiverSearchGroupDataCompleteHandler() {
         @Override
-        public void handler(List<Group> groups) {
-            logger.info("SearchTabFragment获取组数据:" + groups);
-            getDbAllGroup();
+        public void handler() {
+            datas.clear();
+            datas.addAll(MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas());
+            mHandler.post(() -> {
+                if(searchAdapter!=null){
+                    searchAdapter.notifyDataSetChanged();
+                }
+            });
+
         }
     };
-
-    /******************************数据处理*********************************/
-
-
-    /**
-     * 获取本地数据库 组数据
-     */
-    private void getDbAllGroup() {
-        SearchUtil.getDbAllGroup()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CommonObserver<List<GroupSearchBean>>() {
-                    @Override
-                    protected String setTag() {
-                        return "";
-                    }
-
-                    @Override
-                    protected void onError(String errorMsg) {
-                        logger.error("getTotalCountPolice----请求报错:" + errorMsg);
-                    }
-
-                    @Override
-                    protected void onSuccess(List<GroupSearchBean> allRowSize) {
-                        logger.info("获取本地数据库 组数据"+allRowSize);
-                        datas.clear();
-                        datas.addAll(allRowSize);
-                        searchAdapter.notifyDataSetChanged();
-                    }
-                });
-    }
 
     /**
      * 收到強制转组
@@ -119,11 +97,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
             if (!forceSwitchGroup) {
                 return;
             }
-            mHandler.post(() -> {
-                getDbAllGroup();
-                logger.info("SearchTabGroupFragment搜做界面收到强制切组消息"+memberId+toGroupId);
-//                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
-            });
+            MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup();
         }
     };
 

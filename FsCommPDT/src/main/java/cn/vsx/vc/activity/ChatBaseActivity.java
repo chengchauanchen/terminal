@@ -2348,7 +2348,7 @@ public abstract class ChatBaseActivity extends BaseActivity
             final int viewPos = getViewPos(position);
             logger.info("发送成功position:" + position + ",viewPos:" + viewPos);
             handler.post(() -> {
-                if (viewPos != -1) {
+//                if (viewPos != -1) {
 //                    View childView = groupCallList.getChildAt(viewPos);
 //                    temporaryAdapter.progressPercentMap.remove(tokenId);
 //                    if (childView != null) {
@@ -2361,7 +2361,7 @@ public abstract class ChatBaseActivity extends BaseActivity
 //                            tv_progress_pre_upload.setVisibility(View.GONE);
 //                        }
 //                    }
-                }
+//                }
 //                temporaryAdapter.notifyItemChanged(position);
                 temporaryAdapter.setUploadFinished();
             });

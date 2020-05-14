@@ -28,7 +28,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
@@ -442,41 +441,49 @@ public class SearchTabFragment extends BaseSearchFragment {
      */
     private void updateUI() {
         try{
-            //当前没有监听组的数据，说明没有显示监听组，或显示的是搜索的结果,则不需要更新监听组
-            if (datas.size() > 0) {
-                Object o = datas.get(0);
-                if (o instanceof SearchTitleBean) {
-                    SearchTitleBean searchTitleBean = (SearchTitleBean) o;
-                    if (!TextUtils.equals("监听组",searchTitleBean.getTitle())&&
-                            !TextUtils.equals("常用联系人",searchTitleBean.getTitle())) {
-                        if(searchAdapter!=null){
-                            searchAdapter.notifyDataSetChanged();
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                //当前没有监听组的数据，说明没有显示监听组，或显示的是搜索的结果,则不需要更新监听组
+                if (datas.size() > 0) {
+                    Object o = datas.get(0);
+                    if (o instanceof SearchTitleBean) {
+                        SearchTitleBean searchTitleBean = (SearchTitleBean) o;
+                        if (!TextUtils.equals("监听组",searchTitleBean.getTitle())&&
+                                !TextUtils.equals("常用联系人",searchTitleBean.getTitle())) {
+                            mHandler.post(() -> {
+                                if(searchAdapter!=null){
+                                    searchAdapter.notifyDataSetChanged();
+                                }
+                            });
+                            return;
                         }
-                        return;
                     }
                 }
-            }
-            datas.clear();
-            //添加当前组
-            SearchTitleBean titleBean = new SearchTitleBean("监听组");
-            datas.add(titleBean);
-            GroupSearchBean bean = MyTerminalFactory.getSDK().getSearchDataManager().getSearchGroupByNo(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0));
-            if(bean!=null&&!listenedGroupDatas.contains(bean)){
-                listenedGroupDatas.add(bean);
-            }
-            if(listenedGroupDatas.size()>0){
-                datas.addAll(listenedGroupDatas);
-            }
+                datas.clear();
+                //添加监听组
+                SearchTitleBean titleBean = new SearchTitleBean("监听组");
+                datas.add(titleBean);
+                //添加当前组
+                GroupSearchBean currentGroup = SearchUtil.getCurrentGroupInfo();
+                if(currentGroup!=null&&!listenedGroupDatas.contains(currentGroup)){
+                    listenedGroupDatas.add(currentGroup);
+                }
+                if(listenedGroupDatas.size()>0){
+                    datas.addAll(listenedGroupDatas);
+                }
+                //常用联系人
+                if(topContactsDatas.size()>0){
+                    SearchTitleBean titleBean2 = new SearchTitleBean("常用联系人");
+                    datas.add(titleBean2);
+                    datas.addAll(topContactsDatas);
+                }
 
-            if(topContactsDatas.size()>0){
-                SearchTitleBean titleBean2 = new SearchTitleBean("常用联系人");
-                datas.add(titleBean2);
-                datas.addAll(topContactsDatas);
-            }
+                mHandler.post(() -> {
+                    if(searchAdapter!=null){
+                        searchAdapter.notifyDataSetChanged();
+                    }
+                });
+            });
 
-            if(searchAdapter!=null){
-                searchAdapter.notifyDataSetChanged();
-            }
         }catch (Exception e){
             e.printStackTrace();
         }

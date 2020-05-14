@@ -99,7 +99,18 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
         @Override
         public void handler() {
-            myHandler.post(() -> MyApplication.instance.stopHandlerService());
+            try{
+                MyTerminalFactory.getSDK().stop();
+                myHandler.postDelayed(() -> {
+                    cn.vsx.vc.utils.ToastUtil.showToast(getString(R.string.accunt_is_delete));
+                },1000);
+
+                myHandler.postDelayed(() -> {
+                    exitApp();
+                },3000);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     };
 
@@ -944,6 +955,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             MyApplication.instance.isClickVolumeToCall = false;
             MyApplication.instance.isPttPress = false;
             MyApplication.instance.stopHandlerService();
+            MyTerminalFactory.getSDK().stop();
         }catch (Exception e){
             e.printStackTrace();
         }

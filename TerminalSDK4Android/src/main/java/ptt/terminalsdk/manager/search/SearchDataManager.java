@@ -16,8 +16,10 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllAccountHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
+import cn.vsx.hamster.terminalsdk.tools.LogUtil;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import ptt.terminalsdk.receiveHandler.ReceiverSearchGroupDataCompleteHandler;
 
 /**
  * @author martian on 2020/4/7.
@@ -25,7 +27,7 @@ import io.reactivex.schedulers.Schedulers;
 public class SearchDataManager {
 
   private Logger logger = Logger.getLogger(getClass());
-  public static final String TAG = "SearchDataManager---";
+  public static final String TAG = "search-";
   private List<GroupSearchBean> groupDatas = new ArrayList<>();
   private List<MemberSearchBean> memberDatas = new ArrayList<>();
 
@@ -77,11 +79,13 @@ public class SearchDataManager {
 
           @Override
           protected void onSuccess(List<GroupSearchBean> allRowSize) {
-            logger.info(TAG+"getDbAllGroup----onSuccess:" +allRowSize);
+              LogUtil.printLongContentDebug(TAG+"allGroup:",allRowSize.toString());
+//            logger.info(TAG+"getDbAllGroup----onSuccess:" +allRowSize);
             if(allRowSize!=null){
               groupDatas.clear();
               groupDatas.addAll(allRowSize);
             }
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverSearchGroupDataCompleteHandler.class);
           }
         });
   }
@@ -107,7 +111,8 @@ public class SearchDataManager {
 
           @Override
           protected void onSuccess(List<MemberSearchBean> allRowSize) {
-            logger.info(TAG+"getDbAllAccount----onSuccess:"+allRowSize);
+//          logger.info(TAG+"getDbAllAccount----onSuccess:"+allRowSize);
+            LogUtil.printLongContentDebug(TAG+"allAccount:",allRowSize.toString());
             if(allRowSize!=null){
               memberDatas.clear();
               memberDatas.addAll(allRowSize);

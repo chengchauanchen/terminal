@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -1005,6 +1004,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				logger.info("percent:" + percent);
 				logger.info("speed:" + speed);
 				logger.info("============= end ===============");
+				if(percent<0){
+					percent = 0;
+				}
 				TerminalFactory.getSDK().notifyReceiveHandler(ReceiveDownloadProgressHandler.class, percent, terminalMessage);
 			}
 
