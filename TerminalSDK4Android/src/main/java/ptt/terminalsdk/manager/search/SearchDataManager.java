@@ -16,8 +16,6 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllAccountHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
-import cn.vsx.hamster.terminalsdk.tools.LogUtil;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.receiveHandler.ReceiverSearchGroupDataCompleteHandler;
 
@@ -65,7 +63,7 @@ public class SearchDataManager {
   public synchronized void getDbAllGroup() {
     SearchUtil.getDbAllGroup()
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.io())
         .subscribe(new CommonObserver<List<GroupSearchBean>>() {
           @Override
           protected String setTag() {
@@ -79,13 +77,11 @@ public class SearchDataManager {
 
           @Override
           protected void onSuccess(List<GroupSearchBean> allRowSize) {
-              LogUtil.printLongContentDebug(TAG+"allGroup:",allRowSize.toString());
+//              LogUtil.printLongContentDebug(TAG+"allGroup:",allRowSize.toString());
 //            logger.info(TAG+"getDbAllGroup----onSuccess:" +allRowSize);
-            if(allRowSize!=null){
               groupDatas.clear();
               groupDatas.addAll(allRowSize);
-            }
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverSearchGroupDataCompleteHandler.class);
+              TerminalFactory.getSDK().notifyReceiveHandler(ReceiverSearchGroupDataCompleteHandler.class);
           }
         });
   }
@@ -97,7 +93,7 @@ public class SearchDataManager {
   public synchronized  void getDbAllAccount() {
     SearchUtil.getDbAllAccount()
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.io())
         .subscribe(new CommonObserver<List<MemberSearchBean>>() {
           @Override
           protected String setTag() {
@@ -112,11 +108,9 @@ public class SearchDataManager {
           @Override
           protected void onSuccess(List<MemberSearchBean> allRowSize) {
 //          logger.info(TAG+"getDbAllAccount----onSuccess:"+allRowSize);
-            LogUtil.printLongContentDebug(TAG+"allAccount:",allRowSize.toString());
-            if(allRowSize!=null){
-              memberDatas.clear();
-              memberDatas.addAll(allRowSize);
-            }
+//            LogUtil.printLongContentDebug(TAG+"allAccount:",allRowSize.toString());
+            memberDatas.clear();
+            memberDatas.addAll(allRowSize);
           }
         });
   }
@@ -124,6 +118,12 @@ public class SearchDataManager {
   public List<GroupSearchBean> getGroupSreachDatas(){
     return  groupDatas;
   }
+
+    public void addGroupSreachDatas(GroupSearchBean bean){
+      if(bean!=null&& !groupDatas.contains(bean)){
+          groupDatas.add(bean);
+      }
+    }
 
   public List<MemberSearchBean>  getAccountSreachDatas(){
     return  memberDatas;

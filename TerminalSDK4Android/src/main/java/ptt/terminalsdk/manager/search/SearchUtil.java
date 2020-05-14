@@ -219,23 +219,40 @@ public class SearchUtil {
         GroupSearchBean bean = null;
         //判断内存中是否有组的数据
         int size = MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas().size();
+        Log.e("SearchUtil", "getCurrentGroupInfo-size:" + size);
         if(size>0){
             //有数据就从内存中取
             bean = MyTerminalFactory.getSDK().getSearchDataManager().getSearchGroupByNo(groupNo);
         }
-        if(size<=0 || bean == null){
+        Log.e("SearchUtil", "getCurrentGroupInfo-getSearchGroupByNo:" + bean);
+        if(size<=0 || isNeedGetGroupInfo(bean)){
             //如果内存中没有，就从数据库中取
             bean = TerminalFactory.getSDK().getSQLiteDBManager().getGroupByNo(groupNo);
         }
+        Log.e("SearchUtil", "getCurrentGroupInfo-getGroupByNo:" + bean);
         //如果数据库中没有，就从服务器获取
-        if(bean == null){
-            bean = TerminalFactory.getSDK().getDataManager().getGroupSearchBeanByNoWithNoThread(groupNo);
-        }
+//        if(isNeedGetGroupInfo(bean)){
+//            bean = TerminalFactory.getSDK().getDataManager().getGroupSearchBeanByNoWithNoThread(groupNo);
+//        }
+//        Log.e("SearchUtil", "getCurrentGroupInfo-getGroupSearchBeanByNoWithNoThread:" + bean);
         //如果服务器获取失败，就自己new一个名字和编号一样的GroupSearchBean
         if(bean == null){
             bean =  DataUtil.newGroupSearchBeanByNo(groupNo);
         }
+        Log.e("SearchUtil", "getCurrentGroupInfo-newGroupSearchBeanByNo:" + bean);
         return bean;
+    }
+
+    public static boolean isNeedGetGroupInfo(GroupSearchBean bean){
+        boolean result = false;
+        if(bean == null){
+            result = true;
+            return result;
+        }
+        if(TextUtils.equals(String.valueOf(bean.no),bean.name)){
+            result = true;
+        }
+        return result;
     }
 
     /**

@@ -60,6 +60,7 @@ public class SearchTabFragment extends BaseSearchFragment {
     private static final int HANDLE_CODE_LOAD_LISTENER_DATA = 2  ;//获取监听组数据
     private static final int HANDLE_CODE_LOAD_TOP_DATA = 3  ;//获取常用联系人数据
     private static final int HANDLE_CODE_UPDATE_UI = 4  ;//更新UI
+    private static final int HANDLE_CODE_UPDATE_GROUP = 5  ;//更新group
     private static final int UPDATE_DELAYED_TIME = 500  ;//延时的时间
     private boolean searchKeyboardIsVisible = true;
     private ImageView iv_call;
@@ -89,11 +90,16 @@ public class SearchTabFragment extends BaseSearchFragment {
                     removeMessages(HANDLE_CODE_UPDATE_UI);
                     updateUI();
                     break;
+                case HANDLE_CODE_UPDATE_GROUP:
+                    //更新UI
+                    removeMessages(HANDLE_CODE_UPDATE_GROUP);
+                    updateGroup((GroupSearchBean) msg.obj);
+                    break;
+
                 default:break;
             }
         }
     };
-
     @Override
     public int getContentViewId() {
         return R.layout.fragment_search;
@@ -476,6 +482,8 @@ public class SearchTabFragment extends BaseSearchFragment {
                     datas.add(titleBean2);
                     datas.addAll(topContactsDatas);
                 }
+                //判断当前组的信息是不是自己new出来的，如果是则启线程获取当前组的信息，并保存到所有组的数据中
+                checkCurrentGroupInfo(currentGroup);
 
                 mHandler.post(() -> {
                     if(searchAdapter!=null){
@@ -487,7 +495,54 @@ public class SearchTabFragment extends BaseSearchFragment {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
 
+    /**
+     * 更新组信息
+     * @param bean
+     */
+    private void updateGroup(GroupSearchBean bean) {
+        try{
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                if(bean!=null&&datas.contains(bean)){
+                    datas.remove(bean);
+                    datas.add(bean);
+
+                    mHandler.post(() -> {
+                        if(searchAdapter!=null){
+                            searchAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 判断当前组的信息是不是自己new出来的，如果是则启线程获取当前组的信息，并保存到所有组的数据中
+     * @param currentGroup
+     */
+    private void checkCurrentGroupInfo(GroupSearchBean currentGroup) {
+        if(SearchUtil.isNeedGetGroupInfo(currentGroup)) {
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                GroupSearchBean group = TerminalFactory.getSDK().getDataManager().getGroupSearchBeanByNoWithNoThread(currentGroup.getNo());
+                if(group!=null) {
+                    List<Group> groups = new ArrayList<>();
+                    groups.add(group);
+                    //更新到数据库
+                    TerminalFactory.getSDK().getSQLiteDBManager().updateAllGroup(groups, false);
+                    //更新到缓存中
+                    MyTerminalFactory.getSDK().getSearchDataManager().addGroupSreachDatas(group);
+                    //更新UI
+                    Message message = mHandler.obtainMessage();
+                    message.obj = group;
+                    message.what = HANDLE_CODE_UPDATE_GROUP;
+                    mHandler.sendMessageDelayed(message,500);
+                }
+            });
+        }
     }
 
     private void getAccount(String memberNo) {
