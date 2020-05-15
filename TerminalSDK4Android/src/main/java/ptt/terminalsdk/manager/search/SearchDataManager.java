@@ -119,9 +119,15 @@ public class SearchDataManager {
     return  groupDatas;
   }
 
+    /**
+     * 添加组到集合中
+     * @param bean
+     */
     public void addGroupSreachDatas(GroupSearchBean bean){
       if(bean!=null&& !groupDatas.contains(bean)){
           groupDatas.add(bean);
+          //更新UI
+          TerminalFactory.getSDK().notifyReceiveHandler(ReceiverSearchGroupDataCompleteHandler.class);
       }
     }
 
