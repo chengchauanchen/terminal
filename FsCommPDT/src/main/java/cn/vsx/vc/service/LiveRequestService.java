@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -129,7 +130,7 @@ public class LiveRequestService extends BaseService{
         @Override
         public void handler(boolean connected){
             if(!connected){
-                MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
+                MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo,TerminalErrorCode.STOP_REQUEST.getErrorCode());
                 stopBusiness();
             }
         }
@@ -137,7 +138,7 @@ public class LiveRequestService extends BaseService{
 
     private View.OnClickListener cancelOnClickListener = v ->{
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.canceled));
-        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
+        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo,TerminalErrorCode.STOP_REQUEST.getErrorCode());
         stopBusiness();
     };
 
@@ -145,7 +146,9 @@ public class LiveRequestService extends BaseService{
      * 对方拒绝直播，通知界面关闭响铃页
      **/
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc, liveMemberId, liveUniqueNo)-> mHandler.post(() -> {
-        ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
+        if(!TextUtils.isEmpty(resultDesc)){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
+        }
         stopBusiness();
     });
 
