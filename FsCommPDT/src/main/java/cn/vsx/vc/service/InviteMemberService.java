@@ -40,7 +40,6 @@ import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageSendStateEnum;
-import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -1540,7 +1539,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         mTerminalMessage.messageToId = NoCodec.encodeMemberNo(0);
         mTerminalMessage.messageToName = "";
         mTerminalMessage.sendTime = System.currentTimeMillis();
-        mTerminalMessage.messageType = MessageType.GB28181_RECORD.getCode();
+        mTerminalMessage.messageType = oldTerminalMessage.messageType;
         mTerminalMessage.messageBody = jsonObject;
         MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", mTerminalMessage, memberNos, uniqueNos);
         removeView();

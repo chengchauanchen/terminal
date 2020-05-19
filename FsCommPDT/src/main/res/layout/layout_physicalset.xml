@@ -6,7 +6,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/y29"
+        android:layout_height="@dimen/dp_50"
         android:layout_marginTop="@dimen/dp_half_one"
         android:background="@color/itemblue">
 
@@ -28,13 +28,13 @@
     <LinearLayout
         android:id="@+id/ll_voice"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/y62"
+        android:layout_height="@dimen/dp_110"
         android:layout_marginTop="@dimen/dp_half_one"
         android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/y29"
+            android:layout_height="@dimen/dp_50"
             android:background="@color/itemblue">
 
             <TextView
@@ -67,7 +67,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/y29"
+            android:layout_height="@dimen/dp_50"
             android:layout_marginTop="@dimen/dp_half_one"
             android:background="@color/itemblue">
 

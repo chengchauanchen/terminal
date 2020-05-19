@@ -55,6 +55,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     GridView gv_function_bottom;
 
     RelativeLayout top;
+    LinearLayout rlFunctionHidePlusTopContent;
 
     EditText groupCallNewsEt;
 
@@ -127,6 +128,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
 
         gv_function_bottom = view.findViewById(R.id.gv_function_bottom);
         top = view.findViewById(R.id.rl_function_hide_plus_top);
+        rlFunctionHidePlusTopContent = view.findViewById(R.id.rl_function_hide_plus_top_content);
         groupCallNewsEt = view.findViewById(R.id.group_call_news_et);
         hideFunction = view.findViewById(R.id.hide_function);
         groupCallNewsKeyboard = view.findViewById(R.id.group_call_news_keyboard);
@@ -704,6 +706,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
      */
     public void setMergeTransmitVisibility(int visibility){
         bt_merge_transmit.setVisibility(visibility);
+        rlFunctionHidePlusTopContent.setVisibility((visibility == View.VISIBLE)?View.GONE:View.VISIBLE);
     }
 
     /**
