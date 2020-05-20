@@ -535,6 +535,8 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         @Override
         public void handler(int resultCode, String resultDes) {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                //获取当前组在线成员人数
+                getCurrentGroupOnlineMembers();
                 myHandler.post(() -> {
                     //当前文件夹、组数据的显示设置
                     setCurrentGroupView();
@@ -1371,8 +1373,12 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
             rl_uav_push.setVisibility(View.GONE);
         }
 //        setScanGroupIcon();//设置组扫描相关图标
-        //获取当前组在线成员人数
-        getCurrentGroupOnlineMembers();
+        //判断是否是直接进入主页面的，直接进入主页面就再登录
+        boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA, false);
+        if (!hasCompleteData) {
+            //获取当前组在线成员人数
+            getCurrentGroupOnlineMembers();
+        }
     }
 
     /**
