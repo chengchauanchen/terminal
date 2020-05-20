@@ -1374,8 +1374,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         }
 //        setScanGroupIcon();//设置组扫描相关图标
         //判断是否是直接进入主页面的，直接进入主页面就再登录
-        boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA, false);
-        if (!hasCompleteData) {
+        if(getActivity()!=null&&getActivity().getIntent()!=null && !getActivity().getIntent().getBooleanExtra(Params.IS_NEED_lOGIN,false)){
             //获取当前组在线成员人数
             getCurrentGroupOnlineMembers();
         }

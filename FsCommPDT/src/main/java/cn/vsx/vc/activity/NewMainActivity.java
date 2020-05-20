@@ -1207,8 +1207,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
         NfcUtil.writeData();
         //判断是否是直接进入主页面的，直接进入主页面就再登录
-        boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA, false);
-        if (hasCompleteData) {
+        Intent intent = getIntent();
+        if(intent!=null && intent.getBooleanExtra(Params.IS_NEED_lOGIN,false)){
             //认证
             LoginState loginState = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState();
             if(loginState!= LoginState.LOGIN && loginState != LoginState.UPDATE_DATA && loginState != LoginState.ONLINE){
