@@ -358,7 +358,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
      */
     private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = (errorCode, errorDesc) -> myHandler.post(() -> {
         if (errorCode == BaseCommonCode.SUCCESS_CODE) {
-            goOn();
+            goOn(false);
         }
     });
 
@@ -401,7 +401,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
             if(hasCompleteData){
                 changeProgressMsg(getString(R.string.text_start_success));
-                myHandler.postDelayed(() -> goOn(),1000);
+                myHandler.postDelayed(() -> goOn(true),1000);
                 return;
             }
             //是否是认证
@@ -1517,7 +1517,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
 
-    private void goOn() {
+    private void goOn(boolean isNeedLogin) {
         try{
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
@@ -1540,6 +1540,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             Intent intent = new Intent(this,clazz);
             intent.putExtra(UrlParams.THIRD_APP_PACKAGE_NAME,third_app_package_name);
             intent.putExtra(UrlParams.IS_REGIST_ACTIVITY_JOIN,true);
+            intent.putExtra(Params.IS_NEED_lOGIN,isNeedLogin);
             startActivity(intent);
             TerminalFactory.getSDK().putParam(Params.HAS_COMPLETE_DATA,true);
         }catch(ClassNotFoundException e){
