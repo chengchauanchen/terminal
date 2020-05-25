@@ -3,6 +3,7 @@ package cn.vsx.vc.search;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
@@ -190,7 +191,7 @@ public class SearchTabFragment extends BaseSearchFragment {
 
     private void initRecyclerView() {
         group_recyclerView = mRootView.findViewById(R.id.group_recyclerView);
-        group_recyclerView.setLayoutManager(new RecyclerViewNoBugLinearLayoutManager(getContext()));
+        group_recyclerView.setLayoutManager(new RecyclerViewNoBugLinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         searchAdapter = new SearchAdapter(getContext(), datas);
         group_recyclerView.setAdapter(searchAdapter);
     }
@@ -344,7 +345,9 @@ public class SearchTabFragment extends BaseSearchFragment {
                     protected void onSuccess(List<Object> allRowSize) {
                         logger.info(allRowSize);
                         mHandler.post(() -> {
-                            searchAdapter.notifyDataSetChanged();
+                            if(searchAdapter!=null){
+                                searchAdapter.notifyDataSetChanged();
+                            }
                         });
                     }
                 });

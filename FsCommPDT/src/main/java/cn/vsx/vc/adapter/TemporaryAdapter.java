@@ -1130,12 +1130,14 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.live_bubble, View.GONE);
             return;
         }
-        if (messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE) {//被邀请去观看图像
+        if (messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE) {
+            //被邀请去观看图像
             setViewVisibility(holder.reBubble, View.VISIBLE);
             setViewVisibility(holder.ll_botoom_to_watch, View.VISIBLE);
             setViewVisibility(holder.tv_watch_time, View.GONE);
             setViewVisibility(holder.live_bubble, View.GONE);
-        } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END) {//结束观看图像
+        } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END) {
+            //结束观看图像
 //            setViewVisibility(holder.ll_botoom_to_watch, View.GONE);
             setViewVisibility(holder.reBubble, View.GONE);
 //            setViewVisibility(holder.tv_watch_time, View.VISIBLE);
@@ -1157,7 +1159,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 }
             }
         } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.ASK_VIDEO_LIVE) {
-            logger.info("sjl_JsonParam.REMARK:" + messageBody.getInteger(JsonParam.REMARK) + ",REQUIRE_VIDEO_LIVE：" + Remark.ASK_VIDEO_LIVE);
             setViewVisibility(holder.reBubble, View.GONE);
             setViewVisibility(holder.live_bubble, View.VISIBLE);
 

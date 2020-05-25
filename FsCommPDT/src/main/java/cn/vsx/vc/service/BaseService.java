@@ -45,6 +45,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDeparmentChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
@@ -126,6 +127,7 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveDeparmentChangeHandler);
 
     }
 
@@ -249,6 +251,7 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveDeparmentChangeHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
@@ -338,6 +341,16 @@ public abstract class BaseService extends Service{
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE
                 &&MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
+            mHandler.post(() -> stopBusiness());
+        }
+    };
+
+    /**
+     * 部门修改之后，提示用户重新登录
+     */
+    private ReceiveDeparmentChangeHandler receiveDeparmentChangeHandler = new ReceiveDeparmentChangeHandler() {
+        @Override
+        public void handler() {
             mHandler.post(() -> stopBusiness());
         }
     };

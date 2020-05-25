@@ -252,24 +252,28 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     protected void goToRegistActivity() {
-        // 重新走应用的流程是一个正确的做法，因为应用被强杀了还保存 Activity 的栈信息是不合理的
-        if(TerminalFactory.getSDK().isServerConnected()){
-            TerminalFactory.getSDK().getAuthManagerTwo().logout();
+        try{
+            // 重新走应用的流程是一个正确的做法，因为应用被强杀了还保存 Activity 的栈信息是不合理的
+            if(TerminalFactory.getSDK().isServerConnected()){
+                TerminalFactory.getSDK().getAuthManagerTwo().logout();
+            }
+            LoginStateMachine loginStateMachine = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine();
+            if(loginStateMachine!=null){
+                loginStateMachine.stop();
+            }
+            TerminalFactory.getSDK().getClientChannel().stop();
+            MyTerminalFactory.getSDK().stop();
+            MyApplication.instance.isClickVolumeToCall = false;
+            MyApplication.instance.isPttPress = false;
+            OperateReceiveHandlerUtil.getInstance().clear();
+            Intent intent = new Intent(this, RegistActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_CLEAR);
+            startActivity(intent);
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        LoginStateMachine loginStateMachine = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine();
-        if(loginStateMachine!=null){
-            loginStateMachine.stop();
-        }
-        TerminalFactory.getSDK().getClientChannel().stop();
-        MyTerminalFactory.getSDK().stop();
-        MyApplication.instance.isClickVolumeToCall = false;
-        MyApplication.instance.isPttPress = false;
-        OperateReceiveHandlerUtil.getInstance().clear();
-        Intent intent = new Intent(this, RegistActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_CLEAR);
-        startActivity(intent);
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     /**
@@ -688,6 +692,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             //清除数据
             TerminalFactory.getSDK().clearData();
             ToastUtil.showToast(getString(R.string.text_account_data_change_please_relogin));
+            MyTerminalFactory.getSDK().stop();
             myHandler.postDelayed(() -> goToRegistActivity(),2000);
         }
     };

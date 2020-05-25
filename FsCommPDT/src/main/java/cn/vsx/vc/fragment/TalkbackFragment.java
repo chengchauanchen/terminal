@@ -345,11 +345,17 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
                 return;
             }
             logger.info("TalkbackFragment收到强制切组： toGroupId：" + toGroupId);
+            //获取当前组的在线成员列表
+            getCurrentGroupOnlineMembers();
             myHandler.post(() -> {
                 setCurrentGroupView();
-                if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
-                    change2Silence();
-                }
+                //需要判断是否是响应组
+                //如果是响应组，禁止组呼状态
+                //如果不是响应组，空闲状态
+                setPttText();
+//                if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
+//                    change2Silence();
+//                }
             });
         }
     };
