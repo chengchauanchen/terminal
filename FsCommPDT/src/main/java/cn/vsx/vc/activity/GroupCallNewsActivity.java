@@ -59,6 +59,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePowerSaveStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetCurrentGroupHandler;
@@ -147,6 +148,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     public static int mGroupId;
     //获取组内正在上报人数的间隔时间
     private static final long GET_GROUP_LIVING_INTERVAL_TIME = 20*1000;
+//    private static final long GET_GROUP_LIVING_INTERVAL_TIME = 5*1000;
     @SuppressWarnings("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
@@ -284,6 +286,15 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     }
 
+    @Override
+    protected void handleMesage(Message msg) {
+        switch (msg.what) {
+            case VIDEO_LIVE_COUNT:
+                getGroupLivingList();
+                break;
+        }
+    }
+
     public void initListener() {
         newsBarReturn.setOnClickListener(this);
         groupLiveHistory.setOnClickListener(this);
@@ -318,6 +329,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupLivingListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetCurrentGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receivePowerSaveStatusChangedHandler);
         super.initListener();
     }
 
@@ -342,7 +354,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 //        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
         TerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(userId, TerminalMemberStatusEnum.ONLINE.toString() );
         //获取组内正在上报的人数
-        getGroupLivingList();
+        handler.sendEmptyMessage(VIDEO_LIVE_COUNT);
         refreshPtt();
         NfcUtil.writeData();
     }
@@ -397,6 +409,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupLivingListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetCurrentGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receivePowerSaveStatusChangedHandler);
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
         }
@@ -1036,7 +1049,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             }
         });
         if(forNumber){
-            handler.postDelayed(() -> getGroupLivingList(),GET_GROUP_LIVING_INTERVAL_TIME);
+            if(!MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                handler.sendEmptyMessageDelayed(VIDEO_LIVE_COUNT,GET_GROUP_LIVING_INTERVAL_TIME);
+            }
         }
     };
 
@@ -1055,6 +1070,24 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     ToastUtils.showShort(errorDesc);
                 }
             });
+        }
+    };
+
+    /**
+     * 省电模式状态改变的通知
+     */
+    private ReceivePowerSaveStatusChangedHandler receivePowerSaveStatusChangedHandler = new ReceivePowerSaveStatusChangedHandler(){
+        @Override
+        public void handler(boolean isSave){
+            if (isSave) {
+                if(handler.hasMessages(VIDEO_LIVE_COUNT)){
+                    handler.removeMessages(VIDEO_LIVE_COUNT);
+                }
+            }else {
+                if(!handler.hasMessages(VIDEO_LIVE_COUNT)){
+                    handler.sendEmptyMessageDelayed(VIDEO_LIVE_COUNT,GET_GROUP_LIVING_INTERVAL_TIME);
+                }
+            }
         }
     };
 

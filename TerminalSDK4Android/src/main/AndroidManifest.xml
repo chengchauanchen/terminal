@@ -41,6 +41,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name = "android.hardware.camera" />
     <uses-feature android:name = "android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="true" />
@@ -64,7 +67,7 @@
         <!--<service android:name="org.easydarwin.easypusher.BackgroundCameraService"/>-->
         <service android:name=".service.MessageService"
                  android:enabled="true"
-                 android:process=":remote"
+                 android:process=":message"
                  android:exported="true">
         </service>
 
@@ -130,6 +133,18 @@
         <receiver android:name=".broadcastreceiver.FileExpireReceiver">
             <intent-filter >
                 <action android:name="vsxin.action.fileexpiretime" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".broadcastreceiver.PowerSaveReceiver">
+            <intent-filter >
+                <action android:name="vsxin.action.powersave.presavestatus" />
+                <action android:name="vsxin.action.powersave.savestatus" />
+                <action android:name="vsxin.action.powersave.activitytatus" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".broadcastreceiver.LocationRequestReceiver">
+            <intent-filter >
+                <action android:name="vsxin.action.location.request" />
             </intent-filter>
         </receiver>
         <receiver android:name=".broadcastreceiver.LivingStopTimeReceiver">

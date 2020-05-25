@@ -83,7 +83,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void addTerminalMessage(TerminalMessage terminalMessage) {
-        logger.info("向terminalMessage表存消息：" + terminalMessage);
+//        logger.info("向terminalMessage表存消息：" + terminalMessage);
         try{
             SQLiteDatabase db = helper.getWritableDatabase();
             TerminalMessage message = null;
@@ -328,7 +328,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 logger.error(e.toString());
             }
         }
-        logger.info("向terminalMessage表获取消息message_id："+message_id+"-message:"+message);
+//        logger.debug("向terminalMessage表获取消息message_id："+message_id+"-message:"+message);
         return message;
     }
 
@@ -505,7 +505,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     if (cursor.getColumnIndex("unread_count") != -1) {
                         terminalMessage.unReadCount = cursor.getInt(cursor.getColumnIndex("unread_count"));
                     }
-                    logger.info("从数据库取出数据：" + terminalMessage);
+//                    logger.info("从数据库取出数据：" + terminalMessage);
                     terminalMessageList.add(terminalMessage);
                 }
                 cursor.close();

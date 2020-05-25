@@ -50,6 +50,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.SystemUtil;
 import ptt.terminalsdk.context.BaseApplication;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ApkUtil;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
@@ -113,8 +114,11 @@ public class MyApplication extends BaseApplication{
         //清空刷NFC需要传的数据
         MyApplication.instance.setBindTranslateBean(null);
         // TODO 初始化 向地三方应用同步消息的service
-		//初始化 ThirdSendMessage
-		BaseApplication.getApplication().initVsxSendMessage();
+		//判断是否是绿之云的，如果是就初始化同步消息的service
+		if(ApkUtil.isWuHanPoliceStore()){
+			//初始化 ThirdSendMessage
+			initVsxSendMessage();
+		}
 		//上报图像可以不走信令
 		TerminalFactory.getSDK().putParam(Params.PUSH_LIVE_NO_SINGLE,true);
 

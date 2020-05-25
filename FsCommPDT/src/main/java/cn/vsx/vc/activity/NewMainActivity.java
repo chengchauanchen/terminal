@@ -1218,6 +1218,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
                 updateLoginStateView(0,R.string.authing);
             }
+            //获取省电模式的配置信息
+            TerminalFactory.getSDK().getPowerSaveManager().requestSaveStatusAndActivityStatusTime(true);
         }
     }
 
@@ -1565,6 +1567,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }else {
             if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)){
                 if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+                    MyTerminalFactory.getSDK().getLocationManager().startLocation(true,false,false,false);
                     if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
                         CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
                     }

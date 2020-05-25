@@ -624,25 +624,30 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private void sendMessage(ChatViewHolder holder, TerminalMessage terminalMessage, int viewType) {
-        switch (viewType) {
-            case MESSAGE_SHORT_TEXT_SEND:
-                sendShortTextMessage(terminalMessage);
-                break;
-            case MESSAGE_LONG_TEXT_SEND:
-                uploadLongText(holder, terminalMessage);
-                break;
-            case MESSAGE_IMAGE_SEND:
-                break;
-            case MESSAGE_FILE_SEND:
-                break;
-            case MESSAGE_LOCATION_SEND:
-                sendLocationMessage(terminalMessage);
-                break;
-            case MESSAGE_VIDEO_LIVE_SEND:
-                sendVideoLiveMessage(terminalMessage);
-                break;
-
-        }
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                switch (viewType) {
+                    case MESSAGE_SHORT_TEXT_SEND:
+                        sendShortTextMessage(terminalMessage);
+                        break;
+                    case MESSAGE_LONG_TEXT_SEND:
+                        uploadLongText(holder, terminalMessage);
+                        break;
+                    case MESSAGE_IMAGE_SEND:
+                        break;
+                    case MESSAGE_FILE_SEND:
+                        break;
+                    case MESSAGE_LOCATION_SEND:
+                        sendLocationMessage(terminalMessage);
+                        break;
+                    case MESSAGE_VIDEO_LIVE_SEND:
+                        sendVideoLiveMessage(terminalMessage);
+                        break;
+                        default:break;
+                }
+            }
+        });
     }
 
     private void setListener(final int viewType, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {

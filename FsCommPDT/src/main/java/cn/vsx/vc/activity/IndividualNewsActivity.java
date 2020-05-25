@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -175,6 +176,11 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         setStatusBarColor();
         groupCallList.setVerticalScrollBarEnabled(false);
         record.setAudioPauseListener(() -> sendRecord());
+    }
+
+    @Override
+    protected void handleMesage(Message msg) {
+
     }
 
     @Override

@@ -24,7 +24,7 @@ public class RecorderSfGPSManager {
     public MySfMapLocationListener myListener = new MySfMapLocationListener();
 
     public void init(int span) {
-        logger.info(LocationManager.TAG + "顺丰GPSManager初始化了");
+        logger.info(LocationManager.TAG + "SfGPSManager初始化了");
         mSfMapLocationClient = new SfMapLocationClient(application);
 
         initLocation(span);
@@ -32,7 +32,7 @@ public class RecorderSfGPSManager {
 
     private void initLocation(int span) {
 
-        logger.info(LocationManager.TAG + "顺丰GPSManager---initLocation");
+//        logger.info(LocationManager.TAG + "SfGPSManager---initLocation");
         // 设置定位监听
         mSfMapLocationClient.setLocationListener(myListener);
 
@@ -40,8 +40,9 @@ public class RecorderSfGPSManager {
         SfMapLocationClientOption locationOption = new SfMapLocationClientOption();
 
         //设置定位间隔 或者设置单词定位
-        locationOption.setInterval(span);
-        locationOption.setOnceLocation(false);
+//        locationOption.setInterval(span);
+//        locationOption.setOnceLocation(false);
+        locationOption.setOnceLocation(true);
         //设置为WGS84坐标系：即地球坐标系，国际上通用的坐标系
         locationOption.setUseGjc02(false);
         locationOption.setLocationMode(SfMapLocationClientOption.SfMapLocationMode.High_Accuracy);
@@ -64,11 +65,12 @@ public class RecorderSfGPSManager {
         } else {
             initLocation((interval >= 0) ? interval : 0);
         }
-        logger.info(LocationManager.TAG + "顺丰GPSManager定位开始1");
-        if(!mSfMapLocationClient.isStarted()){
-            logger.info(LocationManager.TAG + "顺丰GPSManager定位开始2");
-            mSfMapLocationClient.startLocation();
-        }
+//        if(!mSfMapLocationClient.isStarted()){
+//            mSfMapLocationClient.startLocation();
+//        }else{
+//            mSfMapLocationClient.startLocation();
+//        }
+        mSfMapLocationClient.startLocation();
     }
 
     /**
@@ -84,7 +86,7 @@ public class RecorderSfGPSManager {
      * 停止定位
      */
     public void stop() {
-        logger.info(LocationManager.TAG + "顺丰GPSManager销毁了");
+        logger.info(LocationManager.TAG + "SfGPSManager销毁了");
 //        removelocationListener();
         if (mSfMapLocationClient != null) {
             mSfMapLocationClient.stopLocation();

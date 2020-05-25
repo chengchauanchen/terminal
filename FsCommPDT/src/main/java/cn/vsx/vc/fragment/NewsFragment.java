@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageReduceUnreadCountHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageUpdateCompleteHandler;
-import cn.vsx.vc.activity.VideoMeetingListActivity;
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
@@ -36,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
@@ -51,6 +46,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetAllMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -65,6 +61,9 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHand
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyRecallRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageReduceUnreadCountHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageUpdateCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePersonMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
@@ -87,6 +86,7 @@ import cn.vsx.vc.activity.HistoryCombatGroupActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.PhoneAssistantManageActivity;
 import cn.vsx.vc.activity.PushLiveMessageManageActivity;
+import cn.vsx.vc.activity.VideoMeetingListActivity;
 import cn.vsx.vc.activity.WarningListActivity;
 import cn.vsx.vc.adapter.MessageListAdapter;
 import cn.vsx.vc.application.MyApplication;
@@ -97,7 +97,6 @@ import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
-import java.util.concurrent.CopyOnWriteArrayList;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -659,7 +658,7 @@ public class NewsFragment extends BaseFragment {
 
     /**  接收消息 **/
     private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
-        logger.info("NewsFragment---收到新消息"+terminalMessage);
+//        logger.info("NewsFragment---收到新消息"+terminalMessage);
         synchronized(NewsFragment.this){
             terminalMessageData.clear();
             terminalMessageData.addAll(messageList);
@@ -1897,7 +1896,6 @@ public class NewsFragment extends BaseFragment {
                 //再保存到数据库
                 saveMessagesToSql();
                 if(mMessageListAdapter !=null){
-                    Log.e("NewsFragment", "messageList:" + messageList);
                     mMessageListAdapter.notifyDataSetChanged();
                 }
             }else {

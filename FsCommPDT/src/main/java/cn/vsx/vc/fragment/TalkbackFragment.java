@@ -83,6 +83,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetCurrentGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
@@ -387,6 +388,16 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
                     setCurrentGroupView();
                     setPttText();
                 });
+                //获取当前组在线成员人数
+                getCurrentGroupOnlineMembers();
+            }
+        }
+    };
+
+    private ReceiveSetCurrentGroupHandler receiveSetCurrentGroupHandler = new ReceiveSetCurrentGroupHandler(){
+        @Override
+        public void handler(int currentGroupId, int errorCode, String errorDesc){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE||errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
                 //获取当前组在线成员人数
                 getCurrentGroupOnlineMembers();
             }
@@ -1143,8 +1154,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
     private int groupScanId;
     private boolean isFlex = false;
     private TimerTask timerTaskLock;
-
-
+    private boolean isHidden  = false;
     @Override
     public int getContentViewId() {
         return R.layout.fragment_main_talkback;
@@ -1311,6 +1321,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetCurrentGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -1741,6 +1752,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetCurrentGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
@@ -1983,9 +1995,20 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
     };
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        isHidden = hidden;
+        if(!hidden){
+            setPttText();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        setPttText();
+        if(!isHidden){
+            setPttText();
+        }
         HongHuUtils.isHonghuDep(isDonghu -> {
             if(isDonghu){
                 //获取已绑定的装备列表

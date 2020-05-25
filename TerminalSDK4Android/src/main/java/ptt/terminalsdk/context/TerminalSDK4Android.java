@@ -117,6 +117,7 @@ import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
 import ptt.terminalsdk.manager.live.LiveManager;
 import ptt.terminalsdk.manager.message.SQLiteDBManager;
+import ptt.terminalsdk.manager.powersave.PowerSaveManager;
 import ptt.terminalsdk.manager.recordingAudio.RecordingAudioManager;
 import ptt.terminalsdk.manager.search.SearchDataManager;
 import ptt.terminalsdk.manager.video.VideoProxy;
@@ -186,6 +187,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		PromptManager.getInstance().start(application);
 		getFileTransferOperation().start();
 		searchDataStart();
+        powerSaveManagerStart();
 		// 广播接收器，用来监听SSL服务发出的广播
 		vpnConnectionChangeReceiver = new VPNConnectionChangeReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -227,7 +229,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 	}
 
-	public void registNetworkChangeHandler(){
+    public void registNetworkChangeHandler(){
 		netWorkConnectionChangeReceiver = new NetWorkConnectionChangeReceiver();
 		IntentFilter netFilter = new IntentFilter();
 		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -243,6 +245,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	protected void onStop() {
 		logger.error("TerminalSDK4Android----stop！！");
+        powerSaveManagerStop();
 		searchDataStop();
 		getFileTransferOperation().stop();
 		locationStop();
@@ -585,7 +588,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			} else {
 				application.startService(onlineService);
 			}
-			application.startService(onlineService);
+//			application.startService(onlineService);
 			isBindOnlineService = application.bindService(onlineService,onlineServiceConn,BIND_AUTO_CREATE);
 			application.startService(bleService);
 			isBindBleService = application.bindService(bleService,bleServiceConn,BIND_AUTO_CREATE);
@@ -1131,7 +1134,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			messageServiceIntent.putExtra("accessServerIp", accessServerIp);
 			messageServiceIntent.putExtra("accessServerPort", accessServerPort);
 			messageServiceIntent.putExtra("protocolType",protocolType);
-			application.startService(messageServiceIntent);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				application.startForegroundService(messageServiceIntent);
+			} else {
+				application.startService(messageServiceIntent);
+			}
 			logger.info("开始启动服务MessageService, 连接到信令服务");
 
 
@@ -1184,7 +1191,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			logger.error("MessageServiceon----onServiceDisconnected");
 //			disConnectToServer();
 //			reTryConnectToServer();
-
 		}
 	};
 
@@ -1205,6 +1211,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				timerTask = new TimerTask() {
 					@Override
 					public void run() {
+
 						connectToServer();
 					}
 				};
@@ -1281,7 +1288,15 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		TerminalFactory.getSDK().putParam(Params.LOG_UPLOAD_URL, ApkUtil.getLogUpdateAddress(path));
 	}
 
-	@Override
+    private PowerSaveManager powerSaveManager;
+    @Override
+    public PowerSaveManager getPowerSaveManager() {
+        if (powerSaveManager == null){
+            powerSaveManager =new PowerSaveManager(application);
+        }
+        return powerSaveManager;
+    }
+    @Override
 	public void setDataUpdateAddress(String path) {
 		StringBuffer address = new StringBuffer();
 		address.append(path);
@@ -1527,7 +1542,25 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return false;
 	}
 
-	@Override
+    /**
+     * 开启省电管理
+     */
+    private void powerSaveManagerStart() {
+        if(DataUtil.checkPowerSaveManagerDevice()){
+            getPowerSaveManager().start();
+        }
+    }
+
+    /**
+     * 关闭省电管理
+     */
+    private void powerSaveManagerStop() {
+        if(DataUtil.checkPowerSaveManagerDevice()){
+            getPowerSaveManager().stop();
+        }
+    }
+
+    @Override
 	public Group getGroupByGroupNo(int no){
 		return DataUtil.getGroupByGroupNo(no);
 	}

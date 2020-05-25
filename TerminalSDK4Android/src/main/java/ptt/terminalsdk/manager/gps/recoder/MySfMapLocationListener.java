@@ -7,6 +7,7 @@ import com.sfmap.api.location.SfMapLocationListener;
 
 import org.apache.log4j.Logger;
 
+import ptt.terminalsdk.bean.LocationType;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -20,15 +21,15 @@ public class MySfMapLocationListener implements SfMapLocationListener {
     public void onLocationChanged(SfMapLocation sfMapLocation) {
         if(sfMapLocation==null){
             logger.info(LocationManager.TAG + "顺丰GPSManager定位失败=null");
+            MyTerminalFactory.getSDK().getRecorderSfGPSManager().removelocationListener();
+            MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.SF);
             return;
         }
 
         double longitude = sfMapLocation.getLongitude();
         double latitude = sfMapLocation.getLatitude();
 
-        logger.info(LocationManager.TAG + "顺丰GPSManager中onReceiveLocation-原-Longitude;" + longitude + "--Latitude:" + latitude);
-        logger.info(LocationManager.TAG + "顺丰GPSManager中"
-                + "-- AddrStr=" + sfMapLocation.getAddress());
+        logger.info(LocationManager.TAG + "顺丰GPSManager中onReceiveLocation-原-Longitude;" + longitude + "--Latitude:" + latitude+ "-- AddrStr=" + sfMapLocation.getAddress());
 
         //ToastUtil.showToast("顺丰定位：Longitude--"+longitude+"--Latitude:"+ latitude);
 
@@ -40,6 +41,9 @@ public class MySfMapLocationListener implements SfMapLocationListener {
             MyTerminalFactory.getSDK().getRecorderBDGPSManager().removelocationListener();
             //到LocationManager中分发位置信息
             MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(bdTransformLocation(sfMapLocation,longitude,latitude));
+        }else{
+            MyTerminalFactory.getSDK().getRecorderSfGPSManager().removelocationListener();
+            MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.SF);
         }
     }
 

@@ -905,7 +905,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
 
         @Override
         public void handler(int page, int totalPages, int size, List<Member> members){
-            logger.info("totalPages:" + totalPages + "SearchFragment搜索结果：" + members);
+//            logger.info("totalPages:" + totalPages + "SearchFragment搜索结果：" + members);
             mHandler.post(() -> {
                 mLvSearchSwipeRefreshLayout.setRefreshing(false);
                 if(totalPages == 0){

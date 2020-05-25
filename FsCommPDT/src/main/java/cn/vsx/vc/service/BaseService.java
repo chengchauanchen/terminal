@@ -66,6 +66,7 @@ import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiverBusinessInServiceStatusHandler;
 import ptt.terminalsdk.service.KeepLiveManager;
 
 /**
@@ -129,6 +130,7 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveDeparmentChangeHandler);
 
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverBusinessInServiceStatusHandler.class,this.getClass().getSimpleName(),true);
     }
 
     @Override
@@ -243,6 +245,7 @@ public abstract class BaseService extends Service{
     public void onDestroy(){
         super.onDestroy();
         logger.info(TAG+":onDestroy");
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverBusinessInServiceStatusHandler.class,this.getClass().getSimpleName(),false);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);

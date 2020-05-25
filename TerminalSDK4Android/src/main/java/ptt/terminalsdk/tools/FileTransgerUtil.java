@@ -49,6 +49,7 @@ public class FileTransgerUtil {
     public static final String UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR ="服务器出错";
     public static final String UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_FAEL ="上传文件失败";
     public static final String UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL ="更新文件信息失败";
+    public static final String UPLOAD_FILE_FAIL_RESULT_DESC_POWER_SAVE_STATUS ="设备省电模式中，稍后再试";
 
     //未上传的文件限定时间，超过就自动上传
     private static final int FILE_EXPIRE_TIME = 48;

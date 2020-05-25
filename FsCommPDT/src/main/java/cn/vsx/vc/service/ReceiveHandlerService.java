@@ -128,7 +128,6 @@ import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.permission.FloatWindowManager;
-import ptt.terminalsdk.service.KeepLiveManager;
 import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.StringUtil;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -158,6 +157,7 @@ public class ReceiveHandlerService extends Service{
     private static final int WATCH_LIVE = 7;
 
     protected Logger logger = Logger.getLogger(this.getClass());
+    private static final String TAG = "ReceiveHandlerService---";
     private List<TerminalMessage> data = new ArrayList<>();
     private List<TerminalMessage> warningData = new ArrayList<>();
     //记录紧急观看的CallId，防止PC端重复发送强制观看的消息
@@ -216,13 +216,13 @@ public class ReceiveHandlerService extends Service{
     @Nullable
     @Override
     public IBinder onBind(Intent intent){
-        KeepLiveManager.getInstance().setServiceForeground(this);
+//        KeepLiveManager.getInstance().setServiceForeground(this);
         return receiveHandlerBinder;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-        return START_STICKY;
+        return super.onStartCommand(intent,flags,startId);
     }
 
     public ReceiveHandlerService(){
@@ -232,10 +232,8 @@ public class ReceiveHandlerService extends Service{
     @SuppressLint({"WrongConstant", "InvalidWakeLockTag"})
     @Override
     public void onCreate(){
-        logger.info("--vsx--ReceiveHandlerService--onCreate");
         super.onCreate();
-        logger.info("--vsxSDK--ReceiveHandlerService---onCreate");
-
+        logger.info(TAG+"onCreate");
         createFloatView();
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
         //个呼监听
@@ -322,7 +320,7 @@ public class ReceiveHandlerService extends Service{
         public void registrationOk(){
             super.registrationOk();
             MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,true);
-            logger.info("voip注册成功");
+            logger.info(TAG+"voip注册成功");
 //            registCount = 0;
         }
 
@@ -330,7 +328,7 @@ public class ReceiveHandlerService extends Service{
         public void registrationFailed(){
             super.registrationFailed();
             MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,false);
-            logger.error("voip注册失败");
+            logger.error(TAG+"voip注册失败");
 //            if(registCount == 10){
 //                //10次都注册失败就退出VOIP客户端
 //                MyTerminalFactory.getSDK().getVoipCallManager().destroy(MyApplication.instance);//VOIP服务注销
@@ -361,7 +359,7 @@ public class ReceiveHandlerService extends Service{
                     Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
                     LinphoneAddress from = linphoneCall.getCallLog().getFrom();
                     String userName = from.getUserName();
-                    logger.info("incomingCall-userName:"+userName);
+                    logger.info(TAG+"incomingCall-userName:"+userName);
                     intent.putExtra(Constants.USER_NAME,userName);
                     startService(intent);
                 }
@@ -567,7 +565,7 @@ public class ReceiveHandlerService extends Service{
      * 主动发起个呼
      */
     private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member) -> {
-        logger.info("当前呼叫对象:" + member);
+        logger.info(TAG+"当前呼叫对象:" + member);
         if(!checkFloatPermission()){
             startSetting();
             return;
@@ -667,9 +665,9 @@ public class ReceiveHandlerService extends Service{
         intent.putExtra(Constants.MEMBER_ID, mainMemberId);
         intent.putExtra(Constants.THEME,"");
         if(Constants.HYTERA.equals(Build.MODEL)){
-            logger.info("usbAttached ：" + MyApplication.instance.usbAttached);
+            logger.info(TAG+"usbAttached ：" + MyApplication.instance.usbAttached);
             if(MyApplication.instance.usbAttached){
-                logger.info("海能达手台，外置摄像头开启,使用外置摄像头上报");
+                logger.info(TAG+"海能达手台，外置摄像头开启,使用外置摄像头上报");
                 MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
                 intent.setClass(ReceiveHandlerService.this, UVCPushService.class);
                 startService(intent);
@@ -799,7 +797,7 @@ public class ReceiveHandlerService extends Service{
      */
     @SuppressWarnings("unchecked")
     protected ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
-        logger.info("接收到消息" + terminalMessage.toString());
+//        logger.info(TAG+"接收到消息" + terminalMessage.toString());
         if(lastNotifyTime != 0 && System.currentTimeMillis() - lastNotifyTime < 500){
             return;
         }
@@ -978,7 +976,7 @@ public class ReceiveHandlerService extends Service{
                 MyTerminalFactory.getSDK().download(terminalMessage, true);
             }
             String content = FileUtil.getStringFromFile(file);
-            logger.info("长文本： path:" + path + "    content:" + content);
+//            logger.info(TAG+"长文本： path:" + path + "    content:" + content);
             if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
                 noticeContent = String.format(getString(R.string.text_message_list_text_),terminalMessage.messageFromName,content);
             }else{
@@ -1227,7 +1225,7 @@ public class ReceiveHandlerService extends Service{
             AppKeyUtils.setAppKey(null);
             return;
         }
-        logger.error("上报给：" + uniqueNoAndType);
+        logger.error(TAG+"上报给：" + uniqueNoAndType);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
             AppKeyUtils.setAppKey(null);
@@ -1317,7 +1315,7 @@ public class ReceiveHandlerService extends Service{
             AppKeyUtils.setAppKey(null);
             return;
         }
-        logger.error("请求的直播人：" + member);
+        logger.error(TAG+"请求的直播人：" + member);
         if(member.getNo() == 0){
             Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
             intent.putExtra(Constants.TYPE, Constants.PULL);
@@ -1540,11 +1538,11 @@ public class ReceiveHandlerService extends Service{
             if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
                 //是临时组
                 if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
-                    logger.info("将临时组取消监听");
+                    logger.info(TAG+"将临时组取消监听");
                     currentMonitorGroup.put(groupNo,false);
                     MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
                 }else {
-                    logger.info("将临时组设置监听");
+                    logger.info(TAG+"将临时组设置监听");
                     currentMonitorGroup.put(groupNo,true);
                     MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
                 }
@@ -1556,7 +1554,7 @@ public class ReceiveHandlerService extends Service{
                 }else {
                     //判断有没有超过5个监听组
                     if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>=5){
-                        logger.info(getResources().getString(R.string.monitor_more_than_five));
+                        logger.info(TAG+getResources().getString(R.string.monitor_more_than_five));
                         ToastUtil.showToast(getResources().getString(R.string.monitor_more_than_five));
                     }else {
                         currentMonitorGroup.put(groupNo,true);
@@ -1814,7 +1812,7 @@ public class ReceiveHandlerService extends Service{
     }
 
     public void startSetting(){
-        logger.error("没有获取到悬浮窗权限!!!");
+        logger.error(TAG+"没有获取到悬浮窗权限!!!");
         ToastUtils.showShort(getString(R.string.open_overlay_permisson));
         myHandler.postDelayed(()->{
             FloatWindowManager.getInstance().requestPermission(getApplicationContext());

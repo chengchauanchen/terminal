@@ -230,6 +230,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             logger.info("receiveSendUuidResponseHandler------resultCode：" + resultCode + "；   resultDesc：" + resultDesc + "；   isRegisted：" + isRegisted);
             myHandler.post(() -> {
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                    //获取省电模式的配置信息
+                    TerminalFactory.getSDK().getPowerSaveManager().requestSaveStatusAndActivityStatusTime(true);
                     //认证成功，去连接接入服务
                     changeProgressMsg(getResources().getString(R.string.connecting_server));
                 } else if (resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()) {

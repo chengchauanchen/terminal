@@ -13,6 +13,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.LANGFANG;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICETEST;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.WUTIE;
 
 /**
@@ -45,6 +46,12 @@ public class ApkUtil{
     public static boolean isLangFang(){
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
         return TextUtils.equals(apkType,LANGFANG);
+    }
+
+    //是否为武汉市公安局，以及武汉市公安局测试环境
+    public static boolean isWuHanPoliceStore(){
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
+        return TextUtils.equals(apkType,POLICESTORE)||TextUtils.equals(apkType,POLICETEST);
     }
 
     /**

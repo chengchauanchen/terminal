@@ -139,10 +139,18 @@ public class FileTransferOperation {
         public void handler(PTTProtolbuf.NotifyMemberUploadFileMessage message) {
             logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:" + message);
             if (message != null) {
+
+
                 List<String> list = message.getFileNameListList();
 
                 if (list != null && list.size() > 0) {
                     logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:list:" + list);
+                    if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                        logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:isSave");
+                        //正在省电模式中，
+                        notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_POWER_SAVE_STATUS);
+                        return;
+                    }
                     //从数据库中获取文件的信息,并上传
                     CopyOnWriteArrayList<BitStarFileRecord> records = getRecordsByNames(list);
                     if(!records.isEmpty()){
@@ -278,6 +286,10 @@ public class FileTransferOperation {
                     logger.info(TAG + "uploadFileTreeBean:isConnected:" + isConnected(context));
                     return;
                 }
+                if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                    logger.info(TAG + "uploadFileTreeBean:isSave:");
+                    return;
+                }
                 if (list != null && list.size() > 0) {
                     logger.info(TAG + "uploadFileTreeBean:url:" + getUploadFileServerUrl() + UPLOAD_FILE_INFO_SERVER_PATH + "-list-" + list);
                     Map<String, String> paramsMap = new HashMap<>();
@@ -322,6 +334,10 @@ public class FileTransferOperation {
     public void uploadFileByPath(final String path, final int requestMemberId,final long requestUniqueNo, final boolean isDelete) {
         if (!isConnected(context)) {
             logger.info(TAG + "uploadFileByPath:isConnected:" + isConnected(context));
+            return;
+        }
+        if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+            logger.info(TAG + "uploadFileByPath:isSave" );
             return;
         }
         TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(new Runnable() {
@@ -464,6 +480,10 @@ public class FileTransferOperation {
     public void uploadFileByExpire() {
         if (!isConnected(context)) {
             logger.info(TAG + "uploadFileByExpire:isConnected:" + isConnected(context));
+            return;
+        }
+        if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+            logger.info(TAG + "uploadFileByExpire:isSave" );
             return;
         }
         TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
@@ -816,6 +836,10 @@ public class FileTransferOperation {
                 //删除已经上传的文件
                 deleteUploadedFile();
 
+                if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                    logger.info(TAG + "externNoStorageOperation:isSave" );
+                    return;
+                }
                 CopyOnWriteArrayList<BitStarFileRecord> noList = getRecordByState(FileTransferOperation.UPLOAD_STATE_NO);
                 logger.info(TAG + "externNoStorageOperation:no_upload:" + noList);
                 //上传文件,删除

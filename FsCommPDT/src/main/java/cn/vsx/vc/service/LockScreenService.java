@@ -1,5 +1,6 @@
 package cn.vsx.vc.service;
 
+import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -42,10 +43,13 @@ public class LockScreenService extends Service {
 					Intent lockScreenIntent = new Intent(context,LockScreenActivity.class);
 					lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 					context.startActivity(lockScreenIntent);
-				}else {
-					Intent lockScreenIntent = new Intent(context,PixelActivity.class);
-					lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-					context.startActivity(lockScreenIntent);
+				} else {
+					//需要判断是否有锁屏页面，如果有锁屏页面，可以跳转到1像素页面，如果没有就不能（导致系统直接杀死应用）。
+					if(checkIsLockScreen()){
+						Intent lockScreenIntent = new Intent(context,PixelActivity.class);
+					    lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+					    context.startActivity(lockScreenIntent);
+					}
 				}
 			}else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
 				logger.error("锁屏服务     屏幕亮了，isScreenOff标记置为false");
@@ -90,7 +94,21 @@ public class LockScreenService extends Service {
 
 
         }  
-    }; 
+    };
+
+	/**
+	 * 是否在锁屏的状态
+	 * @return
+	 */
+	private boolean checkIsLockScreen(){
+		boolean result = false;
+		KeyguardManager mKeyguardManager = (KeyguardManager)getSystemService(Context.KEYGUARD_SERVICE);
+		if(mKeyguardManager!=null){
+			result =  mKeyguardManager.inKeyguardRestrictedInputMode();
+		}
+		logger.info("LockScreenService-checkIsLockScreen-result:"+result);
+		return result;
+	}
 
 
 

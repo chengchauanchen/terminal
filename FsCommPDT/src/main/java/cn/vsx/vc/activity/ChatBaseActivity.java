@@ -210,6 +210,7 @@ public abstract class ChatBaseActivity extends BaseActivity
     private int tempPage = 1;
     private boolean refreshing;
     private static final int WATCH_LIVE = 0;
+    protected static final int VIDEO_LIVE_COUNT = 1;
     private static final int PAGE_COUNT = 10;//每次加载的消息数量
     private boolean isEnoughPageCount = false;//每次从本地取的数据的条数是否够10条
     private NFCBindingDialog nfcBindingDialog;//nfc弹窗
@@ -224,6 +225,7 @@ public abstract class ChatBaseActivity extends BaseActivity
     protected Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            handleMesage(msg);
             super.handleMessage(msg);
             switch (msg.what) {
                 case WATCH_LIVE:
@@ -233,8 +235,8 @@ public abstract class ChatBaseActivity extends BaseActivity
             }
         }
     };
+    protected abstract void handleMesage(Message msg);
     private long uniqueNo;
-
     /**
      * 设置状态栏透明
      **/
@@ -664,7 +666,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                     break;
                 case ReceiverSendFileHandler.LOCATION:
                     MyTerminalFactory.getSDK().registReceiveHandler(mReceiveGetGPSLocationHandler);
-                    MyTerminalFactory.getSDK().getLocationManager().requestLocationByChat();
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getLocationManager().requestLocationByChat());
                     sendLocation(0, 0, TEMP_TOKEN_ID, false, false);
                     break;
                 case ReceiverSendFileHandler.VOICE:
@@ -1026,56 +1028,64 @@ public abstract class ChatBaseActivity extends BaseActivity
      */
     private void sendLocation(double longitude, double latitude, int tokenId, boolean realSend, boolean getLocationFail) {
         logger.error("sendLocation:" + "longitude：" + longitude + "/latitude:" + latitude);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
-        if (longitude != 0 && latitude != 0) {
-            //            List<Double> locations = CoordTransformUtils.bd2wgs(latitude, longitude);
-            //            if(locations.size()>1){
-            jsonObject.put(JsonParam.LONGITUDE, longitude);
-            jsonObject.put(JsonParam.LATITUDE, latitude);
-            //            }
-        }
-        jsonObject.put(JsonParam.TOKEN_ID, tokenId);
-        jsonObject.put(JsonParam.ACTUAL_SEND, realSend);
-        jsonObject.put(JsonParam.GET_LOCATION_FAIL, getLocationFail);
-        jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
-        TerminalMessage mTerminalMessage = new TerminalMessage();
-        mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-        mTerminalMessage.messageToId = userId;
-        mTerminalMessage.messageToName = userName;
-        mTerminalMessage.sendTime = System.currentTimeMillis();
-        mTerminalMessage.messageType = MessageType.POSITION.getCode();
-        mTerminalMessage.messageBody = jsonObject;
-        Iterator<TerminalMessage> it = chatMessageList.iterator();
-        while (it.hasNext()) {
-            TerminalMessage next = it.next();
-            if (next.messageBody.containsKey(JsonParam.TOKEN_ID) && next.messageBody.getIntValue(JsonParam.TOKEN_ID) == TEMP_TOKEN_ID) {
-                //这里会删除所有TOKEN_ID为-1的临时位置(无效位置数据，用来显示发送中的UI效果)
-                it.remove();
-            }
-        }
-        chatMessageList.add(mTerminalMessage);
-
-        if (getLocationFail) {
-            boolean isContainFail = false;
-            for (TerminalMessage terminalMessage1 : allFailMessageList) {
-                if (terminalMessage1.messageBody.containsKey(JsonParam.TOKEN_ID) && mTerminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
-                        terminalMessage1.messageBody.getIntValue(JsonParam.TOKEN_ID) == mTerminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
-                    isContainFail = true;
-                    terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
-                    break;
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
+                if (longitude != 0 && latitude != 0) {
+                    //            List<Double> locations = CoordTransformUtils.bd2wgs(latitude, longitude);
+                    //            if(locations.size()>1){
+                    jsonObject.put(JsonParam.LONGITUDE, longitude);
+                    jsonObject.put(JsonParam.LATITUDE, latitude);
+                    //            }
                 }
+                jsonObject.put(JsonParam.TOKEN_ID, tokenId);
+                jsonObject.put(JsonParam.ACTUAL_SEND, realSend);
+                jsonObject.put(JsonParam.GET_LOCATION_FAIL, getLocationFail);
+                jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
+                TerminalMessage mTerminalMessage = new TerminalMessage();
+                mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
+                mTerminalMessage.messageToId = userId;
+                mTerminalMessage.messageToName = userName;
+                mTerminalMessage.sendTime = System.currentTimeMillis();
+                mTerminalMessage.messageType = MessageType.POSITION.getCode();
+                mTerminalMessage.messageBody = jsonObject;
+                Iterator<TerminalMessage> it = chatMessageList.iterator();
+                while (it.hasNext()) {
+                    TerminalMessage next = it.next();
+                    if (next.messageBody.containsKey(JsonParam.TOKEN_ID) && next.messageBody.getIntValue(JsonParam.TOKEN_ID) == TEMP_TOKEN_ID) {
+                        //这里会删除所有TOKEN_ID为-1的临时位置(无效位置数据，用来显示发送中的UI效果)
+                        it.remove();
+                    }
+                }
+                chatMessageList.add(mTerminalMessage);
+
+                if (getLocationFail) {
+                    boolean isContainFail = false;
+                    for (TerminalMessage terminalMessage1 : allFailMessageList) {
+                        if (terminalMessage1.messageBody.containsKey(JsonParam.TOKEN_ID) && mTerminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
+                                terminalMessage1.messageBody.getIntValue(JsonParam.TOKEN_ID) == mTerminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
+                            isContainFail = true;
+                            terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
+                            break;
+                        }
+                    }
+                    //添加到发送失败列表
+                    if (!isContainFail) {
+                        allFailMessageList.add(mTerminalMessage);
+                    }
+                }
+                myHandler.post(() -> {
+                    setListSelection(chatMessageList.size() - 1);
+                    if (temporaryAdapter != null) {
+                        temporaryAdapter.notifyDataSetChanged();
+                    }
+                });
             }
-            //添加到发送失败列表
-            if (!isContainFail) {
-                allFailMessageList.add(mTerminalMessage);
-            }
-        }
-        setListSelection(chatMessageList.size() - 1);
-        if (temporaryAdapter != null) {
-            temporaryAdapter.notifyDataSetChanged();
-        }
+        });
+
     }
 
     protected void setListSelection(int position) {
@@ -1273,17 +1283,14 @@ public abstract class ChatBaseActivity extends BaseActivity
     private ReceiveGetGPSLocationHandler mReceiveGetGPSLocationHandler = new ReceiveGetGPSLocationHandler() {
         @Override
         public void handler(final double longitude, final double latitude) {
-            logger.error("ReceiveGetGPSLocationHandler-------" + " " + longitude + "/" + latitude);
-            handler.post(() -> {
-//                sendLocation(30.495792, 114.433282, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
-                if (longitude != 0.0 && latitude != 0.0) {//获取位置成功
-                    sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
-                } else {//获取位置失败
-                    sendLocation(longitude, latitude, TEMP_TOKEN_ID, false, true);
-                    ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_gps_positioning_failed));
-                }
-                MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
-            });
+//            logger.error("ReceiveGetGPSLocationHandler-------" + " " + longitude + "/" + latitude);
+            if (longitude != 0.0 && latitude != 0.0) {//获取位置成功
+                sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
+            } else {//获取位置失败
+                sendLocation(longitude, latitude, TEMP_TOKEN_ID, false, true);
+                ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_gps_positioning_failed));
+            }
+            MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
         }
     };
 
