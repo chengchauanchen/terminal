@@ -32,7 +32,10 @@ import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.MyDataUtil;
+import cn.vsx.vc.utils.SystemUtil;
+import dji.common.error.DJIError;
 import dji.common.flightcontroller.ConnectionFailSafeBehavior;
+import dji.common.util.CommonCallbacks;
 import dji.sdk.battery.Battery;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
@@ -135,6 +138,10 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
              float altitude = AirCraftUtil.getAltitude(aircraftLocation);
              if(latitude !=0.0 && longitude !=0.0){
                  sendLocationMessage(latitude,longitude,altitude);
+             }else{
+                 if(checkUavPushing()){
+                     cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance,MyApplication.instance.getString(R.string.uav_get_location_error));
+                 }
              }
              myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
 
@@ -305,5 +312,17 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
+    }
+
+    /**
+     * 检查是否在无人机推流中
+     * @return
+     */
+    public boolean checkUavPushing(){
+        if((ActivityCollector.isActivityExist(UavPushActivity.class)
+                && SystemUtil.isForeground(this,UavPushActivity.class.getName()))){
+            return true;
+        }
+        return false;
     }
 }

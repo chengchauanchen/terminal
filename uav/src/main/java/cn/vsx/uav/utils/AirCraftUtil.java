@@ -42,6 +42,7 @@ import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
 import dji.sdk.products.Aircraft;
 import dji.sdk.realname.AppActivationManager;
+import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -69,6 +70,7 @@ public class AirCraftUtil{
         public void handleMessage(Message msg){
             super.handleMessage(msg);
             if(msg.what == MSG_INFORM_ACTIVATION){
+                removeMessages(MSG_INFORM_ACTIVATION);
                 loginToActivationIfNeeded();
             }
         }
@@ -466,6 +468,16 @@ public class AirCraftUtil{
                                 newComponent));
 
                     }
+
+                    @Override
+                    public void onInitProcess(DJISDKInitEvent djisdkInitEvent, int i) {
+                        logger.info("onInitProcess-djisdkInitEvent:" + djisdkInitEvent+"-i:"+i);
+                    }
+
+                    @Override
+                    public void onDatabaseDownloadProgress(long l, long l1) {
+                        logger.info("onDatabaseDownloadProgress-l:" + l+"-l1:"+l1);
+                    }
                 });
             });
         }
@@ -490,6 +502,9 @@ public class AirCraftUtil{
         AppActivationState appActivationState = AppActivationManager.getInstance().getAppActivationState();
         logger.info("addAppActivationListenerIfNeeded状态："+appActivationState);
         if (appActivationState != AppActivationState.ACTIVATED) {
+            if(mHandler.hasMessages(MSG_INFORM_ACTIVATION)){
+                mHandler.removeMessages(MSG_INFORM_ACTIVATION);
+            }
             mHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
             if (hasAppActivationListenerStarted.compareAndSet(false, true)) {
                 AppActivationState.AppActivationStateListener appActivationStateListener = appActivationState1 -> {
