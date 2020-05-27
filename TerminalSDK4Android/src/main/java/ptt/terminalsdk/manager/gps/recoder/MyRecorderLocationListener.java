@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import java.util.List;
 
+import ptt.terminalsdk.bean.LocationType;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.CoordTransformUtils;
 
@@ -22,10 +23,17 @@ public class MyRecorderLocationListener extends BDAbstractLocationListener {
 
     @Override
     public void onReceiveLocation(BDLocation location) {
+        if(location==null){
+            logger.info(LocationManager.TAG + "BDGPSManager定位失败=null");
+            MyTerminalFactory.getSDK().getRecorderBDGPSManager().removelocationListener();
+            MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.BD);
+            return;
+        }
+
         double longitude = getBDLongitude(location);
         double latitude = getBDLatitude(location);
         String floor = location.getFloor();
-        logger.info(LocationManager.TAG + "BDGPSManager中onReceiveLocation-原-Longitude;" + location.getLongitude() + "--Latitude:" + location.getLatitude());
+//        logger.info(LocationManager.TAG + "BDGPSManager中onReceiveLocation-原-Longitude;" + location.getLongitude() + "--Latitude:" + location.getLatitude());
         logger.info(LocationManager.TAG + "BDGPSManager中onReceiveLocation-转-Longitude;" + longitude + "--Latitude:" + latitude);
         logger.info(LocationManager.TAG + "BDGPSManager中LocType=" + location.getLocType()
                 + "-- AddrStr=" + location.getAddrStr()
@@ -42,6 +50,9 @@ public class MyRecorderLocationListener extends BDAbstractLocationListener {
             MyTerminalFactory.getSDK().getRecorderSfGPSManager().removelocationListener();
             //到LocationManager中分发位置信息
             MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(bdTransformLocation(location,longitude,latitude));
+        }else{
+            MyTerminalFactory.getSDK().getRecorderBDGPSManager().removelocationListener();
+            MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.BD);
         }
     }
 

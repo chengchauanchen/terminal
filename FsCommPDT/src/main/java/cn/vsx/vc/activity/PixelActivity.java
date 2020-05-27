@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Window;
@@ -43,8 +44,7 @@ public class PixelActivity extends AppCompatActivity{
     private BroadcastReceiver openLockReceiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent){
-            String action = intent.getAction();
-            if(action !=null && "FINISH_PIXELACTIVITY".equals(action)){
+            if(intent!=null&&TextUtils.equals("FINISH_PIXELACTIVITY",intent.getAction())){
                 Log.e("PixelActivity", "收到FINISH_PIXELACTIVITY");
                 PixelActivity.this.finish();
             }

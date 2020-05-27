@@ -29,13 +29,12 @@ public class ActivityCollector {
      * @param activity
      */
     public static void addActivity(Activity activity, Class<?> clz) {
-        logger.info("addActivity----->activity = "+activity);
         activities.put(clz, activity);
-        logger.info("addActivity----->activities = "+activities);
+        logger.info("addActivity-activity:"+activity+"-activities:"+activities);
     }
 
     public static Map<Class<?>, Activity> getAllActivity(){
-        logger.info("getAllActivity()------->"+activities);
+        logger.info("getAllActivity()-"+activities);
         return activities;
     }
     /**
@@ -48,7 +47,6 @@ public class ActivityCollector {
     public static <T extends Activity> boolean isActivityExist(Class<T> clz) {
         boolean res;
         Activity activity = getActivity(clz);
-        logger.info("getActivity----->activity = "+activity);
         if (activity == null) {
             res = false;
         } else {
@@ -58,7 +56,7 @@ public class ActivityCollector {
                 res = true;
             }
         }
-        logger.info("getActivity----->res = "+res);
+        logger.info("getActivity-activity:"+activity+"-res:"+res);
         return res;
     }
 
@@ -78,11 +76,10 @@ public class ActivityCollector {
      * @param activity
      */
     public static void removeActivity(Activity activity) {
-        logger.info("removeActivity----->activity = "+activity);
         if (activities.containsKey(activity.getClass())) {
             activities.remove(activity.getClass());
         }
-        logger.info("removeActivity----->activities = "+activities);
+        logger.info("removeActivity-activity:"+activity+"-activities:"+activities);
     }
 
     /**

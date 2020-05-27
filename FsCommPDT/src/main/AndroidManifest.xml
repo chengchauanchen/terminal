@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.vc"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="76"
-    android:versionName="1.0.76">
+    android:versionCode="85"
+    android:versionName="1.0.85">
     <!-- android:sharedUserId="android.uid.system" -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -271,6 +271,10 @@
             android:name=".receiver.NotificationClickReceiver"
             android:enabled="true"
             android:exported="true" />
+        <receiver
+            android:name=".receiver.VideoMeetingNotificationClickReceiver"
+            android:enabled="true"
+            android:exported="true" />
         <activity
             android:name=".activity.TransparentActivity"
             android:launchMode="singleInstance"
@@ -308,11 +312,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.VideoMeetingListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity android:name=".activity.VideoMeetingActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:hardwareAccelerated="true"/>
-        <activity android:name=".activity.VideoMeetingInvitationActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
         <service
             android:name=".service.ReceiveHandlerService"
             android:enabled="true"
@@ -323,6 +322,10 @@
             android:exported="false" />
         <service
             android:name=".service.PhonePushService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.PhonePushByNoRegistService"
             android:enabled="true"
             android:exported="false" />
         <service
@@ -373,7 +376,14 @@
             android:name=".service.ReceiveVoipService"
             android:enabled="true"
             android:exported="false" />
-
+        <service
+            android:name=".service.VideoMeetingService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.VideoMeetingInvitationService"
+            android:enabled="true"
+            android:exported="false" />
         <service
             android:name=".service.MultipartyCallService"
             android:enabled="true"

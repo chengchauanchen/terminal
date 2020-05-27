@@ -7,7 +7,7 @@
     <RelativeLayout
         android:id="@+id/change_main_group"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/y30"
+        android:layout_height="@dimen/dp_50"
         android:layout_marginTop="@dimen/dp_half_one"
         android:background="@color/itemblue"
         android:visibility="gone">
@@ -34,7 +34,7 @@
     <RelativeLayout
         android:id="@+id/rl_start_group_sweep"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/y29"
+        android:layout_height="@dimen/dp_50"
         android:layout_marginTop="@dimen/dp_half_one"
         android:background="@color/itemblue">
 
@@ -54,7 +54,7 @@
     <RelativeLayout
         android:id="@+id/rl_group_sweep_setting"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/y29"
+        android:layout_height="@dimen/dp_50"
         android:layout_marginTop="@dimen/dp_half_one"
         android:background="@color/itemblue"
         android:clickable="true">

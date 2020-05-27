@@ -7,10 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import cn.vsx.hamster.common.util.JsonParam;
-import cn.vsx.hamster.terminalsdk.manager.search.TianjinDeviceBean;
-import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
-import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import com.alibaba.fastjson.JSONObject;
 import com.pinyinsearch.util.PinyinUtil;
 
@@ -26,10 +22,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
+import cn.vsx.hamster.terminalsdk.manager.search.TianjinDeviceBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
@@ -37,6 +35,8 @@ import cn.vsx.hamster.terminalsdk.model.Folder;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.tools.MyGsonUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -83,7 +83,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void addTerminalMessage(TerminalMessage terminalMessage) {
-        logger.info("向terminalMessage表存消息：" + terminalMessage);
+//        logger.info("向terminalMessage表存消息：" + terminalMessage);
         try{
             SQLiteDatabase db = helper.getWritableDatabase();
             TerminalMessage message = null;
@@ -328,7 +328,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 logger.error(e.toString());
             }
         }
-        logger.info("向terminalMessage表获取消息message_id："+message_id+"-message:"+message);
+//        logger.debug("向terminalMessage表获取消息message_id："+message_id+"-message:"+message);
         return message;
     }
 
@@ -505,7 +505,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     if (cursor.getColumnIndex("unread_count") != -1) {
                         terminalMessage.unReadCount = cursor.getInt(cursor.getColumnIndex("unread_count"));
                     }
-                    logger.info("从数据库取出数据：" + terminalMessage);
+//                    logger.info("从数据库取出数据：" + terminalMessage);
                     terminalMessageList.add(terminalMessage);
                 }
                 cursor.close();
@@ -520,7 +520,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateMessageList(List<TerminalMessage> terminalMessages) {
-        logger.info("保存消息列表数据:" + terminalMessages);
+//        logger.info("保存消息列表数据:" + terminalMessages);
         SQLiteDatabase db = null;
         try {
             db = helper.getWritableDatabase();
@@ -566,6 +566,36 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
 
 //        db.close();
+    }
+
+    @Override
+    public TerminalMessage existMessageListDB(int userId) {
+        logger.info("获取本地数据库中是否存在对应消息existMessageListDB userId:" + userId);
+        SQLiteDatabase db = helper.getReadableDatabase();
+        TerminalMessage terminalMessage = null;
+        Cursor cursor;
+
+        int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+
+//        if (userId ==memberId) {
+//            //发给谁
+//            cursor = db.query(MESSAGE_LIST, null, "message_from_id = ? and current_member_id = ?", new String[]{userId + "",memberId + ""}, null, null, null);
+//            logger.info("获取本地数据库中是否存在对应消息existMessageListDB message_from_id = {"+userId+"} and current_member_id = {"+memberId+"}");
+//        } else {
+//            cursor = db.query(MESSAGE_LIST, null, "(message_to_id = ? or message_from_id =?) and current_member_id = ?", new String[]{userId + "",memberId + ""}, null, null, null);
+//            logger.info("获取本地数据库中是否存在对应消息existMessageListDB message_to_id = {"+userId+"} and current_member_id = {"+memberId+"}");
+//        }
+
+        cursor = db.query(MESSAGE_LIST, null, "(message_to_id = ? or message_from_id =?) and current_member_id = ?", new String[]{userId + "",userId + "",memberId + ""}, null, null, null);
+        logger.info("获取本地数据库中是否存在对应消息existMessageListDB message_to_id = {"+userId+"} and current_member_id = {"+memberId+"}");
+
+        List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
+        logger.info("查询消息列表数据existMessageListDB：" + terminalMessageList);
+        if(terminalMessageList!=null &&terminalMessageList.size()>0){
+            terminalMessage = terminalMessageList.get(0);
+            logger.info("找到了："+terminalMessage);
+        }
+        return terminalMessage;
     }
 
     @Override
@@ -734,6 +764,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     member.phone = cursor.getString(cursor.getColumnIndex("member_phone"));
                     member.departmentName = cursor.getString(cursor.getColumnIndex("department_name"));
                     member.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+                    member.setUniqueNoStr(member.getUniqueNo()+"");
                     memberList.add(member);
                 }
                 cursor.close();
@@ -1586,8 +1617,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         List<GroupSearchBean> groups = new ArrayList<>();
         try{
             SQLiteDatabase db = helper.getReadableDatabase();
-
-            String sql = "SELECT * FROM allGroup WHERE 1 = 1 LIMIT 1";
+            int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+            String sql = "SELECT * FROM allGroup WHERE current_member_id = "+memberId+ " LIMIT 1";
             Cursor cursor = db.rawQuery(sql, new String[]{});
             GroupSearchBean group = null;
             while (cursor.moveToNext()) {
@@ -1651,6 +1682,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
+    public void deleteAllGroup() {
+        try{
+            SQLiteDatabase db = helper.getWritableDatabase();
+            db.execSQL("DELETE FROM allGroup");
+        }catch (Exception e){
+            logger.error(e.toString());
+        }
+    }
+
+    @Override
     public synchronized List<GroupSearchBean> getAllGroup(List<GroupSearchBean> groups, int index) {
         logger.info("分页查询 group index:" + index);
         long start = System.currentTimeMillis();
@@ -1659,6 +1700,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         try {
             SQLiteDatabase db = helper.getReadableDatabase();
             Cursor cursor = db.query(ALL_GROUP, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "group_no ASC LIMIT " + pageSize + " offset " + index);
+//            Cursor cursor = db.query(ALL_GROUP, null, null,null, null, null, "group_no ASC LIMIT " + pageSize + " offset " + index);
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
                     index++;
@@ -1679,6 +1721,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
                     group.setTempGroupType(cursor.getString(cursor.getColumnIndex("temp_group_type")));
                     group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+                    group.setCurrentMemberId(cursor.getInt(cursor.getColumnIndex("current_member_id")));
 
                     //T9搜索
                     group.getLabelPinyinSearchUnit().setBaseData(group.getName()+ group.getNo());
@@ -1703,6 +1746,47 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
+    public GroupSearchBean getGroupByNo(int groupNo) {
+        GroupSearchBean group = null;
+        try {
+            SQLiteDatabase db = helper.getReadableDatabase();
+            Cursor cursor = db.query(ALL_GROUP, null, "group_no = ?", new String[]{groupNo + ""}, null, null, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    group = new GroupSearchBean();
+                    group.setId(cursor.getInt(cursor.getColumnIndex("group_id")));
+                    group.setNo(cursor.getInt(cursor.getColumnIndex("group_no")));
+                    group.setBusinessId(cursor.getString(cursor.getColumnIndex("business_id")));
+                    group.setCreatedMemberName(cursor.getString(cursor.getColumnIndex("created_member_name")));
+                    group.setCreatedMemberNo(cursor.getInt(cursor.getColumnIndex("created_member_no")));
+                    group.setCreatedMemberUniqueNo(cursor.getLong(cursor.getColumnIndex("created_member_unique_no")));
+                    group.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
+                    group.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
+                    group.setGroupType(cursor.getString(cursor.getColumnIndex("group_type")));
+                    group.setHighUser(cursor.getInt(cursor.getColumnIndex("high_user")) == 1);
+                    group.setName(cursor.getString(cursor.getColumnIndex("group_name")));
+                    group.setProcessingState(cursor.getString(cursor.getColumnIndex("processing_state")));
+                    group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
+                    group.setTempGroupType(cursor.getString(cursor.getColumnIndex("temp_group_type")));
+                    group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+
+                    //T9搜索
+                    group.getLabelPinyinSearchUnit().setBaseData(group.getName()+ group.getNo());
+                    PinyinUtil.parse(group.getLabelPinyinSearchUnit());
+                    String sortKey = PinyinUtil.getSortKey(group.getLabelPinyinSearchUnit()).toUpperCase();
+                    group.setSortKey(praseSortKey(sortKey));
+                }
+                cursor.close();
+
+            }
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        logger.info("getGroupByNo--groupNo:" + groupNo+"--group:"+group);
+        return group;
+    }
+
+    @Override
     public void updateAllAccount(List<Account> accounts) {
         logger.info("保存账号数据:" + accounts);
         SQLiteDatabase db =null;
@@ -1723,6 +1807,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("dept_id", account.getDeptId());
                 values.put("members", MyGsonUtil.list2String(true, account.getMembers()));
                 values.put("department_name", account.getDepartmentName());
+                values.put("update_time", 0);//默认记录当前时间为 0
                 db.replace(ALL_ACCOUNT, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
@@ -1773,7 +1858,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         List<MemberSearchBean> memberList = new ArrayList<>();
         try{
             SQLiteDatabase db = helper.getReadableDatabase();
-            String sql = "SELECT * FROM allAccount WHERE 1 = 1 LIMIT 1";
+            int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+            String sql = "SELECT * FROM allAccount WHERE current_member_id = "+memberId+ " LIMIT 1";
             Cursor cursor = db.rawQuery(sql, new String[]{});
             MemberSearchBean account = null;
             while (cursor.moveToNext()) {
@@ -1786,6 +1872,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
                 String members = cursor.getString(cursor.getColumnIndex("members"));
                 account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
+                account.setUpdateTime(cursor.getLong(cursor.getColumnIndex("update_time")));
 
                 account.getLabelPinyinSearchUnit().setBaseData(account.getName() + account.getNo());
                 PinyinUtil.parse(account.getLabelPinyinSearchUnit());
@@ -1804,12 +1891,78 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return memberList;
     }
 
-    @Override public void updateAccountUseTime(int accountNo) {
+    @Override
+    public void deleteAllAccount() {
+        try{
+            SQLiteDatabase db = helper.getWritableDatabase();
+            db.execSQL("DELETE FROM allAccount");
+        }catch (Exception e){
+            logger.error(e.toString());
+        }
+    }
 
+    @Override public void updateAccountUseTime(int accountNo) {
+        logger.info("记录此联系人的 使用时间:" + accountNo);
+        SQLiteDatabase db = null;
+        try {
+            db = helper.getWritableDatabase();
+            //开始事务
+            db.beginTransaction();
+
+            ContentValues cv = new ContentValues();
+            cv.put("update_time", System.currentTimeMillis());
+            String[] args = {accountNo + ""};
+            db.update(ALL_ACCOUNT, cv, "account_no=?", args);
+            db.setTransactionSuccessful();  //设置事务成功完成
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            //结束事务
+            try{
+                if(db!=null){
+                    db.endTransaction();
+                }
+            }catch (Exception e){
+                logger.error(e.toString());
+            }
+        }
     }
 
     @Override public List<MemberSearchBean> getTop5ContactsAccount() {
-        return null;
+        List<MemberSearchBean> memberList = new ArrayList<>();
+        try{
+            SQLiteDatabase db = helper.getReadableDatabase();
+            String sql = "SELECT * FROM allAccount WHERE update_time<>0 ORDER BY update_time desc LIMIT 5 ";
+            Cursor cursor = db.rawQuery(sql, new String[]{});
+
+            while (cursor.moveToNext()) {
+                MemberSearchBean account = null;
+                account = new MemberSearchBean();
+                account.setId(cursor.getInt(cursor.getColumnIndex("account_id")));
+                account.setNo(cursor.getInt(cursor.getColumnIndex("account_no")));
+                account.setName(cursor.getString(cursor.getColumnIndex("account_name")));
+                account.setPhone(cursor.getString(cursor.getColumnIndex("account_phone")));
+                account.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
+                account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
+                String members = cursor.getString(cursor.getColumnIndex("members"));
+                account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
+                //记录时间
+                account.setUpdateTime(cursor.getLong(cursor.getColumnIndex("update_time")));
+//            account.getLabelPinyinSearchUnit().setBaseData(account.getName() + account.getNo());
+//            PinyinUtil.parse(account.getLabelPinyinSearchUnit());
+//            String sortKey = PinyinUtil.getSortKey(account.getLabelPinyinSearchUnit()).toUpperCase();
+//            account.setSortKey(praseSortKey(sortKey));
+
+                if (account != null) {
+                    memberList.add(account);
+                }
+            }
+            cursor.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        logger.info("常用联系人前5条查询结果：" + memberList);
+        return memberList;
     }
 
     @Override public Long addBindDevice(TianjinDeviceBean device) {
@@ -1824,8 +1977,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public List<MemberSearchBean> getAllAccount(List<MemberSearchBean> accounts, int index) {
-        logger.info("分页查询 Account index:" + index);
-        long start = System.currentTimeMillis();
+//        logger.info("分页查询 Account index:" + index);
+//        long start = System.currentTimeMillis();
         int cursorSize = 0;
         try {
             SQLiteDatabase db = helper.getReadableDatabase();
@@ -1844,6 +1997,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     String members = cursor.getString(cursor.getColumnIndex("members"));
                     account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
 
+                    account.setUpdateTime(cursor.getLong(cursor.getColumnIndex("update_time")));
+
                     String no = handleId(account.getNo());//去掉88 86
 
                     String phone = account.getPhone();
@@ -1857,8 +2012,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 }
                 cursor.close();
 
-                long end = System.currentTimeMillis();
-                logger.info("获取数据库数据所耗时间getAllAccount：" + (end - start));
+//                long end = System.currentTimeMillis();
+//                logger.info("获取数据库数据所耗时间getAllAccount：" + (end - start));
             }
         } catch (Exception e) {
             logger.error(e.toString());

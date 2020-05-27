@@ -31,7 +31,7 @@ public class RecorderBDGPSManager {
     }
 
     private void initLocation(int span) {
-        logger.info(LocationManager.TAG + "百度BDGPSManager---initLocation");
+//        logger.info(LocationManager.TAG + "BDGPSManager---initLocation");
 
         //声明LocationClient类
         mLocationClient.registerLocationListener(myListener);
@@ -64,7 +64,6 @@ public class RecorderBDGPSManager {
         option.setWifiCacheTimeOut(5 * 60 * 1000);
         //可选，V7.2版本新增能力
         //如果设置了该接口，首次启动定位时，会先判断当前Wi-Fi是否超出有效期，若超出有效期，会先重新扫描Wi-Fi，然后定位
-
         mLocationClient.setLocOption(option);
     }
 
@@ -81,8 +80,12 @@ public class RecorderBDGPSManager {
         } else {
             initLocation((interval >= 0) ? interval : 0);
         }
-        if(! mLocationClient.isStarted()){
+        if (mLocationClient != null && !mLocationClient.isStarted()) {
             mLocationClient.start();
+            return;
+        }
+        if(mLocationClient != null){
+            mLocationClient.requestLocation();
         }
     }
 
@@ -100,10 +103,9 @@ public class RecorderBDGPSManager {
      */
     public void stop() {
         logger.info(LocationManager.TAG + "BDGPSManager销毁了");
-//        removelocationListener();
-        if (mLocationClient != null) {
+        removelocationListener();
+        if (mLocationClient != null && mLocationClient.isStarted()) {
             mLocationClient.stop();
         }
-
     }
 }

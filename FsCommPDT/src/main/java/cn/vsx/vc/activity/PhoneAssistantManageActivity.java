@@ -317,15 +317,19 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
         @Override
         public void handler(final float percent, TerminalMessage terminalMessage) {
             mHandler.post(() -> {
-                if (downloadProgressBar != null) {
-                    int percentInt = (int) (percent * 100);
-                    logger.info("下载进度" + percent);
-                    downloadProgressBar.setProgress(percentInt);
-
-                    if (percentInt >= 100) {
-                        status.setImageResource(R.drawable.downloaded);
+                try{
+                    if (downloadProgressBar != null) {
+                        int percentInt = (int) (percent * 100);
+                        logger.info("下载进度" + percent);
+                        downloadProgressBar.setProgress(percentInt);
+                        if (percentInt >= 100) {
+                            status.setImageResource(R.drawable.downloaded);
+                        }
                     }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
+
             });
         }
     };

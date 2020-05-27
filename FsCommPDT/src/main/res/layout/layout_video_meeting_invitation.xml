@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cn.vsx.vc.view.ServiceRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/work_bg">
+
+    <RelativeLayout
+        android:id="@+id/rl_user_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_30"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <org.raphets.roundimageview.RoundImageView
+            android:id="@+id/iv_avatar_report"
+            android:layout_width="@dimen/dp_73"
+            android:layout_height="@dimen/dp_73"
+            android:layout_centerHorizontal="true"
+            app:border_color="@android:color/transparent"
+            app:border_width="0dp"
+            app:leftBottom_corner_radius="@dimen/dp_50"
+            app:leftTop_corner_radius="@dimen/dp_50"
+            app:rightBottom_corner_radius="@dimen/dp_50"
+            app:rightTop_corner_radius="@dimen/dp_50"
+            app:type="round" />
+
+        <LinearLayout
+            android:id="@+id/ll_info_one"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/iv_avatar_report"
+            android:layout_marginTop="@dimen/dp_10"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/dp_5"
+            android:paddingRight="@dimen/dp_5">
+
+            <TextView
+                android:id="@+id/tv_live_report_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="@color/work_text_gray"
+                android:textSize="@dimen/sp_17" />
+
+            <TextView
+                android:id="@+id/tv_live_report_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dp_15"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="@color/work_text_gray"
+                android:textSize="@dimen/sp_17" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_deptment_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/ll_info_one"
+            android:layout_marginTop="@dimen/dp_2"
+            android:paddingLeft="@dimen/dp_5"
+            android:paddingRight="@dimen/dp_5"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text=""
+            android:textColor="@color/work_text_gray"
+            android:textSize="@dimen/sp_15" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_live_respond_refuse_total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/dp_75"
+        android:layout_marginBottom="@dimen/live_request_hangup_bottom"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:background="@drawable/video_meeting_refuse_button" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/dp_20"
+            android:text="@string/text_call_hang_up"
+            android:textColor="@color/work_text_gray_5"
+            android:textSize="@dimen/sp_12" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_live_respond_accept_total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="@dimen/dp_75"
+        android:layout_marginBottom="@dimen/live_request_answer_bottom"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:background="@drawable/video_meeting_join_button" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/dp_20"
+            android:text="@string/text_join"
+            android:textColor="@color/work_text_gray_5"
+            android:textSize="@dimen/sp_12" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="47dp"
+            android:background="@drawable/icon_video_meeting_2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            android:text="@string/text_meeting_invitation"
+            android:textColor="@color/work_text_gray_5"
+            android:textSize="@dimen/sp_17" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/ll_network_state"
+        layout="@layout/layout_no_network_h"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x40"
+        android:layout_below="@+id/rl_user_info"
+        android:visibility="gone" />
+</cn.vsx.vc.view.ServiceRelativeLayout>

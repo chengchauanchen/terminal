@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -78,6 +79,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
@@ -92,17 +94,22 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupOrMemberNotExistHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyRecallRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestLoginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
@@ -114,6 +121,7 @@ import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.PlayType;
 import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
+import cn.vsx.vc.receiveHandle.ReceiverRequestVideoMeetingHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
@@ -125,6 +133,7 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.StatusBarUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
@@ -201,10 +210,14 @@ public abstract class ChatBaseActivity extends BaseActivity
     private int tempPage = 1;
     private boolean refreshing;
     private static final int WATCH_LIVE = 0;
+    protected static final int VIDEO_LIVE_COUNT = 1;
     private static final int PAGE_COUNT = 10;//每次加载的消息数量
     private boolean isEnoughPageCount = false;//每次从本地取的数据的条数是否够10条
     private NFCBindingDialog nfcBindingDialog;//nfc弹窗
     private boolean isActivity;//是否是显示
+
+    LinearLayout noNetWork;
+    TextView tv_status;
 
 //    private NfcAdapter mNfcAdapter;
 //    private PendingIntent mPendingIntent;
@@ -212,6 +225,7 @@ public abstract class ChatBaseActivity extends BaseActivity
     protected Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            handleMesage(msg);
             super.handleMessage(msg);
             switch (msg.what) {
                 case WATCH_LIVE:
@@ -221,8 +235,8 @@ public abstract class ChatBaseActivity extends BaseActivity
             }
         }
     };
+    protected abstract void handleMesage(Message msg);
     private long uniqueNo;
-
     /**
      * 设置状态栏透明
      **/
@@ -261,6 +275,12 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestLoginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
@@ -471,6 +491,12 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestLoginHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowForwardMoreHandler);
@@ -640,7 +666,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                     break;
                 case ReceiverSendFileHandler.LOCATION:
                     MyTerminalFactory.getSDK().registReceiveHandler(mReceiveGetGPSLocationHandler);
-                    MyTerminalFactory.getSDK().getLocationManager().requestLocationByChat();
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getLocationManager().requestLocationByChat());
                     sendLocation(0, 0, TEMP_TOKEN_ID, false, false);
                     break;
                 case ReceiverSendFileHandler.VOICE:
@@ -1002,56 +1028,64 @@ public abstract class ChatBaseActivity extends BaseActivity
      */
     private void sendLocation(double longitude, double latitude, int tokenId, boolean realSend, boolean getLocationFail) {
         logger.error("sendLocation:" + "longitude：" + longitude + "/latitude:" + latitude);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
-        if (longitude != 0 && latitude != 0) {
-            //            List<Double> locations = CoordTransformUtils.bd2wgs(latitude, longitude);
-            //            if(locations.size()>1){
-            jsonObject.put(JsonParam.LONGITUDE, longitude);
-            jsonObject.put(JsonParam.LATITUDE, latitude);
-            //            }
-        }
-        jsonObject.put(JsonParam.TOKEN_ID, tokenId);
-        jsonObject.put(JsonParam.ACTUAL_SEND, realSend);
-        jsonObject.put(JsonParam.GET_LOCATION_FAIL, getLocationFail);
-        jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
-        TerminalMessage mTerminalMessage = new TerminalMessage();
-        mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-        mTerminalMessage.messageToId = userId;
-        mTerminalMessage.messageToName = userName;
-        mTerminalMessage.sendTime = System.currentTimeMillis();
-        mTerminalMessage.messageType = MessageType.POSITION.getCode();
-        mTerminalMessage.messageBody = jsonObject;
-        Iterator<TerminalMessage> it = chatMessageList.iterator();
-        while (it.hasNext()) {
-            TerminalMessage next = it.next();
-            if (next.messageBody.containsKey(JsonParam.TOKEN_ID) && next.messageBody.getIntValue(JsonParam.TOKEN_ID) == TEMP_TOKEN_ID) {
-                //这里会删除所有TOKEN_ID为-1的临时位置(无效位置数据，用来显示发送中的UI效果)
-                it.remove();
-            }
-        }
-        chatMessageList.add(mTerminalMessage);
-
-        if (getLocationFail) {
-            boolean isContainFail = false;
-            for (TerminalMessage terminalMessage1 : allFailMessageList) {
-                if (terminalMessage1.messageBody.containsKey(JsonParam.TOKEN_ID) && mTerminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
-                        terminalMessage1.messageBody.getIntValue(JsonParam.TOKEN_ID) == mTerminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
-                    isContainFail = true;
-                    terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
-                    break;
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
+                if (longitude != 0 && latitude != 0) {
+                    //            List<Double> locations = CoordTransformUtils.bd2wgs(latitude, longitude);
+                    //            if(locations.size()>1){
+                    jsonObject.put(JsonParam.LONGITUDE, longitude);
+                    jsonObject.put(JsonParam.LATITUDE, latitude);
+                    //            }
                 }
+                jsonObject.put(JsonParam.TOKEN_ID, tokenId);
+                jsonObject.put(JsonParam.ACTUAL_SEND, realSend);
+                jsonObject.put(JsonParam.GET_LOCATION_FAIL, getLocationFail);
+                jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
+                TerminalMessage mTerminalMessage = new TerminalMessage();
+                mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
+                mTerminalMessage.messageToId = userId;
+                mTerminalMessage.messageToName = userName;
+                mTerminalMessage.sendTime = System.currentTimeMillis();
+                mTerminalMessage.messageType = MessageType.POSITION.getCode();
+                mTerminalMessage.messageBody = jsonObject;
+                Iterator<TerminalMessage> it = chatMessageList.iterator();
+                while (it.hasNext()) {
+                    TerminalMessage next = it.next();
+                    if (next.messageBody.containsKey(JsonParam.TOKEN_ID) && next.messageBody.getIntValue(JsonParam.TOKEN_ID) == TEMP_TOKEN_ID) {
+                        //这里会删除所有TOKEN_ID为-1的临时位置(无效位置数据，用来显示发送中的UI效果)
+                        it.remove();
+                    }
+                }
+                chatMessageList.add(mTerminalMessage);
+
+                if (getLocationFail) {
+                    boolean isContainFail = false;
+                    for (TerminalMessage terminalMessage1 : allFailMessageList) {
+                        if (terminalMessage1.messageBody.containsKey(JsonParam.TOKEN_ID) && mTerminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
+                                terminalMessage1.messageBody.getIntValue(JsonParam.TOKEN_ID) == mTerminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
+                            isContainFail = true;
+                            terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
+                            break;
+                        }
+                    }
+                    //添加到发送失败列表
+                    if (!isContainFail) {
+                        allFailMessageList.add(mTerminalMessage);
+                    }
+                }
+                myHandler.post(() -> {
+                    setListSelection(chatMessageList.size() - 1);
+                    if (temporaryAdapter != null) {
+                        temporaryAdapter.notifyDataSetChanged();
+                    }
+                });
             }
-            //添加到发送失败列表
-            if (!isContainFail) {
-                allFailMessageList.add(mTerminalMessage);
-            }
-        }
-        setListSelection(chatMessageList.size() - 1);
-        if (temporaryAdapter != null) {
-            temporaryAdapter.notifyDataSetChanged();
-        }
+        });
+
     }
 
     protected void setListSelection(int position) {
@@ -1249,17 +1283,14 @@ public abstract class ChatBaseActivity extends BaseActivity
     private ReceiveGetGPSLocationHandler mReceiveGetGPSLocationHandler = new ReceiveGetGPSLocationHandler() {
         @Override
         public void handler(final double longitude, final double latitude) {
-            logger.error("ReceiveGetGPSLocationHandler-------" + " " + longitude + "/" + latitude);
-            handler.post(() -> {
-//                sendLocation(30.495792, 114.433282, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
-                if (longitude != 0.0 && latitude != 0.0) {//获取位置成功
-                    sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
-                } else {//获取位置失败
-                    sendLocation(longitude, latitude, TEMP_TOKEN_ID, false, true);
-                    ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_gps_positioning_failed));
-                }
-                MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
-            });
+//            logger.error("ReceiveGetGPSLocationHandler-------" + " " + longitude + "/" + latitude);
+            if (longitude != 0.0 && latitude != 0.0) {//获取位置成功
+                sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
+            } else {//获取位置失败
+                sendLocation(longitude, latitude, TEMP_TOKEN_ID, false, true);
+                ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_gps_positioning_failed));
+            }
+            MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
         }
     };
 
@@ -1568,34 +1599,34 @@ public abstract class ChatBaseActivity extends BaseActivity
                     ToastUtils.showShort(R.string.text_calling_cannot_pull);
                     return;
                 }
-
-
                 //先请求看视频上报是否已经结束
                 MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-                    int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-                    String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
-                    Map<String, String> paramsMap = new HashMap<>();
-                    paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
-                    paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-                    logger.info("查看视频播放是否结束url：" + url);
-                    String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-                    logger.info("查看视频播放是否结束结果：" + result);
-                    if (!Util.isEmpty(result)) {
-                        JSONObject jsonObject = JSONObject.parseObject(result);
-                        boolean living = jsonObject.getBoolean("living");
-                        if (living) {
-                            Message msg = Message.obtain();
-                            msg.what = WATCH_LIVE;
-                            msg.obj = terminalMessage;
-                            handler.sendMessage(msg);
-                        } else {
-                            // TODO: 2018/8/7
-                            Intent intent = new Intent(ChatBaseActivity.this, PlayLiveHistoryActivity.class);
-                            intent.putExtra("terminalMessage", terminalMessage);
-                            ChatBaseActivity.this.startActivity(intent);
-                        }
+                    String liveUrl = "";
+                    try{
+                        liveUrl = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
+                   if(!android.text.TextUtils.isEmpty(liveUrl)){
+                       boolean isLiving = TerminalFactory.getSDK().getLiveManager().checkPushLiveIsLivingByUrl(liveUrl);
+                       if (isLiving) {
+                           Message msg = Message.obtain();
+                           msg.what = WATCH_LIVE;
+                           msg.obj = terminalMessage;
+                           handler.sendMessage(msg);
+                       } else {
+                           // 如果是没有注册的上报图像就不观看历史上报图像
+                           if(TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(terminalMessage.messageBody)){
+                               ToastUtil.showToast(getString(R.string.text_video_live_from_no_regist_can_not_watch_history));
+                           }else{
+                               Intent intent = new Intent(ChatBaseActivity.this, PlayLiveHistoryActivity.class);
+                               intent.putExtra("terminalMessage", terminalMessage);
+                               ChatBaseActivity.this.startActivity(intent);
+                           }
+                       }
+                   }else{
+                       ToastUtil.showToast(getString(R.string.text_liveing_url_is_empty));
+                   }
                 });
             }
 
@@ -1773,6 +1804,10 @@ public abstract class ChatBaseActivity extends BaseActivity
 //                                    showQRDialog();
                                     goToScan();
                                     break;
+                                case ReceiverSendFileCheckMessageHandler.VIDEO_MEETING://视频会商
+                                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(
+                                            ReceiverRequestVideoMeetingHandler.class, 2);
+                                    break;
                             }
                         } else {
                             setViewVisibility(fl_fragment_container, View.GONE);
@@ -1818,6 +1853,10 @@ public abstract class ChatBaseActivity extends BaseActivity
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
+
+        if(!NetworkUtil.isConnected(this)){
+            updateLoginStateView(0,R.string.net_work_disconnect);
+        }
     }
 
     @Override
@@ -2316,7 +2355,7 @@ public abstract class ChatBaseActivity extends BaseActivity
             final int viewPos = getViewPos(position);
             logger.info("发送成功position:" + position + ",viewPos:" + viewPos);
             handler.post(() -> {
-                if (viewPos != -1) {
+//                if (viewPos != -1) {
 //                    View childView = groupCallList.getChildAt(viewPos);
 //                    temporaryAdapter.progressPercentMap.remove(tokenId);
 //                    if (childView != null) {
@@ -2329,7 +2368,7 @@ public abstract class ChatBaseActivity extends BaseActivity
 //                            tv_progress_pre_upload.setVisibility(View.GONE);
 //                        }
 //                    }
-                }
+//                }
 //                temporaryAdapter.notifyItemChanged(position);
                 temporaryAdapter.setUploadFinished();
             });
@@ -2523,7 +2562,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                 if (i < size) {
                     noteJsonArray.add(String.valueOf(temporaryAdapter.getMessageContent(forwardList.get(i))));
                 }
-                idJsonArray.add(forwardList.get(i).messageId);
+                idJsonArray.add(forwardList.get(i).messageId+"");
             }
             JSONObject jsonObject = new JSONObject();
             String name = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
@@ -2693,14 +2732,15 @@ public abstract class ChatBaseActivity extends BaseActivity
     //自动播放下一条语音
     private void autoPlay(int index){
         try{
+            logger.debug("autoPlay---size:"+chatMessageList.size());
             if(index<chatMessageList.size()){//不是最后一条消息，自动播放
                 //不是语音消息跳过执行下一条
-                if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&!isReject) {
+                if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&chatMessageList.get(index).messageType != MessageType.GROUP_CALL.getCode()&&!isReject) {
                     index = index + 1;
                     autoPlay(index);
                 }else {
                     if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
-                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !MediaManager.isPlaying() && !isReject) {
+                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !isReject) {
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index,
                             (chatMessageList.get(index).messageType == MessageType.AUDIO.getCode())?PlayType.PLAY_AUDIO.getCode():PlayType.PLAY_GROUP_CALL.getCode());
                     } else {
@@ -2849,6 +2889,140 @@ public abstract class ChatBaseActivity extends BaseActivity
         }
 
 
+    }
+
+    /**
+     * 真实网络的状态
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if (!connected) {
+                updateLoginStateView(0,R.string.net_work_disconnect);
+            }else{
+                if(TerminalFactory.getSDK().isServerConnected()){
+                    updateLoginStateView(-1,0);
+                }else {
+                    updateLoginStateView(0,R.string.authing);
+                }
+            }
+        }
+    };
+
+
+    /**
+     * 网络连接状态
+     */
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
+
+        @Override
+        public void handler(final boolean connected) {
+            logger.info("个人会话页面收到服务是否连接的通知" + connected);
+            if (!connected) {
+                updateLoginStateView(0,R.string.net_work_disconnect);
+            }
+        }
+    };
+
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
+        @Override
+        public void handler(boolean connected){
+            updateLoginStateView(0,connected?R.string.logining:R.string.text_disconnection_of_network_connection);
+        }
+    };
+
+    /**
+     * 信令服务发送NotifyForceRegisterMessage消息时，先去reAuth(false)，然后login()
+     */
+    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
+        @Override
+        public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                if (isRegisted) {//注册过，在后台登录，session超时也走这
+                    updateLoginStateView(0,R.string.connecting_server);
+                }
+            }else if(resultCode == TerminalErrorCode.REGISTER_DEVICE_KILL.getErrorCode()){
+            }else if(resultCode == TerminalErrorCode.REGISTER_ACCOUNT_DELETE.getErrorCode()
+                    ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()){
+            }else {
+                boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
+                updateLoginStateView(0,hasCompleteData?R.string.connecting_server:R.string.auth_fail);
+            }
+        }
+    };
+
+    /**
+     * 请求登录
+     */
+    private ReceiveRequestLoginHandler receiveRequestLoginHandler = new ReceiveRequestLoginHandler(){
+        @Override
+        public void handler(int code, LoginState state){
+            if(code == BaseCommonCode.SUCCESS_CODE){
+                updateLoginStateView(0,R.string.logining);
+            }else if(state!=null&&state == LoginState.IDLE){
+                updateLoginStateView(0,R.string.authing);
+            }else if(state!=null&&state == LoginState.LOGIN){
+                //正在登录时，再次登录不修改UI
+            }else{
+                updateLoginStateView(-1,0);
+            }
+        }
+    };
+
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = new ReceiveLoginResponseHandler(){
+        @Override
+        public void handler(int resultCode, String resultDesc){
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                updateLoginStateView(1,R.string.login_success);
+            }else {
+                updateLoginStateView(0,R.string.login_fail);
+            }
+        }
+    };
+
+//    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
+//        @Override
+//        public void handler(int errorCode, String errorDesc){
+//            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+//                updateLoginStateView(1);
+//            }else{
+//                updateLoginStateView(-1);
+//            }
+//        }
+//    };
+
+    /**
+     * 更新登录的状态
+     * @param type -1：Gone 0：离线中  1：登录成功
+     */
+    private void updateLoginStateView(int type,int stringId){
+        try{
+            myHandler.post(()->{
+                if(type == 0){
+                    if(noNetWork!=null){
+                        noNetWork.setVisibility(View.VISIBLE);
+                    }
+                    if(tv_status!=null){
+                        tv_status.setText(stringId);
+                    }
+                }else if(type == 1){
+                    if(tv_status!=null){
+                        tv_status.setText(stringId);
+                    }
+                    myHandler.postDelayed(()-> {
+                        if(noNetWork!=null){
+                            noNetWork.setVisibility(View.GONE);
+                        }
+                    },1000);
+                }else {
+                    if(noNetWork!=null){
+                        noNetWork.setVisibility(View.GONE);
+                    }
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

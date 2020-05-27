@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,6 +16,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -25,6 +27,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 public class LiveRequestService extends BaseService{
 
@@ -71,6 +74,7 @@ public class LiveRequestService extends BaseService{
     @Override
     protected void initListener(){
         mLlLiveRequestStopTotal.setOnClickListener(cancelOnClickListener);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);
@@ -82,7 +86,7 @@ public class LiveRequestService extends BaseService{
 
         String memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
-        uniqueNo = intent.getLongExtra(Constants.UNIQUE_NO, 0l);
+        uniqueNo = intent.getLongExtra(Constants.UNIQUE_NO, 0L);
         //开始响铃
         PromptManager.getInstance().IndividualCallRequestRing();
         mTvLiveRequestName.setText(HandleIdUtil.handleName(memberName));
@@ -94,6 +98,10 @@ public class LiveRequestService extends BaseService{
             ptt.terminalsdk.tools.ToastUtil.livingFailToast(LiveRequestService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
             stopBusiness();
         }
+
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+memberId);
+        SearchUtil.setUpdateUseTimeTag(memberId);
     }
 
     @Override
@@ -106,24 +114,31 @@ public class LiveRequestService extends BaseService{
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
-            stopBusiness();
-        }
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
     }
 
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if(!connected){
+                MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo,TerminalErrorCode.STOP_REQUEST.getErrorCode());
+                stopBusiness();
+            }
+        }
+    };
+
     private View.OnClickListener cancelOnClickListener = v ->{
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.canceled));
-        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
+        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo,TerminalErrorCode.STOP_REQUEST.getErrorCode());
         stopBusiness();
     };
 
@@ -131,7 +146,9 @@ public class LiveRequestService extends BaseService{
      * 对方拒绝直播，通知界面关闭响铃页
      **/
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc, liveMemberId, liveUniqueNo)-> mHandler.post(() -> {
-        ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
+        if(!TextUtils.isEmpty(resultDesc)){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
+        }
         stopBusiness();
     });
 

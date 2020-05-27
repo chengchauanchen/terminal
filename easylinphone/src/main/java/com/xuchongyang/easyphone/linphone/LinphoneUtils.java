@@ -1,7 +1,6 @@
 package com.xuchongyang.easyphone.linphone;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.linphone.core.LinphoneAddress;
 import org.linphone.core.LinphoneAuthInfo;
@@ -54,9 +53,9 @@ public class LinphoneUtils {
      * @throws LinphoneCoreException
      */
     public void registerUserAuth(String name, String password, String host) throws LinphoneCoreException {
-        Log.e(TAG, "registerUserAuth name = " + name);
-        Log.e(TAG, "registerUserAuth pw = " + password);
-        Log.e(TAG, "registerUserAuth host = " + host);
+        System.out.println(TAG+"registerUserAuth name = " + name);
+        System.out.println(TAG+"registerUserAuth pw = " + password);
+        System.out.println(TAG+"registerUserAuth host = " + host);
         String identify = "sip:" + name + "@" + host;
         String proxy = "sip:" + host;
         LinphoneAddress proxyAddr = LinphoneCoreFactory.instance().createLinphoneAddress(proxy);
@@ -169,7 +168,7 @@ public class LinphoneUtils {
         }
 
         if (LinphoneManager.isInstanceiated()) {
-            org.linphone.mediastream.Log.w("LinphoneManager not instanciated yet...");
+            System.out.println(TAG+"LinphoneManager not instanciated yet...");
             return LinphoneCoreFactory.instance().createLpConfig(context.getFilesDir().getAbsolutePath() + "/.linphonerc");
         }
 

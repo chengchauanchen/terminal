@@ -46,6 +46,7 @@ import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.manager.search.SearchUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -126,6 +127,10 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         userName = getIntent().getStringExtra("userName");
         String avatarUrl = getIntent().getStringExtra("avatarUrl");
         loadData();
+
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+userId);
+        SearchUtil.setUpdateUseTimeTag(userId);
     }
 
     /**

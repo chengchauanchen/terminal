@@ -173,6 +173,22 @@ public class StringUtil{
     }
 
     /**
+     * String 转long
+     * @return
+     */
+    public static  long  stringToLong(String string){
+        long data = -1L;
+        if(!TextUtils.isEmpty(string)){
+            try{
+                data = Long.valueOf(string);
+            }catch (Exception e){
+                data =  -1 ;
+            }
+        }
+        return data;
+    }
+
+    /**
      * 小时转秒
      * @return
      */

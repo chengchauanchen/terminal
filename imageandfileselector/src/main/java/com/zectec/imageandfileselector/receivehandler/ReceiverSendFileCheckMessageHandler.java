@@ -15,6 +15,7 @@ public interface ReceiverSendFileCheckMessageHandler extends ReceiveHandler {
     public static final int RECORD=6;//语音输入
     public static final int NFC=7;//NFC
     public static final int QR_CODE=8;//二维码
+    public static final int VIDEO_MEETING=9;//视频会商
 
     /**
      * @param msgType

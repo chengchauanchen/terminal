@@ -1,4 +1,4 @@
-package cn.vsx.vc.search;
+package ptt.terminalsdk.manager.search;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,18 +11,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import ptt.terminalsdk.bean.SearchTitleBean;
+import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiverUpdateTopContactsHandler;
 
 public class SearchUtil {
 
@@ -100,7 +104,7 @@ public class SearchUtil {
             @Override
             public List<Group> call() throws Exception {
                 Log.i("SearchUtil", "更新通讯录组数据 没有缓存正在网络同步");
-                return TerminalFactory.getSDK().getConfigManager().getGroupsAllSync(false);
+                return TerminalFactory.getSDK().getConfigManager().getGroupsAllSync(true);
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -115,7 +119,7 @@ public class SearchUtil {
             @Override
             public List<Account> call() throws Exception {
                 Log.i("SearchUtil", "更新通讯录人数据 没有缓存正在网络同步");
-                return TerminalFactory.getSDK().getConfigManager().getDeptAllDataSync(false);
+                return TerminalFactory.getSDK().getConfigManager().getDeptAllDataSync(true);
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -185,7 +189,7 @@ public class SearchUtil {
     public static Observable<List<MemberSearchBean>> getDbAllAccount() {
         return Observable.fromCallable(() -> {
             List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllAccount(new ArrayList<>(),0);
-            Log.e("SearchUtil", "成员数据.size:" + search.size());
+            Log.e("SearchUtil", "getDbAllAccount-成员数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -198,7 +202,7 @@ public class SearchUtil {
     public static Observable<List<MemberSearchBean>> getAllAccountFirst() {
         return Observable.fromCallable(() -> {
             List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllAccountFirst();
-            Log.e("SearchUtil", "成员数据.size:" + search.size());
+            Log.e("SearchUtil", "getDbAllAccount-成员数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -207,6 +211,62 @@ public class SearchUtil {
     /*----------------组-----------------------*/
 
     /**
+     * 获取当前组的信息
+     * @return
+     */
+    public static GroupSearchBean getCurrentGroupInfo() {
+        int groupNo = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0);
+        GroupSearchBean bean = null;
+        //判断内存中是否有组的数据
+        int size = MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas().size();
+        Log.e("SearchUtil", "getCurrentGroupInfo-size:" + size);
+        if(size>0){
+            //有数据就从内存中取
+            bean = MyTerminalFactory.getSDK().getSearchDataManager().getSearchGroupByNo(groupNo);
+        }
+        Log.e("SearchUtil", "getCurrentGroupInfo-getSearchGroupByNo:" + bean);
+        if(size<=0 || isNeedGetGroupInfo(bean)){
+            //如果内存中没有，就从数据库中取
+            bean = TerminalFactory.getSDK().getSQLiteDBManager().getGroupByNo(groupNo);
+        }
+        Log.e("SearchUtil", "getCurrentGroupInfo-getGroupByNo:" + bean);
+        //如果数据库中没有，就从服务器获取
+//        if(isNeedGetGroupInfo(bean)){
+//            bean = TerminalFactory.getSDK().getDataManager().getGroupSearchBeanByNoWithNoThread(groupNo);
+//        }
+//        Log.e("SearchUtil", "getCurrentGroupInfo-getGroupSearchBeanByNoWithNoThread:" + bean);
+        //如果服务器获取失败，就自己new一个名字和编号一样的GroupSearchBean
+        if(bean == null){
+            bean =  DataUtil.newGroupSearchBeanByNo(groupNo);
+        }
+        Log.e("SearchUtil", "getCurrentGroupInfo-newGroupSearchBeanByNo:" + bean);
+        return bean;
+    }
+
+    public static boolean isNeedGetGroupInfo(GroupSearchBean bean){
+        boolean result = false;
+        if(bean == null){
+            result = true;
+            return result;
+        }
+        if(TextUtils.equals(String.valueOf(bean.no),bean.name)){
+            result = true;
+        }
+        return result;
+    }
+
+    /**
+     * 获取本地数据库 根据组编号获取组信息
+     *
+     * @return
+     */
+    public static Observable<GroupSearchBean> getGroupByGroupNo(int groupNo) {
+        return Observable.fromCallable(() -> {
+            GroupSearchBean search = TerminalFactory.getSDK().getSQLiteDBManager().getGroupByNo(groupNo);
+            return search;
+        }).subscribeOn(Schedulers.io());
+    }
+    /**
      * 获取本地数据库 组数据
      *
      * @return
@@ -214,7 +274,7 @@ public class SearchUtil {
     public static Observable<List<GroupSearchBean>> getDbAllGroup() {
         return Observable.fromCallable(() -> {
             List<GroupSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllGroup(new ArrayList<>(),0);
-            Log.e("SearchUtil", "组数据.size:" + search.size());
+            Log.e("SearchUtil", "getDbAllGroup-组数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -227,7 +287,7 @@ public class SearchUtil {
     public static Observable<List<GroupSearchBean>> getAllGroupFirst() {
         return Observable.fromCallable(() -> {
             List<GroupSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllGroupFirst();
-            Log.e("SearchUtil", "组数据.size:" + search.size());
+            Log.e("SearchUtil", "getAllGroupFirst-组数据.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -247,6 +307,33 @@ public class SearchUtil {
             Log.e("SearchUtil", "搜索组数据search.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * 人员 拼音搜索Observable
+     *
+     * @param keyword
+     * @return
+     */
+    public static List<MemberSearchBean> searchMemberByKey(String keyword) {
+        List<MemberSearchBean> accounts = MyTerminalFactory.getSDK().getSearchDataManager().getAccountSreachDatas();
+        List<MemberSearchBean> search = SearchUtil.searchMember(keyword, accounts);
+        List<MemberSearchBean> result = DataUtil.filterNoMemberFromAccount(search);
+        Log.e("SearchUtil", "搜索成员数据search.size:" + search.size()+"-filter:"+result.size());
+        return result;
+    }
+
+    /**
+     * 组 拼音搜索Observable
+     *
+     * @param keyword
+     * @return
+     */
+    public static List<GroupSearchBean> searchGroupByKey(String keyword) {
+        List<GroupSearchBean> groups = MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas();
+        List<GroupSearchBean> search = SearchUtil.searchGroup(keyword, groups);
+        Log.e("SearchUtil", "搜索组数据search.size:" + search.size());
+        return search;
     }
 
     /**
@@ -301,6 +388,30 @@ public class SearchUtil {
             result.add(value);
         }
         return result;
+    }
+
+    /**
+     * 获取常用联系人 前5位
+     *
+     * @return
+     */
+    public static Observable<List<MemberSearchBean>> getTop5ContactsAccount() {
+        return Observable.fromCallable(() -> {
+            List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getTop5ContactsAccount();
+            Log.e("SearchUtil", "获取常用联系人.size:" + search.size());
+            return search;
+        }).subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * 常用联系人 应用打 Tag
+     *
+     * @param accountNo
+     */
+    public static void setUpdateUseTimeTag(int accountNo) {
+        TerminalFactory.getSDK().getSQLiteDBManager().updateAccountUseTime(accountNo);
+        //发送 常用联系人更新通知
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateTopContactsHandler.class);
     }
 
 }

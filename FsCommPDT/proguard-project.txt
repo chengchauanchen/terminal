@@ -132,6 +132,7 @@
 
 -keep class cn.vsx.hamster.terminalsdk.receiveHandler.** { *; }
 -keep class cn.vsx.vc.receiveHandle.** { *; }
+-keep class cn.vsx.vc.notification.** { *; }
 -keep class com.zectec.imageandfileselector.receivehandler.** { *; }
 -keep class ptt.terminalsdk.receiveHandler.** { *; }
 
@@ -312,3 +313,6 @@
 
 #顺丰地图
 -keep class com.sfmap.**{*;}
+
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}

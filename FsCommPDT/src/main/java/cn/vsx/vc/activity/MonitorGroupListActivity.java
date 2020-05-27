@@ -9,12 +9,14 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MonitorGroupListAdapter;
+
 
 /**
  * 作者：ly-xuxiaolong
@@ -25,6 +27,7 @@ import cn.vsx.vc.adapter.MonitorGroupListAdapter;
  */
 public class MonitorGroupListActivity extends BaseActivity implements View.OnClickListener{
 
+    public static final String ACTION ="receive_remove_list" ;
     private RecyclerView recyclerview;
     private ImageView barBack;
     private List<Group> data = new ArrayList<>();
@@ -45,11 +48,14 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
     @Override
     public void initListener(){
         barBack.setOnClickListener(this);
-        TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+
     }
 
     @Override
     public void initData(){
+        logger.info("initData");
         setData();
         recyclerview.setLayoutManager(new LinearLayoutManager(this));
         monitorGroupListAdapter = new MonitorGroupListAdapter(data,this);
@@ -58,7 +64,8 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
 
     @Override
     public void doOtherDestroy(){
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
     }
 
     @Override
@@ -69,23 +76,60 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
         }
     }
 
-    private ReceiveSetMonitorGroupListHandler receiveSetMonitorGroupListHandler = new ReceiveSetMonitorGroupListHandler(){
+    /**
+     * 设置监听组之后更新UI
+     */
+    private ReceiveSetMonitorGroupViewHandler receiveSetMonitorGroupViewHandler = new ReceiveSetMonitorGroupViewHandler(){
         @Override
-        public void handler(int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                mHandler.post(()-> {
-                    setData();
-                    if(!isFinishing()){
-                        monitorGroupListAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
+        public void handler(){
+            setData();
+            mHandler.post(()-> {
+                if(monitorGroupListAdapter!=null&&!isFinishing()){
+                    monitorGroupListAdapter.notifyDataSetChanged();
+                }
+            });
         }
     };
+
 
     private void setData(){
         data.clear();
         List<Group> groups = TerminalFactory.getSDK().getConfigManager().getAllListenerGroup();
+        logger.info("获取所有监听组列表-----groups="+groups);
         data.addAll(groups);
+        //监听组
+        List<Group> monitorGroup = TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
+        logger.info("获取监听组列表-----monitorGroup="+monitorGroup);
+        //移除总列表
+        List<Group> removelists = TerminalFactory.getSDK().getList(Params.TOTAL_REMOVE_GROUP_LIST, new ArrayList<Group>(), Group.class);
+        logger.info("失效的监听组列表-----removelists="+removelists);
+        //失效列表可能包含当前监听列表的id
+        for (Group group:monitorGroup){
+            if(group!=null){
+                removelists.remove(group);
+            }
+        }
+        TerminalFactory.getSDK().putList(Params.TOTAL_REMOVE_GROUP_LIST,removelists);
+        data.addAll(removelists);
     }
+
+    /**
+     * 强制切组
+     */
+    private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
+
+        @Override
+        public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType) {
+            if (!forceSwitchGroup) {
+                return;
+            }
+            logger.info("TalkbackFragment收到强制切组： toGroupId：" + toGroupId);
+            setData();
+            myHandler.post(() -> {
+                if(monitorGroupListAdapter!=null&&!isFinishing()){
+                    monitorGroupListAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
 }

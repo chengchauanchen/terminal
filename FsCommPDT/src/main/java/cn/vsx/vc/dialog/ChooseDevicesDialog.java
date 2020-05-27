@@ -182,6 +182,7 @@ public class ChooseDevicesDialog extends Dialog {
             Member m = new Member();
             m.type = TerminalMemberType.TERMINAL_PHONE.getCode();
             m.setUniqueNo(0);
+            m.setUniqueNoStr("0");
             m.setPhone(account.getPhone());
             result.add(m);
         }

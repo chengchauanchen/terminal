@@ -328,7 +328,7 @@ public class NewGroupFragment extends BaseFragment{
 
             catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
             TerminalFactory.getSDK().getConfigManager().updateAllGroups();
-            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
+            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(true);
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
                 swipeRefreshLayout.setRefreshing(false);

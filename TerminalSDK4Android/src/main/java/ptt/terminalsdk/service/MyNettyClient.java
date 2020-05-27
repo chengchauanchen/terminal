@@ -67,7 +67,9 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
             if (handler0.asBinder() != handler.asBinder()){
             }
         }
-        serverMessageReceivedHandlerAidls.add(handler);
+        if (!serverMessageReceivedHandlerAidls.contains(handler)) {
+            serverMessageReceivedHandlerAidls.add(handler);
+        }
     }
 
     @Override

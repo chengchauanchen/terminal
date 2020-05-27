@@ -624,25 +624,30 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private void sendMessage(ChatViewHolder holder, TerminalMessage terminalMessage, int viewType) {
-        switch (viewType) {
-            case MESSAGE_SHORT_TEXT_SEND:
-                sendShortTextMessage(terminalMessage);
-                break;
-            case MESSAGE_LONG_TEXT_SEND:
-                uploadLongText(holder, terminalMessage);
-                break;
-            case MESSAGE_IMAGE_SEND:
-                break;
-            case MESSAGE_FILE_SEND:
-                break;
-            case MESSAGE_LOCATION_SEND:
-                sendLocationMessage(terminalMessage);
-                break;
-            case MESSAGE_VIDEO_LIVE_SEND:
-                sendVideoLiveMessage(terminalMessage);
-                break;
-
-        }
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                switch (viewType) {
+                    case MESSAGE_SHORT_TEXT_SEND:
+                        sendShortTextMessage(terminalMessage);
+                        break;
+                    case MESSAGE_LONG_TEXT_SEND:
+                        uploadLongText(holder, terminalMessage);
+                        break;
+                    case MESSAGE_IMAGE_SEND:
+                        break;
+                    case MESSAGE_FILE_SEND:
+                        break;
+                    case MESSAGE_LOCATION_SEND:
+                        sendLocationMessage(terminalMessage);
+                        break;
+                    case MESSAGE_VIDEO_LIVE_SEND:
+                        sendVideoLiveMessage(terminalMessage);
+                        break;
+                        default:break;
+                }
+            }
+        });
     }
 
     private void setListener(final int viewType, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
@@ -1130,12 +1135,14 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.live_bubble, View.GONE);
             return;
         }
-        if (messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE) {//被邀请去观看图像
+        if (messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE) {
+            //被邀请去观看图像
             setViewVisibility(holder.reBubble, View.VISIBLE);
             setViewVisibility(holder.ll_botoom_to_watch, View.VISIBLE);
             setViewVisibility(holder.tv_watch_time, View.GONE);
             setViewVisibility(holder.live_bubble, View.GONE);
-        } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END) {//结束观看图像
+        } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END) {
+            //结束观看图像
 //            setViewVisibility(holder.ll_botoom_to_watch, View.GONE);
             setViewVisibility(holder.reBubble, View.GONE);
 //            setViewVisibility(holder.tv_watch_time, View.VISIBLE);
@@ -1157,7 +1164,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 }
             }
         } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.ASK_VIDEO_LIVE) {
-            logger.info("sjl_JsonParam.REMARK:" + messageBody.getInteger(JsonParam.REMARK) + ",REQUIRE_VIDEO_LIVE：" + Remark.ASK_VIDEO_LIVE);
             setViewVisibility(holder.reBubble, View.GONE);
             setViewVisibility(holder.live_bubble, View.VISIBLE);
 

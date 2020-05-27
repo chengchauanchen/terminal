@@ -230,7 +230,8 @@
     <!--top-->
     <color name="funcation_top_bg">#F8F8F8</color>
     <color name="funcation_top_et_text">#000000</color>
-    <color name="funcation_top_et_underline">#0091ff</color>
+    <color name="funcation_top_et_underline">#33ffffff</color>
+    <color name="funcation_top_et_merge_transmit">#0091ff</color>
     <color name="funcation_top_btn_text">#00c0ff</color>
     <color name="funcation_bottom_line">#E6E6E6</color>
     <color name="funcation_bottom_bg">#F8F8F8</color>
@@ -626,4 +627,21 @@
 
     <color name="video_meeting_text_name">#B5E5F0</color>
     <color name="video_meeting_text_time">#617F8E</color>
+    <color name="video_meeting_minimize_bg">#469BB3</color>
+
+    <color name="work_bg">#000a17</color><!--任务字体灰色1 -->
+    <color name="work_text_gray">#b5e5f0</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_1">#b5e5f0</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_2">#ff43f3e0</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_3">#ff19d1ff</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_4">#ff19d1ff</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_5">#ffffff</color><!--任务字体灰色1 -->
+
+    <color name="color_grey_31">#313131</color>
+    <color name="color_grey_53">#535353</color>
+    <color name="color_grey_a0">#A0A0A0</color>
+    <color name="color_blue_26">#26A2FF</color>
+    <color name="color_yellow_f3">#F39800</color>
+    <color name="upload_log_button">#809eb6</color>
+
 </resources>

@@ -45,7 +45,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +59,6 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.MergeTransmitListActivity;
@@ -1406,19 +1404,15 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
         if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
             //先请求看视频上报是否已经结束
             MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-                int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-                String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
-                Map<String, String> paramsMap = new HashMap<>();
-                paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
-                paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-                logger.info("查看视频播放是否结束url：" + url);
-                String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-                logger.info("查看视频播放是否结束结果：" + result);
-                if (!Util.isEmpty(result)) {
-                    JSONObject jsonObject = JSONObject.parseObject(result);
-                    boolean living = jsonObject.getBoolean("living");
-                    if (living) {
+                String liveUrl = "";
+                try{
+                    liveUrl = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                if(!android.text.TextUtils.isEmpty(liveUrl)){
+                    boolean isLiving = TerminalFactory.getSDK().getLiveManager().checkPushLiveIsLivingByUrl(liveUrl);
+                    if (isLiving) {
                         activity.runOnUiThread(() -> {
                             Intent intent = new Intent(activity, PullLivingService.class);
                             intent.putExtra(Constants.WATCH_TYPE, Constants.ACTIVE_WATCH);
@@ -1426,13 +1420,18 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                             activity.startService(intent);
                         });
                     } else {
-                        // TODO: 2018/8/7
                         activity.runOnUiThread(() -> {
-                            Intent intent = new Intent(activity, PlayLiveHistoryActivity.class);
-                            intent.putExtra("terminalMessage", terminalMessage);
-                            activity.startActivity(intent);
+                            if(TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(terminalMessage.messageBody)){
+                                cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance.getString(R.string.text_video_live_from_no_regist_can_not_watch_history));
+                            }else{
+                                Intent intent = new Intent(activity, PlayLiveHistoryActivity.class);
+                                intent.putExtra("terminalMessage", terminalMessage);
+                                activity.startActivity(intent);
+                            }
                         });
                     }
+                }else{
+                    cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance.getString(R.string.text_liveing_url_is_empty));
                 }
             });
         }

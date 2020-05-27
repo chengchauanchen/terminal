@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,7 +39,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageComplet
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -62,6 +62,7 @@ import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 
 /**
@@ -77,8 +78,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     ImageView individualNewsInfo;
 
     ImageView individual_news_help;
-
-    LinearLayout noNetWork;
 
     VolumeViewLayout volumeViewLayout;
 
@@ -156,6 +155,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         newsBarGroupName = (TextView) findViewById(R.id.tv_chat_name);
         volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
         noNetWork = (LinearLayout) findViewById(R.id.noNetWork);
+        tv_status = (TextView) findViewById(R.id.tv_status);
         individual_news_help = (ImageView) findViewById(R.id.individual_news_help);
         individualNewsInfo = (ImageView) findViewById(R.id.individual_news_info);
         individualNewsPhone = (ImageView) findViewById(R.id.individual_news_phone);
@@ -179,13 +179,17 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     }
 
     @Override
+    protected void handleMesage(Message msg) {
+
+    }
+
+    @Override
     public void initListener() {
         newsBarReturn.setOnClickListener(this);
         individualNewsPhone.setOnClickListener(this);
         individualNewsInfo.setOnClickListener(this);
         individual_news_help.setOnClickListener(this);
         ivCall.setOnClickListener(this);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
@@ -203,6 +207,9 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.initData();
         mFromId = userId;
         logger.info("userId：" + userId);
+        //设置常用联系人 的Tag
+        SearchUtil.setUpdateUseTimeTag(userId);
+
         type = getIntent().getIntExtra("type",0);
         funcation.setFunction(false, userId);
         funcation.setMemberFunction(type);
@@ -276,7 +283,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     public void doOtherDestroy() {
         handler.removeCallbacksAndMessages(null);
         record.cancel();
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartLiveHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverIndividualCallFromMsgItemHandler);
@@ -443,24 +449,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     };
 
     private Handler myHandler = new Handler(Looper.getMainLooper());
-
-    /**
-     * 网络连接状态
-     */
-    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
-
-        @Override
-        public void handler(final boolean connected) {
-            logger.info("个人会话页面收到服务是否连接的通知" + connected);
-            IndividualNewsActivity.this.runOnUiThread(() -> {
-                if (!connected) {
-                    noNetWork.setVisibility(View.VISIBLE);
-                } else {
-                    noNetWork.setVisibility(View.GONE);
-                }
-            });
-        }
-    };
 
     /**更新所有成员列表*/
     private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {

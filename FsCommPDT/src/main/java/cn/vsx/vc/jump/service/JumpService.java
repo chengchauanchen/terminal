@@ -2,18 +2,14 @@ package cn.vsx.vc.jump.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import org.apache.log4j.Logger;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
-import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
-import cn.vsx.hamster.terminalsdk.tools.JudgeWhetherConnect;
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.jump.command.FactoryCommand;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
@@ -26,6 +22,11 @@ public class JumpService extends Service {
 
     protected static Logger logger = Logger.getLogger(JumpService.class);
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -34,9 +35,13 @@ public class JumpService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        KeepLiveManager.getInstance().setServiceForeground(this);
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {//SDK>8.0
+            KeepLiveManager.getInstance().setServiceForeground(this);
+        }
         return super.onStartCommand(intent, flags, startId);
     }
+
+
 
     public class JumpBinder extends IJump.Stub {
 

@@ -39,10 +39,12 @@ import java.util.List;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDeparmentChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
@@ -97,7 +99,18 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
         @Override
         public void handler() {
-            myHandler.post(() -> MyApplication.instance.stopHandlerService());
+            try{
+                MyTerminalFactory.getSDK().stop();
+                myHandler.postDelayed(() -> {
+                    cn.vsx.vc.utils.ToastUtil.showToast(getString(R.string.accunt_is_delete));
+                },1000);
+
+                myHandler.postDelayed(() -> {
+                    exitApp();
+                },3000);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     };
 
@@ -236,7 +249,31 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         startActivity(intent);
         ActivityCollector.removeAllActivityExcept(RegistActivity.class);
         android.os.Process.killProcess(android.os.Process.myPid());
+    }
 
+    protected void goToRegistActivity() {
+        try{
+            // 重新走应用的流程是一个正确的做法，因为应用被强杀了还保存 Activity 的栈信息是不合理的
+            if(TerminalFactory.getSDK().isServerConnected()){
+                TerminalFactory.getSDK().getAuthManagerTwo().logout();
+            }
+            LoginStateMachine loginStateMachine = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine();
+            if(loginStateMachine!=null){
+                loginStateMachine.stop();
+            }
+            TerminalFactory.getSDK().getClientChannel().stop();
+            MyTerminalFactory.getSDK().stop();
+            MyApplication.instance.isClickVolumeToCall = false;
+            MyApplication.instance.isPttPress = false;
+            OperateReceiveHandlerUtil.getInstance().clear();
+            Intent intent = new Intent(this, RegistActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_CLEAR);
+            startActivity(intent);
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -272,6 +309,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveDeparmentChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTianjinAuthLoginAndLogoutHandler);
         registerHeadsetPlugReceiver();
@@ -285,6 +323,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveDeparmentChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTianjinAuthLoginAndLogoutHandler);
     }
@@ -645,6 +684,20 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     };
 
     /**
+     * 部门修改之后，提示用户重新登录
+     */
+    private ReceiveDeparmentChangeHandler receiveDeparmentChangeHandler = new ReceiveDeparmentChangeHandler() {
+        @Override
+        public void handler() {
+            //清除数据
+            TerminalFactory.getSDK().clearData();
+            ToastUtil.showToast(getString(R.string.text_account_data_change_please_relogin));
+            MyTerminalFactory.getSDK().stop();
+            myHandler.postDelayed(() -> goToRegistActivity(),2000);
+        }
+    };
+
+    /**
      * 响应执法记录仪绑定警务通（相应给请求人，说明绑定请求是否成功）
      */
     private ReceiveResponseZfyBoundPhoneByRequestMessageHandler receiveResponseZfyBoundPhoneByRequestMessageHandler = new ReceiveResponseZfyBoundPhoneByRequestMessageHandler(){
@@ -894,24 +947,22 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     public void exitApp() {
-
-        if(TerminalFactory.getSDK().isServerConnected()){
-            TerminalFactory.getSDK().getAuthManagerTwo().logout();
+        try{
+            if(TerminalFactory.getSDK().isServerConnected()){
+                TerminalFactory.getSDK().getAuthManagerTwo().logout();
+            }
+            Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+            stoppedCallIntent.putExtra("stoppedResult", "0");
+            SendRecvHelper.send(BaseActivity.this, stoppedCallIntent);
+            for (Activity activity : ActivityCollector.getAllActivity().values()) {
+                activity.finish();
+            }
+            MyApplication.instance.isClickVolumeToCall = false;
+            MyApplication.instance.isPttPress = false;
+            MyApplication.instance.stopHandlerService();
+            MyTerminalFactory.getSDK().stop();
+        }catch (Exception e){
+            e.printStackTrace();
         }
-
-        Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-        stoppedCallIntent.putExtra("stoppedResult", "0");
-        SendRecvHelper.send(BaseActivity.this, stoppedCallIntent);
-
-
-        for (Activity activity : ActivityCollector.getAllActivity().values()) {
-            activity.finish();
-        }
-        MyApplication.instance.isClickVolumeToCall = false;
-        MyApplication.instance.isPttPress = false;
-        MyApplication.instance.stopHandlerService();
     }
-
-
-
 }

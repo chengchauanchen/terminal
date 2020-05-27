@@ -15,6 +15,25 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+
+import org.apache.log4j.Logger;
+import org.easydarwin.push.EasyPusher;
+import org.easydarwin.push.InitCallback;
+import org.easydarwin.push.LocalVideoPushStream;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -33,26 +52,11 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberUploadFileMe
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateUploadFileRateLimitHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import org.apache.log4j.Logger;
-import org.easydarwin.push.EasyPusher;
-import org.easydarwin.push.InitCallback;
-import org.easydarwin.push.LocalVideoPushStream;
 import ptt.terminalsdk.broadcastreceiver.FileExpireReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -135,12 +139,26 @@ public class FileTransferOperation {
         public void handler(PTTProtolbuf.NotifyMemberUploadFileMessage message) {
             logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:" + message);
             if (message != null) {
+
+
                 List<String> list = message.getFileNameListList();
 
                 if (list != null && list.size() > 0) {
                     logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:list:" + list);
+                    if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                        logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:isSave");
+                        //正在省电模式中，
+                        notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_POWER_SAVE_STATUS);
+                        return;
+                    }
                     //从数据库中获取文件的信息,并上传
-                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), false);
+                    CopyOnWriteArrayList<BitStarFileRecord> records = getRecordsByNames(list);
+                    if(!records.isEmpty()){
+                        uploadFileByPaths(records, message.getRequestMemberId(),message.getRequestUniqueNo(), false);
+                    }else{
+                        //本地没有这条数据时，通知PC没有
+                        notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
+                    }
                     //推送视频文件到流媒体服务器
                     //                    pushStreamOfVideoFile(list);
                 }
@@ -268,6 +286,10 @@ public class FileTransferOperation {
                     logger.info(TAG + "uploadFileTreeBean:isConnected:" + isConnected(context));
                     return;
                 }
+                if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                    logger.info(TAG + "uploadFileTreeBean:isSave:");
+                    return;
+                }
                 if (list != null && list.size() > 0) {
                     logger.info(TAG + "uploadFileTreeBean:url:" + getUploadFileServerUrl() + UPLOAD_FILE_INFO_SERVER_PATH + "-list-" + list);
                     Map<String, String> paramsMap = new HashMap<>();
@@ -282,7 +304,7 @@ public class FileTransferOperation {
                                 String success = object.getString(RESULT_SUCCESS);
                                 if (RESULT_SUCCESS_TRUE.equals(success)) {
                                     //判断是否是执法记录仪，是的话就自动上传文件
-                                    // TODO: 2019/7/24  判断是否是执法记录仪,是的话就自动上传文件,随后要改成服务配置参数
+                                    //判断是否是自动上传文件,随后要改成服务配置参数
                                     if(isRecorderDevice()){
                                         uploadFileByPath(path, 0, 0L,false);
                                     }
@@ -312,6 +334,10 @@ public class FileTransferOperation {
     public void uploadFileByPath(final String path, final int requestMemberId,final long requestUniqueNo, final boolean isDelete) {
         if (!isConnected(context)) {
             logger.info(TAG + "uploadFileByPath:isConnected:" + isConnected(context));
+            return;
+        }
+        if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+            logger.info(TAG + "uploadFileByPath:isSave" );
             return;
         }
         TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(new Runnable() {
@@ -380,12 +406,14 @@ public class FileTransferOperation {
      */
     public String uploadFileByOkHttp(String url, final File file) {
         try{
+            logger.info(TAG + "uploadFileByOkHttp--url:" + url);
             long startTime = System.currentTimeMillis();
-            rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("application/octet-stream"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+            rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
             RequestBody requestBody;
             requestBody = new MultipartBody.Builder()
-                .addFormDataPart("fileStream", file.getName(), rateLimitingRequestBody)
-                .addFormDataPart("sign", SignatureUtil.sign(""))
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("fileStream", file.getName(), rateLimitingRequestBody)
+                    .addFormDataPart("sign", SignatureUtil.sign(""))
                 .build();
             Request.Builder builder = new Request.Builder();
             builder.url(url);
@@ -452,6 +480,10 @@ public class FileTransferOperation {
     public void uploadFileByExpire() {
         if (!isConnected(context)) {
             logger.info(TAG + "uploadFileByExpire:isConnected:" + isConnected(context));
+            return;
+        }
+        if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+            logger.info(TAG + "uploadFileByExpire:isSave" );
             return;
         }
         TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
@@ -599,7 +631,7 @@ public class FileTransferOperation {
     public CopyOnWriteArrayList<BitStarFileRecord> getRecordsByNames(List<String> fileNames) {
         CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
         String[] array = fileNames.toArray(new String[fileNames.size()]);
-        if (fileNames != null && fileNames.size() > 0 && array != null && array.length > 0) {
+        if (fileNames != null && fileNames.size() > 0 && array.length > 0) {
             list.addAll(TerminalFactory.getSDK().getSQLiteDBManager().getBitStarFileRecords(array));
             logger.info(TAG + "getRecordByName:fileNames：" + fileNames + "--list--" + list);
         }
@@ -804,6 +836,10 @@ public class FileTransferOperation {
                 //删除已经上传的文件
                 deleteUploadedFile();
 
+                if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                    logger.info(TAG + "externNoStorageOperation:isSave" );
+                    return;
+                }
                 CopyOnWriteArrayList<BitStarFileRecord> noList = getRecordByState(FileTransferOperation.UPLOAD_STATE_NO);
                 logger.info(TAG + "externNoStorageOperation:no_upload:" + noList);
                 //上传文件,删除
@@ -918,10 +954,10 @@ public class FileTransferOperation {
      * @param endTime 到期时间
      */
     public void startFileExpireAlarmManager(long endTime) {
-        if(isRecorderDevice()){
+//        if(isRecorderDevice()){
             logger.info(TAG + "startFileExpireAlarmManager:endTime-" + endTime);
             getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
-        }
+//        }
     }
 
     /**
@@ -1144,6 +1180,15 @@ public class FileTransferOperation {
     private boolean isRecorderDevice(){
         String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         return TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode();
+    }
+
+    /**
+     * 是否是手机
+     * @return
+     */
+    private boolean isPhoneDevice(){
+        String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        return TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_PHONE.getCode();
     }
 
     private boolean isUavDevice(){

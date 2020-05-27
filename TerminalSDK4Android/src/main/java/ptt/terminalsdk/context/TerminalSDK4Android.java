@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -68,10 +67,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimerTask;
+import java.util.UUID;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
@@ -83,7 +83,6 @@ import cn.vsx.hamster.terminalsdk.manager.okhttp.MyCacheInterceptor;
 import cn.vsx.hamster.terminalsdk.manager.servicebus.ServiceBusManager;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.IdentifyType;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
@@ -99,9 +98,9 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
-import ptt.terminalsdk.R;
 import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
 import ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver;
+import ptt.terminalsdk.listener.InitUuidCallBack;
 import ptt.terminalsdk.manager.MyDataManager;
 import ptt.terminalsdk.manager.Prompt.PromptManager;
 import ptt.terminalsdk.manager.audio.AudioProxy;
@@ -118,7 +117,9 @@ import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
 import ptt.terminalsdk.manager.live.LiveManager;
 import ptt.terminalsdk.manager.message.SQLiteDBManager;
+import ptt.terminalsdk.manager.powersave.PowerSaveManager;
 import ptt.terminalsdk.manager.recordingAudio.RecordingAudioManager;
+import ptt.terminalsdk.manager.search.SearchDataManager;
 import ptt.terminalsdk.manager.video.VideoProxy;
 import ptt.terminalsdk.manager.voip.VoipManager;
 import ptt.terminalsdk.service.BluetoothLeService;
@@ -127,7 +128,7 @@ import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.AppUtil;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.HttpUtil;
-import ptt.terminalsdk.tools.ToastUtil;
+import ptt.terminalsdk.tools.SDCardUtil;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.MODE_PRIVATE;
@@ -167,6 +168,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean isBindBleService;
 	private boolean isBindedUVCCameraService;
 	private VPNConnectionChangeReceiver vpnConnectionChangeReceiver;
+	private TimerTask timerTask;
 
 	public TerminalSDK4Android(Application mApplication, String terminalMemberType){
 		application = mApplication;
@@ -184,7 +186,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
 		getFileTransferOperation().start();
-
+		searchDataStart();
+        powerSaveManagerStart();
 		// 广播接收器，用来监听SSL服务发出的广播
 		vpnConnectionChangeReceiver = new VPNConnectionChangeReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -226,7 +229,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 	}
 
-	public void registNetworkChangeHandler(){
+    public void registNetworkChangeHandler(){
 		netWorkConnectionChangeReceiver = new NetWorkConnectionChangeReceiver();
 		IntentFilter netFilter = new IntentFilter();
 		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -242,6 +245,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	protected void onStop() {
 		logger.error("TerminalSDK4Android----stop！！");
+        powerSaveManagerStop();
+		searchDataStop();
 		getFileTransferOperation().stop();
 		locationStop();
 		getVideoProxy().stop();
@@ -583,7 +588,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			} else {
 				application.startService(onlineService);
 			}
-			application.startService(onlineService);
+//			application.startService(onlineService);
 			isBindOnlineService = application.bindService(onlineService,onlineServiceConn,BIND_AUTO_CREATE);
 			application.startService(bleService);
 			isBindBleService = application.bindService(bleService,bleServiceConn,BIND_AUTO_CREATE);
@@ -894,6 +899,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		return locationManager;
 	}
+	private SearchDataManager searchDataManager;
+	public SearchDataManager getSearchDataManager(){
+		if(searchDataManager == null){
+			searchDataManager = new SearchDataManager();
+		}
+		return searchDataManager;
+	}
 	public Application getApplication(){
 		return application;
 	}
@@ -995,6 +1007,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				logger.info("percent:" + percent);
 				logger.info("speed:" + speed);
 				logger.info("============= end ===============");
+				if(percent<0){
+					percent = 0;
+				}
 				TerminalFactory.getSDK().notifyReceiveHandler(ReceiveDownloadProgressHandler.class, percent, terminalMessage);
 			}
 
@@ -1119,7 +1134,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			messageServiceIntent.putExtra("accessServerIp", accessServerIp);
 			messageServiceIntent.putExtra("accessServerPort", accessServerPort);
 			messageServiceIntent.putExtra("protocolType",protocolType);
-			application.startService(messageServiceIntent);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				application.startForegroundService(messageServiceIntent);
+			} else {
+				application.startService(messageServiceIntent);
+			}
 			logger.info("开始启动服务MessageService, 连接到信令服务");
 
 
@@ -1170,9 +1189,38 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			logger.error("MessageServiceon----onServiceDisconnected");
-			connectToServer();
+//			disConnectToServer();
+//			reTryConnectToServer();
 		}
 	};
+
+	/**
+	 * 重新尝试再连接MessageServer
+	 */
+	private void reTryConnectToServer() {
+		try{
+			if(timerTask != null){
+				timerTask.cancel();
+				timerTask = null;
+			}
+		}catch (Exception ef){
+			logger.error("onServiceDisconnected  Exception f:"+ef);
+			timerTask = null;
+		}finally {
+			try{
+				timerTask = new TimerTask() {
+					@Override
+					public void run() {
+
+						connectToServer();
+					}
+				};
+				TerminalFactory.getSDK().getTimer().schedule(timerTask,5*1000);
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
 
 	/**
 	 * 如果messageService不为空把Service先unbind,再bindService，保证onServiceConnected可以正常被调用
@@ -1235,8 +1283,20 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public void setAPKUpdateAddress(String path) {
 		TerminalFactory.getSDK().putParam(Params.UPDATE_URL, ApkUtil.getAPKUpdateAddress(path));
 	}
-
 	@Override
+	public void setLogUpLoadAddress(String path) {
+		TerminalFactory.getSDK().putParam(Params.LOG_UPLOAD_URL, ApkUtil.getLogUpdateAddress(path));
+	}
+
+    private PowerSaveManager powerSaveManager;
+    @Override
+    public PowerSaveManager getPowerSaveManager() {
+        if (powerSaveManager == null){
+            powerSaveManager =new PowerSaveManager(application);
+        }
+        return powerSaveManager;
+    }
+    @Override
 	public void setDataUpdateAddress(String path) {
 		StringBuffer address = new StringBuffer();
 		address.append(path);
@@ -1248,15 +1308,71 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return account;
 	}
 
+    /**
+     * 初始化uuid，主要是从文件中获取uuid
+     */
+	public void initUuid(InitUuidCallBack callBack){
+        getThreadPool().execute(() -> {
+        	try{
+                //从sharepreference获取
+				String uuid = getParam(Params.UUID,"");
+				String uuidFileData = SDCardUtil.readUuidFromSdCard(getUuidFilePath()+getUuidFileName());
+				logger.info("initUuid--uuid："+uuid+"--uuidFileData:"+uuidFileData);
+				if(TextUtils.isEmpty(uuid)){
+					//从文件中获取uuid，如果有数据，就存到sharepreference中
+					if(!TextUtils.isEmpty(uuidFileData)){
+						putParam(Params.UUID,uuidFileData);
+					}
+				}else{
+					//判断文件中是否有uuid数据，没有的话，需要再写入
+					if(TextUtils.isEmpty(uuidFileData)){
+						SDCardUtil.saveUuidToSdCard(getUuidFilePath(),getUuidFileName(), uuid);
+					}
+				}
+			}catch (Exception e){
+        		e.printStackTrace();
+			}finally {
+				if(callBack!=null){
+					callBack.onComplete();
+				}
+			}
+        });
+	}
+
+
 	@Override
 	public String getUuid(){
-		String uuid = Util.md5(newUuid());
-		if(Util.isEmpty(uuid)){
-			throw new IllegalArgumentException("newUuid()的返回值不能为null或空字符串");
+		//从sharepreference获取
+		String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		String uuid = getParam(Params.UUID,"");
+		logger.info("getUuid-uuid："+uuid);
+		if(TextUtils.isEmpty(uuid)){
+			uuid = UUID.randomUUID().toString();
+
+			//保存在sharepreference
+			putParam(Params.UUID,uuid);
+			//写入sd卡中
+			String finalUuid = uuid;
+			getThreadPool().execute(() -> {
+				SDCardUtil.saveUuidToSdCard(getUuidFilePath(),getUuidFileName(), finalUuid);
+			});
 		}
-		logger.info("uuid是："+uuid);
-		return uuid;
+		String result = Util.md5(uuid+deviceType);
+		logger.info("getUuid-uuid-result："+result);
+		return result;
 	}
+
+    /**
+     * 获取uuid文件的目录
+     * @return
+     */
+	public String getUuidFilePath(){
+		return Environment.getExternalStorageDirectory()
+				+ File.separator + "."+ application.getPackageName()+File.separator;
+	}
+	public String getUuidFileName(){
+	    return "uuid.txt";
+    }
 
 	@SuppressLint("MissingPermission")
 	@Override
@@ -1272,20 +1388,27 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 					wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
 		}
 		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+deviceType);
-		return account+deviceType;
+//		return account+deviceType;
+		return account;
+//		return account+"1234567890";
 	}
 	@SuppressLint("MissingPermission")
 	@Override
 	protected String newOldUuid() {
-		String account = TerminalFactory.getSDK().getParam(UrlParams.ACCOUNT);
-		if (Util.isEmpty(account)){
-			TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
-			WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
-			account = telephonyManager.getDeviceId() == null ?
-					wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
+		String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		String account = "";
+		TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
+		WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
+		if(telephonyManager.getDeviceId() != null ){
+			account = telephonyManager.getDeviceId();
+			logger.info(" TerminalSDK4Android--------> newOldUuid = "+account);
+		}else if(!TextUtils.isEmpty(wm.getConnectionInfo().getMacAddress())
+				&&!TextUtils.equals(wm.getConnectionInfo().getMacAddress(),"02:00:00:00:00:00")){
+			account = wm.getConnectionInfo().getMacAddress();
+			logger.info(" TerminalSDK4Android--------> newOldUuid getMacAddress= "+account);
 		}
-		logger.info(" TerminalSDK4Android--------> newOldUuid = "+account);
-		return account;
+		logger.info(" TerminalSDK4Android--------> newOldUuid = "+account+"---terminalType = "+deviceType);
+		return (TextUtils.isEmpty(account))?"":(account.hashCode()+""+deviceType);
 	}
 
 	@Override
@@ -1386,7 +1509,58 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 	}
 
-	@Override
+	/**
+	 * 根据设备类型开启搜索
+	 */
+	private void searchDataStart() {
+		if(checkSearchDataDevice()){
+			getSearchDataManager().start();
+		}
+	}
+
+	/**
+	 * 根据设备类型开启搜索
+	 */
+	private void searchDataStop() {
+		if(checkSearchDataDevice()){
+			getSearchDataManager().stop();
+		}
+	}
+
+	/**
+	 * 判断哪些设备可以加载搜索数据
+	 * @return
+	 */
+	private boolean checkSearchDataDevice(){
+		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		if(!TextUtils.isEmpty(deviceType)){
+			if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_PHONE.toString())
+					||TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_UAV.toString())){
+				return true;
+			}
+		}
+		return false;
+	}
+
+    /**
+     * 开启省电管理
+     */
+    private void powerSaveManagerStart() {
+        if(DataUtil.checkPowerSaveManagerDevice()){
+            getPowerSaveManager().start();
+        }
+    }
+
+    /**
+     * 关闭省电管理
+     */
+    private void powerSaveManagerStop() {
+        if(DataUtil.checkPowerSaveManagerDevice()){
+            getPowerSaveManager().stop();
+        }
+    }
+
+    @Override
 	public Group getGroupByGroupNo(int no){
 		return DataUtil.getGroupByGroupNo(no);
 	}
@@ -1440,43 +1614,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	public Object getEventManager() {
 		return null;
-	}
-
-	@Override
-	public void getTianJinStringToken() {
-		try{
-			MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, "");
-			MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,false);
-			Cursor cursor = application.getContentResolver().query(Uri.parse(Params.AUTH_TIAN_JIN_TOKEN_URI),null,null,null,null);
-			logger.info("getTianJinStringToken--cursor:"+cursor+"--count:"+((cursor!=null)?cursor.getCount():0));
-			if (cursor != null && cursor.moveToFirst()) {
-				do{
-					int resultCode = cursor.getInt(cursor.getColumnIndex("resultCode"));
-					String message = cursor.getString(cursor.getColumnIndex("message"));
-					String billStr = cursor.getString(cursor.getColumnIndex("billStr"));
-					logger.info("getTianJinStringToken--resultCode"+resultCode+"--message:"+message+"--billStr:"+billStr);
-					if(resultCode == BaseCommonCode.SUCCESS_CODE){
-						if(!TextUtils.isEmpty(billStr)){
-							//传给服务端获取警员信息
-							MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,true);
-							MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STRTOKEN,billStr);
-							MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, IdentifyType.IDENTIFY_TYPE_TOKEN_OUTER.toString());
-						}else{
-							ToastUtil.showToast(application,application.getString(R.string.text_get_token_fail));
-						}
-					} else {
-						ToastUtil.showToast(application,TextUtils.isEmpty(message)?application.getString(R.string.text_get_token_fail):message);
-					}
-				}while(cursor.moveToNext());
-			}else{
-				ToastUtil.showToast(application,application.getString(R.string.text_get_token_fail));
-			}
-			if(cursor!=null){
-				cursor.close();
-			}
-		}catch (Exception e){
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -1579,7 +1716,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return okHttpClient;
 	}
 
-	private String getVersionName(){
+	public String getVersionName(){
 		String localVersion = "";
 		try{
 			PackageInfo packageInfo = application.getApplicationContext().getPackageManager().getPackageInfo(application.getPackageName(), 0);

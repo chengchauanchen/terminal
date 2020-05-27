@@ -28,8 +28,8 @@
             <RelativeLayout
                 android:id="@+id/rl_ble"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
-                android:layout_marginTop="@dimen/y5"
+                android:layout_height="@dimen/dp_50"
+                android:layout_marginTop="@dimen/dp_10"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical">
 
@@ -69,7 +69,7 @@
             <LinearLayout
                 android:id="@+id/ll_group_scan"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
@@ -101,7 +101,7 @@
             <LinearLayout
                 android:id="@+id/ll_video_resolution_setting"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
@@ -118,7 +118,7 @@
             <LinearLayout
                 android:id="@+id/ll_log_upload"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
@@ -137,7 +137,7 @@
             <RelativeLayout
                 android:id="@+id/ll_lock_screen_setting"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
@@ -176,7 +176,7 @@
             <RelativeLayout
                 android:id="@+id/rl_daytime_mode"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
@@ -200,7 +200,7 @@
             <LinearLayout
                 android:id="@+id/ll_helpAndfeedback"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
@@ -227,7 +227,7 @@
             <RelativeLayout
                 android:id="@+id/about"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y30"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical">
@@ -252,7 +252,7 @@
             <LinearLayout
                 android:id="@+id/ll_exit"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/y29"
+                android:layout_height="@dimen/dp_50"
                 android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/red_fd"
                 android:gravity="center"

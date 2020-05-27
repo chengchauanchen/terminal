@@ -208,7 +208,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		BufferedReader in = null;
 		try {
 			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
-			logger.info("发送get请求" + url);
+//			logger.info("发送get请求" + url);
 			String urlNameString = url;
 			URL realUrl = new URL(urlNameString);
 			// 打开和URL之间的连接

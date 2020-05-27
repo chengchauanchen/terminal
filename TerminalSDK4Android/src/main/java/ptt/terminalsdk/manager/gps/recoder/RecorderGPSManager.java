@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.tools.Util;
+import ptt.terminalsdk.bean.LocationType;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class RecorderGPSManager {
@@ -35,9 +36,9 @@ public class RecorderGPSManager {
 		locationManager = (LocationManager) MyTerminalFactory.getSDK().getApplication().getSystemService(Context.LOCATION_SERVICE);
 		//获取所有可用的位置提供器
 		List<String> providersFalse = locationManager.getProviders(false);
-		logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager所有的locationProvider：" + providersFalse);
+//		logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager所有的locationProvider：" + providersFalse);
 		List<String> providers = locationManager.getProviders(true);
-		logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager可用的locationProvider：" + providers);
+//		logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager可用的locationProvider：" + providers);
 		if (providers.contains(LocationManager.GPS_PROVIDER)) {
 			//如果是GPS
 			locationProvider = LocationManager.GPS_PROVIDER;
@@ -71,30 +72,47 @@ public class RecorderGPSManager {
 
 			@Override
 			public void onLocationChanged(Location location) {
-				logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--Longitude:" + location.getLongitude()+"--Latitude:" +location.getLatitude()
-						+"--location:" +location);
-				StringBuffer stringBuffer = new StringBuffer();
 				try {
-					List<Address> addresses = new Geocoder(context).getFromLocation(
-							location.getLatitude(), location.getLongitude(),
-							1);
-					if (addresses.size() > 0) {
-						Address address = addresses.get(0);
-						stringBuffer.append(address.getCountryName());
-                        if(address.getMaxAddressLineIndex() == 0){
-                            stringBuffer.append(address.getAddressLine(0));
-                        }else{
-                            for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                                stringBuffer.append(address.getAddressLine(i));
-                            }
-                        }
+					if(location==null){
+						logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG + "GPSManager定位失败=null");
+						MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();
+						MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.GPS);
+						return;
+					}
+					logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--Longitude:" + location.getLongitude()+"--Latitude:" +location.getLatitude()
+							+"--location:" +location);
+					StringBuffer stringBuffer = new StringBuffer();
+					if (location.getLongitude() != 0 && location.getLatitude() != 0) {
+						List<Address> addresses = new Geocoder(context).getFromLocation(
+								location.getLatitude(), location.getLongitude(),
+								1);
+						if (addresses.size() > 0) {
+							Address address = addresses.get(0);
+							stringBuffer.append(address.getCountryName());
+							if(address.getMaxAddressLineIndex() == 0){
+								stringBuffer.append(address.getAddressLine(0));
+							}else{
+								for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+									stringBuffer.append(address.getAddressLine(i));
+								}
+							}
+						}
+						//停止顺丰GPS定位的监听
+						MyTerminalFactory.getSDK().getRecorderSfGPSManager().removelocationListener();
+						//停止百度定位的监听
+						MyTerminalFactory.getSDK().getRecorderBDGPSManager().removelocationListener();
+						location.setExtras(MyTerminalFactory.getSDK().getLocationManager().getAddressBundle(stringBuffer.toString()));
+						logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--addresses:" + stringBuffer.toString());
+						MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(location);
+					}else{
+						MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();
+						MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.GPS);
 					}
 				}catch (Exception e){
 					e.printStackTrace();
+					MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();
+					MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.GPS);
 				}
-				location.setExtras(MyTerminalFactory.getSDK().getLocationManager().getAddressBundle(stringBuffer.toString()));
-				logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--addresses:" + stringBuffer.toString());
-				MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(location);
 			}
 		};
 	}

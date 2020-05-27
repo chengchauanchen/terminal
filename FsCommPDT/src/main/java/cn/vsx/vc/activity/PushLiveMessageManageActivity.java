@@ -12,12 +12,14 @@ import java.util.List;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.PushLiveListAdapter;
+import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.PullToRefreshLayout;
 import cn.vsx.vc.view.PullableListView;
 import cn.vsx.vc.view.VolumeViewLayout;
@@ -54,10 +56,18 @@ public class PushLiveMessageManageActivity extends BaseActivity implements View.
         findViewById(R.id.iv_back).setOnClickListener(this);
         pl_video_send.setAdapter(mPushLiveListAdapter);
         pl_video_send.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(PushLiveMessageManageActivity.this,PlayLiveHistoryActivity.class);
-            Log.e("PushLiveMessageManageAc", "position:" + position+"----id:"+id);
-            intent.putExtra("terminalMessage",mLiveMessageList.get(position));
-            PushLiveMessageManageActivity.this.startActivity(intent);
+            try{
+                if(TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(mLiveMessageList.get(position).messageBody)){
+                    ToastUtil.showToast(getString(R.string.text_video_live_from_no_regist_can_not_watch_history));
+                }else{
+                    Intent intent = new Intent(PushLiveMessageManageActivity.this,PlayLiveHistoryActivity.class);
+                    Log.e("PushLiveMessageManageAc", "position:" + position+"----id:"+id);
+                    intent.putExtra("terminalMessage",mLiveMessageList.get(position));
+                    PushLiveMessageManageActivity.this.startActivity(intent);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         });
     }
 
