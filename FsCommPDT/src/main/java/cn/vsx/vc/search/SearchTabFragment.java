@@ -539,7 +539,7 @@ public class SearchTabFragment extends BaseSearchFragment {
     private void checkCurrentGroupInfo(GroupSearchBean currentGroup) {
         if(SearchUtil.isNeedGetGroupInfo(currentGroup)) {
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                GroupSearchBean group = TerminalFactory.getSDK().getDataManager().getGroupSearchBeanByNoWithNoThread(currentGroup.getNo());
+                GroupSearchBean group = TerminalFactory.getSDK().getDataManager().getGroupSearcByNoOldMethodWithNoThread(currentGroup.getNo());
                 if(group!=null) {
                     List<Group> groups = new ArrayList<>();
                     groups.add(group);

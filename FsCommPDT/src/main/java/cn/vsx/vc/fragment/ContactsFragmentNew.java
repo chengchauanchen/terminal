@@ -406,7 +406,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                         }
                       //获取该组信息，并更新数据库，最后更新UI
                       TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        Group group = TerminalFactory.getSDK().getDataManager().getGroupSearchByNoWithNoThread(tempGroupNo);
+                        Group group = TerminalFactory.getSDK().getDataManager().getGroupByNoOldMethodWithNoThread(tempGroupNo);
                         if(group!=null){
                             List<Group> groups = new ArrayList<>();
                             groups.add(group);

@@ -2943,7 +2943,8 @@ public abstract class ChatBaseActivity extends BaseActivity
                 }
             }else if(resultCode == TerminalErrorCode.REGISTER_DEVICE_KILL.getErrorCode()){
             }else if(resultCode == TerminalErrorCode.REGISTER_ACCOUNT_DELETE.getErrorCode()
-                    ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()){
+                    ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()
+                    ||resultCode == TerminalErrorCode.UNKNOWN_ERROR.getErrorCode()){
             }else {
                 boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
                 updateLoginStateView(0,hasCompleteData?R.string.connecting_server:R.string.auth_fail);
