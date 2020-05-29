@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.uav"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="36"
-    android:versionName="1.0.36">
+    android:versionCode="40"
+    android:versionName="1.0.40">
     <!--<uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />-->
     <application
         android:name=".UavApplication"
@@ -32,7 +32,7 @@
                 android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
                 android:resource="@xml/accessory_filter" />
         </activity>
-        <service android:name="dji.sdk.sdkmanager.DJIGlobalService" /> <!-- DJI SDK -->
+        <service android:name="dji.sdk.sdkmanager.DJIGlobalService" /> <!-- DJI SDK     -->
         <!--
            ADD API_KEY HERE and make sure you
            are connected to the Internet before
