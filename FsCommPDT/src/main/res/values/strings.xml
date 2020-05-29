@@ -441,7 +441,7 @@
     <string name="text_load_audio_fail">录音下载失败</string>
     <string name="text_network_anomaly">网络异常</string>
     <string name="text_prompt">提示</string>
-    <string name="text_temporarily_unavailable_permissions">:暂时未开通权限</string>
+    <string name="text_temporarily_unavailable_permissions">:当前账号所属部门权限未开通，暂时无法登陆</string>
     <string name="text_departmental_delegation_expires">:部门授权过期</string>
     <string name="text_terminal_type_error">:认证失败，类型不匹配</string>
     <string name="text_terminal_repeat">:登录失败，找到多个重复用户</string>

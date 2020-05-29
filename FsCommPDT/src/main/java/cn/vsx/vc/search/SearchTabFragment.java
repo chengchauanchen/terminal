@@ -94,7 +94,8 @@ public class SearchTabFragment extends BaseSearchFragment {
                 case HANDLE_CODE_UPDATE_GROUP:
                     //更新UI
                     removeMessages(HANDLE_CODE_UPDATE_GROUP);
-                    updateGroup((GroupSearchBean) msg.obj);
+                    String searchKey = (phone!=null)?phone.getText().toString():"";
+                    updateGroup((GroupSearchBean) msg.obj,searchKey);
                     break;
 
                 default:break;
@@ -477,12 +478,16 @@ public class SearchTabFragment extends BaseSearchFragment {
                     listenedGroupDatas.add(currentGroup);
                 }
                 if(listenedGroupDatas.size()>0){
+                    //清空搜索状态
+                    clearGroupSearchKeyWordStatus(listenedGroupDatas);
                     datas.addAll(listenedGroupDatas);
                 }
                 //常用联系人
                 if(topContactsDatas.size()>0){
                     SearchTitleBean titleBean2 = new SearchTitleBean("常用联系人");
                     datas.add(titleBean2);
+                    //清空搜索状态
+                    clearContactsSearchKeyWordStatus(topContactsDatas);
                     datas.addAll(topContactsDatas);
                 }
                 //判断当前组的信息是不是自己new出来的，如果是则启线程获取当前组的信息，并保存到所有组的数据中
@@ -504,13 +509,17 @@ public class SearchTabFragment extends BaseSearchFragment {
      * 更新组信息
      * @param bean
      */
-    private void updateGroup(GroupSearchBean bean) {
+    private void updateGroup(GroupSearchBean bean,String searchKey) {
         try{
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
                 if(bean!=null&&datas.contains(bean)){
-                    datas.remove(bean);
-                    datas.add(bean);
-
+                    if(TextUtils.isEmpty(searchKey)){
+                        bean.clearMatchKeywords();
+                    }
+                    int index = datas.indexOf(bean);
+                    if(index>=0 && index<datas.size()){
+                        datas.set(index,bean);
+                    }
                     mHandler.post(() -> {
                         if(searchAdapter!=null){
                             searchAdapter.notifyDataSetChanged();
@@ -586,6 +595,22 @@ public class SearchTabFragment extends BaseSearchFragment {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
         } else {
             ToastUtil.showToast(getContext(), getContext().getString(R.string.text_network_connection_abnormal_please_check_the_network));
+        }
+    }
+
+    private void clearGroupSearchKeyWordStatus(List<GroupSearchBean> listenedGroupDatas) {
+        for (GroupSearchBean bean: listenedGroupDatas) {
+            if(bean!=null){
+                bean.clearMatchKeywords();
+            }
+        }
+    }
+
+    private void clearContactsSearchKeyWordStatus(List<MemberSearchBean> topContactsDatas) {
+        for (MemberSearchBean bean: topContactsDatas) {
+            if(bean!=null){
+                bean.clearMatchKeywords();
+            }
         }
     }
 }

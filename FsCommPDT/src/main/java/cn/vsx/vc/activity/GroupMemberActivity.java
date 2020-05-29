@@ -25,12 +25,14 @@ import java.util.List;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMemberListHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseAddMemberToTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRemoveMemberToTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
@@ -89,7 +91,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
     private List<Member> currentGroupMembers = new ArrayList<>();
     private int groupId;
     String groupName;
-    private int total=0;
+//    private int total=0;
     private boolean canDelete;//只有自己创建的临时组才能删除人
     private boolean isTemporaryGroup;
     public void setListViewHeightBasedOnChildren(ListView listView) {
@@ -171,6 +173,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRemoveMemberToTempGroupMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseAddMemberToTempGroupMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
     }
 
     @Override
@@ -223,6 +226,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRemoveMemberToTempGroupMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseAddMemberToTempGroupMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
         }
@@ -250,23 +254,17 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             delete_btn.setVisibility(View.GONE);
             delete_text.setVisibility(View.VISIBLE);
             cancel_text.setVisibility(View.VISIBLE);
+            clearCheckStatus();
             sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true,isTemporaryGroup);
-            sortAdapter.setOnItemClickListener((view1, position, checked, member) -> {
-                if(checked){
-                    total++;
-                }else{
-                    total--;
-                }
-                if(total > 0){
-                    delete_text.setText(String.format(getString(R.string.button_delete_number), total));
-                }else{
-                    delete_text.setText(R.string.text_delete);
-                }
+            sortAdapter.setOnItemClickListener((view1,position,member) -> {
+                setDeleteCountText();
             });
             memberList.setAdapter(sortAdapter);
             sortAdapter.notifyDataSetChanged();
+            setDeleteCountText();
         }else if(i == R.id.delete_text){
-            if(currentGroupMembers.size() <= 2){//当前组仅剩创建者本身的时候点击删除销临时组
+            if(currentGroupMembers.size() <= 2){
+                //当前组仅剩创建者本身的时候点击删除销临时组
                 final AlertDialog alertDialog = new AlertDialog.Builder(GroupMemberActivity.this).create();
                 alertDialog.show();
                 Display display = getWindowManager().getDefaultDisplay();
@@ -297,11 +295,11 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                 Button btn_cancel = window.findViewById(R.id.btn_cancel);
                 btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
             }else{
-                List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
+                List<Long> deleteMemberList = sortAdapter.getDeleteMemberList();
                 if(deleteMemberList.isEmpty()){
                     ToastUtils.showShort(R.string.please_select_delete_member);
                 }else{
-                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l), DataUtil.getUniqueNos(deleteMemberList));
+                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L), deleteMemberList);
                     add_btn.setVisibility(View.VISIBLE);
                     delete_btn.setVisibility(View.VISIBLE);
                     delete_text.setVisibility(View.GONE);
@@ -316,6 +314,18 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false,isTemporaryGroup);
             memberList.setAdapter(sortAdapter);
             sortAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void setDeleteCountText(){
+        if(sortAdapter!=null && !sortAdapter.getDeleteMemberList().isEmpty()){
+            if(delete_text!=null){
+                delete_text.setText(String.format(getString(R.string.button_delete_number), sortAdapter.getDeleteMemberList().size()));
+            }
+        }else{
+            if(delete_text!=null){
+                delete_text.setText(R.string.text_delete);
+            }
         }
     }
 
@@ -394,12 +404,15 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                     ok_btn.setVisibility(View.GONE);
                     in_title_bar.setVisibility(View.GONE);
                     temp_title_bar.setVisibility(View.VISIBLE);
-                    rightBtn.setVisibility(View.GONE);
-                    ok_btn.setVisibility(View.GONE);
-                    add_btn.setVisibility(View.VISIBLE);
-                    delete_btn.setVisibility(canDelete?View.VISIBLE:View.GONE);
                     temp_bar_title.setText(String.format(getString(R.string.text_temp_group_members_title),onlineNumber,total));
                     ll_member_num.setVisibility(View.GONE);
+                    if(delete_text.getVisibility() == View.VISIBLE && cancel_text.getVisibility() == View.VISIBLE){
+                        add_btn.setVisibility(View.GONE);
+                        delete_btn.setVisibility(View.GONE);
+                    }else{
+                        add_btn.setVisibility(View.VISIBLE);
+                        delete_btn.setVisibility(canDelete?View.VISIBLE:View.GONE);
+                    }
                 }
             });
         }
@@ -443,6 +456,22 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         }
     };
 
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler() {
+        @Override
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType) {
+            if (!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)) {
+                if (!isAdd && tempGroupNo == groupId) {
+                    try{
+                        myHandler.post(GroupMemberActivity.this::finish);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    };
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -453,6 +482,17 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             }else {
                 //不同意，提示
                 cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_phone_not_open_call_is_unenabled));
+            }
+        }
+    }
+
+    /**
+     * 清空选择的状态
+     */
+    private void clearCheckStatus() {
+        for (Member member: currentGroupMembers) {
+            if(member!=null){
+                member.isChecked = false;
             }
         }
     }

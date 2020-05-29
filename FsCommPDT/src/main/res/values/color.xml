@@ -643,5 +643,6 @@
     <color name="color_blue_26">#26A2FF</color>
     <color name="color_yellow_f3">#F39800</color>
     <color name="upload_log_button">#809eb6</color>
+    <color name="push_live_wiht_no_regist_log_text">#ffffff</color>
 
 </resources>

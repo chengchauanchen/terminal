@@ -10,6 +10,7 @@ import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.common.MessageFunEnum;
@@ -40,7 +41,7 @@ public class ClientChannel extends AbsClientChannel {
 	private ServerMessageReceivedHandlerAidl handler = new Stub() {
 		@Override
 		public void handle(byte[] data, int offset, int length) throws RemoteException {
-//			logger.info("收到消息 "+ Arrays.toString(data)+"of = "+offset+"  le = "+length);
+			logger.info("收到消息 "+ Arrays.toString(data)+"of = "+offset+"  le = "+length);
 			getDispatcher().notifyMessageReceived(PTTMsgCodec.INSTANCE.getDecode().decodeMessage(data, offset, length));
 		}
 	};

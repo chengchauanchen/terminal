@@ -317,7 +317,7 @@
                     android:layout_marginTop="@dimen/dp_10"
                     android:text="@string/text_push_live"
                     android:textSize="@dimen/sp_16"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/push_live_wiht_no_regist_log_text" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

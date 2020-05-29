@@ -581,4 +581,5 @@
 
     <color name="funcation_top_et_underline">#33313131</color>
     <color name="upload_log_button">#0191ff</color>
+    <color name="push_live_wiht_no_regist_log_text">#990091ff</color>
 </resources>
