@@ -188,7 +188,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
                 updateLoginStateView(1,R.string.login_success);
-                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
+//                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
             }else {
                 updateLoginStateView(0,R.string.login_fail);
             }
@@ -1158,7 +1158,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
 
         //开启服务，开启锁屏界面
-        startService(new Intent(NewMainActivity.this, LockScreenService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(NewMainActivity.this, LockScreenService.class));
+        } else {
+            startService(new Intent(NewMainActivity.this, LockScreenService.class));
+        }
         SpecificSDK.initVoipSpecificSDK();
 
         MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);

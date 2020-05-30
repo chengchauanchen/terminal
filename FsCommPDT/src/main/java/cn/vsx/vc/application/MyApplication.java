@@ -337,4 +337,18 @@ public class MyApplication extends BaseApplication{
 		return false;
 	}
 
+	/**
+	 * 检查是否有业务在service中
+	 * @return
+	 */
+	public boolean checkBusinessInServiceIsWorking(){
+		if(getIndividualState() !=  IndividualCallState.IDLE
+				|| getVideoLivePlayingState()!= VideoLivePlayingState.IDLE
+				|| getVideoLivePushingState()!= VideoLivePushingState.IDLE
+		        || checkVideoMeeting()){
+			return true;
+		}
+		return false;
+	}
+
 }

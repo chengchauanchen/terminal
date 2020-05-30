@@ -406,9 +406,10 @@ public class FileTransferOperation {
      */
     public String uploadFileByOkHttp(String url, final File file) {
         try{
-            logger.info(TAG + "uploadFileByOkHttp--url:" + url);
+            boolean needRateLimit = getUpLoadFileNeedRateLimit();
+            logger.info(TAG + "uploadFileByOkHttp--url:" + url+"-needRateLimit:"+needRateLimit);
             long startTime = System.currentTimeMillis();
-            rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+            rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, needRateLimit?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
             RequestBody requestBody;
             requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)

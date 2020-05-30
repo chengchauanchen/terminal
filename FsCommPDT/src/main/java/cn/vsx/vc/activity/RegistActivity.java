@@ -1461,6 +1461,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     });
     private long currentTime;
     public void uploadLog() {
+        String serverIp = TerminalFactory.getSDK().getParam(Params.REGIST_IP, "");
+        String serverPort = TerminalFactory.getSDK().getParam(Params.REGIST_PORT, "");
+        if(TextUtils.isEmpty(serverIp)||TextUtils.isEmpty(serverPort)){
+            ToastUtil.showToast(getString(R.string.text_please_choose_server));
+            return;
+        }
         timer.schedule(new TimerTask() {
             @Override
             public void run() {

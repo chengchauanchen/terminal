@@ -97,14 +97,14 @@ public class MonitorGroupListActivity extends BaseActivity implements View.OnCli
         List<Group> groups = TerminalFactory.getSDK().getConfigManager().getAllListenerGroup();
         logger.info("获取所有监听组列表-----groups="+groups);
         data.addAll(groups);
-        //监听组
-        List<Group> monitorGroup = TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
-        logger.info("获取监听组列表-----monitorGroup="+monitorGroup);
+//        //监听组
+//        List<Group> monitorGroup = TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
+//        logger.info("获取监听组列表-----monitorGroup="+monitorGroup);
         //移除总列表
         List<Group> removelists = TerminalFactory.getSDK().getList(Params.TOTAL_REMOVE_GROUP_LIST, new ArrayList<Group>(), Group.class);
         logger.info("失效的监听组列表-----removelists="+removelists);
         //失效列表可能包含当前监听列表的id
-        for (Group group:monitorGroup){
+        for (Group group:groups){
             if(group!=null){
                 removelists.remove(group);
             }

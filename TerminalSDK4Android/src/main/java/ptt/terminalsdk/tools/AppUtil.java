@@ -1,12 +1,15 @@
 package ptt.terminalsdk.tools;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.PowerManager;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -103,6 +106,30 @@ public class AppUtil {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    @SuppressLint("Wakelock")
+    @SuppressWarnings("deprecation")
+    public static void wakeUpAndUnlock(Context context) {
+        try{
+            // 获取电源管理器对象
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            // 获取PowerManager.WakeLock对象，后面的参数|表示同时传入两个值，最后的是调试用的Tag
+            PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
+                    | PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "bright");
+            // 点亮屏幕
+            wl.acquire();
+            // 释放
+            wl.release();
+            // 得到键盘锁管理器对象
+            KeyguardManager km = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+            KeyguardManager.KeyguardLock kl = km.newKeyguardLock("unLock");
+            // 解锁
+            kl.disableKeyguard();
+//
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

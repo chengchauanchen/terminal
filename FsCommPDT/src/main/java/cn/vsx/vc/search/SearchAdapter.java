@@ -62,10 +62,13 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     //成员
     private static final int MEMBER = 1003;
 
+    private boolean showHightLight;
 
-    public SearchAdapter(Context context, List<Object> datas) {
+
+    public SearchAdapter(Context context, List<Object> datas,boolean showHightLight) {
         this.mContext = context;
         this.mDatas = datas;
+        this.showHightLight = showHightLight;
     }
 
     @Override
@@ -163,18 +166,24 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
      */
     private void bindGroup(GroupSearchBean data, GroupViewHolder holder) {
 
-        switch (data.getSearchByType()) {
-            case SearchByLabel:
-                ViewUtil.showTextHighlight(holder.tvName, data.getName(), data.getMatchKeywords().toString());
-                ViewUtil.showTextHighlight(holder.tv_group_no, data.getNo()+"", data.getMatchKeywords().toString());
-                break;
-            case SearchByNull:
-                ViewUtil.showTextNormal(holder.tvName, data.getName());
-                ViewUtil.showTextNormal(holder.tv_group_no, data.getNo()+"");
-                break;
-            default:
-                break;
+        if(showHightLight){
+            switch (data.getSearchByType()) {
+                case SearchByLabel:
+                    ViewUtil.showTextHighlight(holder.tvName, data.getName(), data.getMatchKeywords().toString());
+                    ViewUtil.showTextHighlight(holder.tv_group_no, data.getNo()+"", data.getMatchKeywords().toString());
+                    break;
+                case SearchByNull:
+                    ViewUtil.showTextNormal(holder.tvName, data.getName());
+                    ViewUtil.showTextNormal(holder.tv_group_no, data.getNo()+"");
+                    break;
+                default:
+                    break;
+            }
+        }else{
+            holder.tvName.setText(data.getName());
+            holder.tv_group_no.setText(String.valueOf(data.getNo()));
         }
+
         holder.tv_department_name.setText(data.getDepartmentName());
 //        holder.tv_group_no.setText(data.getNo()+"");
 //        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
@@ -257,10 +266,17 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if(account==null){
             return;
         }
-        if(!TextUtils.isEmpty(account.getName())){
-            ViewUtil.showTextHighlight(userViewHolder.tvName, account.getName(), account.getMatchKeywords().toString());
-            //userViewHolder.tvName.setText(account.getName() + "");
+        if(showHightLight){
+            if(!TextUtils.isEmpty(account.getName())){
+                ViewUtil.showTextHighlight(userViewHolder.tvName, account.getName(), account.getMatchKeywords().toString());
+                //userViewHolder.tvName.setText(account.getName() + "");
+            }else{
+                userViewHolder.tvName.setText("");
+            }
+        }else {
+            userViewHolder.tvName.setText(TextUtils.isEmpty(account.getName())?"":account.getName());
         }
+
         //userViewHolder.tvId.setText(account.getNo() + "");
 
         String no = HandleIdUtil.handleId(account.getNo());//去掉88 86

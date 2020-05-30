@@ -356,7 +356,7 @@ public class PullOutGB28181Service extends BaseService{
                 //                }
                 mLiveWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
-                onVideoSizeChange();
+//                onVideoSizeChange();
             } else if (resultCode == EasyRTSPClient.RESULT_TIMEOUT) {
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.time_up));
                 finishVideoLive();

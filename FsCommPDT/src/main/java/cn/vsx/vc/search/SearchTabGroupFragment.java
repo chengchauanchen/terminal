@@ -34,7 +34,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
     private void initRecyclerView() {
         group_recyclerView = mRootView.findViewById(R.id.group_recyclerView);
         group_recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        searchAdapter = new SearchAdapter(getContext(), datas);
+        searchAdapter = new SearchAdapter(getContext(), datas,false);
         group_recyclerView.setAdapter(searchAdapter);
     }
 

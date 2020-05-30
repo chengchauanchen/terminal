@@ -129,6 +129,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.tools.ApkUtil;
+import ptt.terminalsdk.tools.AppUtil;
 import ptt.terminalsdk.tools.StringUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -688,6 +689,8 @@ public class ReceiveHandlerService extends Service{
                     TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
                 }
                 myHandler.post(() -> PromptManager.getInstance().startReportByNotity());
+                //解锁
+                AppUtil.wakeUpAndUnlock(MyApplication.instance);
                 MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
                 intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
                 intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
@@ -772,7 +775,7 @@ public class ReceiveHandlerService extends Service{
                 if(!warningData.contains(terminalMessage)){
                     warningData.add(0,terminalMessage);
                 }
-                if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE &&!MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress) {
+                if(!MyApplication.instance.checkBusinessInServiceIsWorking() && !MyApplication.instance.isPttPress) {
                     showWarningDialog();
                 }
             });
@@ -844,7 +847,7 @@ public class ReceiveHandlerService extends Service{
             }else if((terminalMessage.messageBody.containsKey(JsonParam.REMARK)&&terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE)
                     ||TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(terminalMessage.messageBody)){
                 //voip走的个呼状态机
-                if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE && !MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
+                if(!MyApplication.instance.checkBusinessInServiceIsWorking() && !MyApplication.instance.isPttPress){
                     String liver = (String) terminalMessage.messageBody.get(JsonParam.LIVER);
                     TerminalFactory.getSDK().getThreadPool().execute(() -> {
                         if(!android.text.TextUtils.isEmpty(liver)){
@@ -884,7 +887,7 @@ public class ReceiveHandlerService extends Service{
                 terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
             //国标平台消息
             // TODO: 2019/6/27  
-            if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE && !MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
+            if(!MyApplication.instance.checkBusinessInServiceIsWorking() && !MyApplication.instance.isPttPress){
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
                     cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     if(terminalMessage.messageBody.containsKey(JsonParam.ACCOUNT_ID) && !TextUtils.isEmpty(terminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID))){

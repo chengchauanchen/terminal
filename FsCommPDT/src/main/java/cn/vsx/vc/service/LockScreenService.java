@@ -17,6 +17,7 @@ import cn.vsx.vc.activity.LockScreenActivity;
 import cn.vsx.vc.activity.PixelActivity;
 import cn.vsx.vc.application.MyApplication;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.service.KeepLiveManager;
 
 public class LockScreenService extends Service {
 
@@ -115,6 +116,7 @@ public class LockScreenService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		logger.debug("开启锁屏服务");
+		KeepLiveManager.getInstance().setServiceForeground(this);
 		return START_STICKY;
 	}
 	

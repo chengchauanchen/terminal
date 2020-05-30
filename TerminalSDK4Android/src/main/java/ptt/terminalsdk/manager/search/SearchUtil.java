@@ -168,6 +168,13 @@ public class SearchUtil {
         for (MemberSearchBean memberSearchBean : memberSearchs) {
             PinyinSearchUnit labelPinyinSearchUnit = memberSearchBean.getLabelPinyinSearchUnit();
             boolean match = T9Util.match(labelPinyinSearchUnit, keyword);
+//            if(memberSearchBean.getNo() == 10000367){
+//                Log.e("SearchUtil", "searchMember-memberSearchBean:" + memberSearchBean);
+//                Log.e("SearchUtil", "searchMember-labelPinyinSearchUnit:" + labelPinyinSearchUnit.getBaseData());
+//                Log.e("SearchUtil", "searchMember-labelPinyinSearchUnit:" + labelPinyinSearchUnit.getMatchKeyword());
+//                Log.e("SearchUtil", "searchMember-labelPinyinSearchUnit:" + labelPinyinSearchUnit.getPinyinUnits());
+//                Log.e("SearchUtil", "searchMember-match:" + match);
+//            }
             if (true == match) {// search by LabelPinyinUnits;
                 MemberSearchBean member = memberSearchBean;
                 member.setSearchByType(MemberSearchBean.SearchByType.SearchByLabel);
@@ -230,6 +237,7 @@ public class SearchUtil {
             bean = TerminalFactory.getSDK().getSQLiteDBManager().getGroupByNo(groupNo);
         }
         Log.e("SearchUtil", "getCurrentGroupInfo-getGroupByNo:" + bean);
+
         //如果数据库中没有，就从服务器获取
 //        if(isNeedGetGroupInfo(bean)){
 //            bean = TerminalFactory.getSDK().getDataManager().getGroupSearchBeanByNoWithNoThread(groupNo);

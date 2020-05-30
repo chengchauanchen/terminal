@@ -193,7 +193,7 @@ public class SearchTabFragment extends BaseSearchFragment {
     private void initRecyclerView() {
         group_recyclerView = mRootView.findViewById(R.id.group_recyclerView);
         group_recyclerView.setLayoutManager(new RecyclerViewNoBugLinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        searchAdapter = new SearchAdapter(getContext(), datas);
+        searchAdapter = new SearchAdapter(getContext(), datas,true);
         group_recyclerView.setAdapter(searchAdapter);
     }
 
@@ -250,6 +250,13 @@ public class SearchTabFragment extends BaseSearchFragment {
     ReceiveSetMonitorGroupViewHandler receiveSetMonitorGroupViewHandler = new ReceiveSetMonitorGroupViewHandler() {
         @Override
         public void handler() {
+            if(checkIsShowSearchData()){
+                mHandler.post(() -> {
+                    if(searchAdapter!=null){
+                        searchAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
             mHandler.sendEmptyMessageDelayed(HANDLE_CODE_LOAD_LISTENER_DATA,UPDATE_DELAYED_TIME);
         }
     };
@@ -453,20 +460,13 @@ public class SearchTabFragment extends BaseSearchFragment {
         try{
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
                 //当前没有监听组的数据，说明没有显示监听组，或显示的是搜索的结果,则不需要更新监听组
-                if (datas.size() > 0) {
-                    Object o = datas.get(0);
-                    if (o instanceof SearchTitleBean) {
-                        SearchTitleBean searchTitleBean = (SearchTitleBean) o;
-                        if (!TextUtils.equals("监听组",searchTitleBean.getTitle())&&
-                                !TextUtils.equals("常用联系人",searchTitleBean.getTitle())) {
-                            mHandler.post(() -> {
-                                if(searchAdapter!=null){
-                                    searchAdapter.notifyDataSetChanged();
-                                }
-                            });
-                            return;
+                if(checkIsShowSearchData()){
+                    mHandler.post(() -> {
+                        if(searchAdapter!=null){
+                            searchAdapter.notifyDataSetChanged();
                         }
-                    }
+                    });
+                    return;
                 }
                 datas.clear();
                 //添加监听组
@@ -505,7 +505,21 @@ public class SearchTabFragment extends BaseSearchFragment {
         }
     }
 
-    /**
+    private boolean checkIsShowSearchData(){
+        if (datas.size() > 0) {
+            Object o = datas.get(0);
+            if (o instanceof SearchTitleBean) {
+                SearchTitleBean searchTitleBean = (SearchTitleBean) o;
+                if (!TextUtils.equals("监听组",searchTitleBean.getTitle())&&
+                        !TextUtils.equals("常用联系人",searchTitleBean.getTitle())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+   /**
      * 更新组信息
      * @param bean
      */
