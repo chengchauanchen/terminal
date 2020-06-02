@@ -73,7 +73,6 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
 
     ImageView rightBtn;
 
-    TextView add_note;
 
     VolumeViewLayout volumeViewLayout;
 
@@ -98,7 +97,6 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         tvUnit = (TextView) findViewById(R.id.tv_unit);
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
-        add_note = (TextView) findViewById(R.id.add_note);
         rightBtn = (ImageView) findViewById(R.id.right_btn);
         barTitle = (TextView) findViewById(R.id.bar_title);
         newsBarBack = (ImageView) findViewById(R.id.news_bar_back);

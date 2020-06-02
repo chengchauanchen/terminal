@@ -40,6 +40,7 @@ import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCloseVideoMeetingMinimizeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAddVideoMeetingMessageHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.notification.VideoMeetingNotification;
@@ -274,14 +275,14 @@ public class VideoMeetingService extends BaseService {
     public class JsInterface{
         //跳转到视频会商主页面
         @JavascriptInterface
-        public void goToVideoMeeting(long roomId){
+        public void goToVideoMeeting(String roomId){
             try{
                 logger.info(TAG+"--goToVideoMeeting----roomId:" + roomId);
                 mHandler.post(() -> {
-                    if(roomId>0){
+                    if(!TextUtils.isEmpty(roomId) && DataUtil.stringToLong(roomId)>0){
                         TerminalFactory.getSDK().getVideoMeetingManager().setMeetingStatus(true);
                         videoMeetingType = 3;
-                        VideoMeetingService.this.roomId = roomId;
+                        VideoMeetingService.this.roomId = DataUtil.stringToLong(roomId);
                     }else{
                         cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance,
                             getString(R.string.text_video_meeting_data_error));

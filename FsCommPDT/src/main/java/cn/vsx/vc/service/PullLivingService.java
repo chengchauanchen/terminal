@@ -75,6 +75,7 @@ import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.tools.StringUtil;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.vc.receive.Actions.KILL_LIVE_WATCH;
@@ -898,7 +899,7 @@ public class PullLivingService extends BaseService{
             }else{
                 theme = terminalMessage.messageBody.getString(JsonParam.TITLE);
             }
-            mLiveVedioTheme.setText(theme);
+            mLiveVedioTheme.setText(StringUtil.getLongName(15,theme));
         }else{
             ToastUtil.livingFailToast(this, resultCode, TerminalErrorCode.LIVING_PLAYING.getErrorCode());
         }

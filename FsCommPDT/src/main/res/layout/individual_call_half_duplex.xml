@@ -48,6 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_member_portrait_half_duplex"
+            android:layout_toLeftOf="@+id/iv_individual_call_hangup_half_duplex"
             android:gravity="left"
             android:orientation="vertical">
 
@@ -55,6 +56,8 @@
                 android:id="@+id/tv_member_name_half_duplex"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:ellipsize="end"
                 android:layout_margin="@dimen/y2"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_20" />

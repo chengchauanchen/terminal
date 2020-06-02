@@ -87,6 +87,7 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.MyDataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.StringUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -1115,15 +1116,16 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(split!=null){
                 if(split.length>1){
                     String memberName = split[1];
-                    liveTheme = String.format(activity.getString(R.string.current_push_member),memberName);
+                    liveTheme = String.format(activity.getString(R.string.current_push_member),StringUtil.getLongName(20,memberName));
                     setText(holder.tvContent, liveTheme);
                 }else {
                     long finalLiverUniqueNo = liverUniqueNo;
                     TerminalFactory.getSDK().getThreadPool().execute(() -> {
                         Member member = cn.vsx.hamster.terminalsdk.tools.DataUtil.getMemberByUniqueNo(finalLiverUniqueNo,true);
                         String name = (member!=null)?member.getName():terminalMessage.messageFromName;
+                        String finalName = StringUtil.getLongName(20,name);
                         myHandler.post(() -> {
-                            setText(holder.tvContent, String.format(activity.getString(R.string.current_push_member),name));
+                            setText(holder.tvContent, String.format(activity.getString(R.string.current_push_member), finalName));
                         });
                     });
                 }

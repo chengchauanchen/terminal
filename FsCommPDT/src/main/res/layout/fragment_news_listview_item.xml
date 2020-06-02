@@ -48,10 +48,9 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="0dp"
                     android:ellipsize="end"
-                    android:maxEms="10"
                     android:maxLines="1"
+                    android:layout_toLeftOf="@+id/tv_last_msg_time"
                     android:textColor="@color/news_item_text_name"
                     android:textSize="@dimen/sp_14" />
 

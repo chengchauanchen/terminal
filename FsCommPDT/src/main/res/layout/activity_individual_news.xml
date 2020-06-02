@@ -32,10 +32,11 @@
 
         <TextView
             android:id="@+id/tv_chat_name"
-            android:layout_toRightOf="@+id/news_bar_line"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textColor="@color/individual_news_bar_name"
             android:textSize="@dimen/sp_21"
             />
@@ -49,11 +50,6 @@
             android:src="@drawable/help"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/x95"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
 
         <ImageView
             android:id="@+id/iv_call"

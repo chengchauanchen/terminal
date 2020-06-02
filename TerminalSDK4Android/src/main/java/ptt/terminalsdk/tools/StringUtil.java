@@ -211,4 +211,20 @@ public class StringUtil{
         return time/60;
     }
 
+    /**
+     * 获取长名字（截取）
+     * @param name
+     * @return
+     */
+    public static String getLongName(int length,String name){
+        try{
+            if(!TextUtils.isEmpty(name)&&name.length()>length){
+                name = name.substring(0,length)+"...";
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return name;
+    }
+
 }
