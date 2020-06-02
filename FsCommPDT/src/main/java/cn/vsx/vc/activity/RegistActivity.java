@@ -342,12 +342,14 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     changeProgressMsg(getResources().getString(R.string.updating_data));
                 } else {
                     hideProgressDialog();
-                    AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                            .setTitle(R.string.text_prompt)
-                            .setMessage(resultDesc)
-                            .setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish())
-                            .create();
-                    alerDialog.show();
+                    if(!RegistActivity.this.isFinishing()){
+                        AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
+                                .setTitle(R.string.text_prompt)
+                                .setMessage(resultDesc)
+                                .setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish())
+                                .create();
+                        alerDialog.show();
+                    }
                 }
             });
         }catch (Exception e){

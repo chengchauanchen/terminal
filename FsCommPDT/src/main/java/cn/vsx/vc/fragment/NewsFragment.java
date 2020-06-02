@@ -322,7 +322,7 @@ public class NewsFragment extends BaseFragment {
     }
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-        Bundle savedInstanceState) {
+                                       Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         //获取视频会商的消息
         loadVideoMessages();
@@ -669,7 +669,7 @@ public class NewsFragment extends BaseFragment {
                     }
                 }
             }
-             if (TerminalMessageUtil.isGroupMessage(terminalMessage)) {
+            if (TerminalMessageUtil.isGroupMessage(terminalMessage)) {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
                     //合成作战组消息，只存一个条目
                     if(GroupUtils.isCombatGroup(terminalMessage.messageToId)){
@@ -813,7 +813,7 @@ public class NewsFragment extends BaseFragment {
      * @param unReadCount 原来未读条数
      * @param terminalMessage 新消息
      */
-    private void whetherUnReadAdd(int unReadCount, TerminalMessage terminalMessage,boolean clearUnread,long tempGroupMessageVersion) {
+    private synchronized void whetherUnReadAdd(int unReadCount, TerminalMessage terminalMessage,boolean clearUnread,long tempMessageVersion) {
         //如果是自己发的消息，如果是请求过来的消息就清空未读，如果是个呼的消息，就用原来的未读
         if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
             if(clearUnread){
@@ -831,10 +831,10 @@ public class NewsFragment extends BaseFragment {
                             terminalMessage.messageBody.put(JsonParam.UNREAD, true);
                         }
                     }else {//不是同一个人，通知
-                        setPersonMessageUnReadCount(unReadCount, terminalMessage);
+                        setPersonMessageUnReadCount(unReadCount,terminalMessage,clearUnread);
                     }
                 }else {//个人会话页关闭， 通知
-                    setPersonMessageUnReadCount(unReadCount, terminalMessage);
+                    setPersonMessageUnReadCount(unReadCount,terminalMessage,clearUnread);
                 }
             }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
                 if (ActivityCollector.isActivityExist(GroupCallNewsActivity.class)){//组会话页打开了
@@ -860,14 +860,14 @@ public class NewsFragment extends BaseFragment {
                         //    }
                         //}
                     }else {//不是当前打开的会话组，通知
-                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion,clearUnread);
+                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempMessageVersion,clearUnread);
                     }
                 }else {//组会话页关闭， 通知
                     if(ActivityCollector.isActivityExist(CombatGroupActivity.class) ||
                             ActivityCollector.isActivityExist(HistoryCombatGroupActivity.class)){
                         terminalMessage.unReadCount = 0;
                     }else {
-                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion,clearUnread);
+                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempMessageVersion,clearUnread);
                     }
                 }
             }
@@ -875,7 +875,11 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().getTerminalMessageManager().updateTerminalMessage(terminalMessage);
     }
 
-    private void setPersonMessageUnReadCount(int unReadCount, TerminalMessage terminalMessage) {
+    private synchronized void setPersonMessageUnReadCount(int unReadCount, TerminalMessage terminalMessage,boolean clearUnread) {
+        if(clearUnread){
+            terminalMessage.unReadCount = getPersonMessageUnreadCount(unReadCount,terminalMessage);
+            return;
+        }
         if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()){//个呼消息
             if (MyApplication.instance.isPrivateCallOrVideoLiveHand){//做过操作，已读
                 terminalMessage.unReadCount = unReadCount;
@@ -965,17 +969,37 @@ public class NewsFragment extends BaseFragment {
      * 获取组消息的未读数量
      * @param unReadCount
      * @param terminalMessage
-     * @param tempGroupMessageVersion
      * @return
      */
-    private int getGroupMessageUnreadCount(int unReadCount, TerminalMessage terminalMessage,long tempGroupMessageVersion){
-        if(tempGroupMessageVersion == 0){
+    private synchronized int getPersonMessageUnreadCount(int unReadCount, TerminalMessage terminalMessage){
+//        logger.info("saveMessageToList-tempMessageVersion-----:"+terminalMessage.tempMessageVersion+"-messageVersion:"+terminalMessage.messageVersion+"-unReadCount:"+unReadCount);
+//        logger.info("saveMessageToList-tempMessageVersion-----:"+terminalMessage.tempMessageVersion);
+        if(terminalMessage.tempMessageVersion == 0){
+            return unReadCount;
+        }
+        if(terminalMessage.messageVersion > terminalMessage.tempMessageVersion){
+            return (unReadCount+1);
+        }else{
+            return unReadCount;
+        }
+    }
+
+
+    /**
+     * 获取组消息的未读数量
+     * @param unReadCount
+     * @param terminalMessage
+     * @param tempMessageVersion
+     * @return
+     */
+    private int getGroupMessageUnreadCount(int unReadCount, TerminalMessage terminalMessage,long tempMessageVersion){
+        if(tempMessageVersion == 0){
             return (unReadCount + 1);
         }else{
-            if(terminalMessage.messageVersion>tempGroupMessageVersion){
-                return (int) (terminalMessage.messageVersion-tempGroupMessageVersion);
+            if(terminalMessage.messageVersion>tempMessageVersion){
+                return (int) (terminalMessage.messageVersion-tempMessageVersion+unReadCount);
             }else{
-                return 0;
+                return +unReadCount;
             }
         }
     }
@@ -1017,6 +1041,8 @@ public class NewsFragment extends BaseFragment {
             }else {
                 terminalMessageData.clear();
                 terminalMessageData.addAll(messageList);
+                //按照消息版本号从小到达的顺序排序
+                Collections.sort(messageRecord, (o1, o2) -> (o1.messageVersion) > (o2.messageVersion) ? 1 : -1);
                 for(TerminalMessage terminalMessage : messageRecord){
                     if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
                         //警情消息会在警情详情处理
@@ -1044,6 +1070,7 @@ public class NewsFragment extends BaseFragment {
 //                            generateNotification(terminalMessage,i);
 //                        }
 //                    }
+//                    logger.info("saveMessageToList-messageList:"+messageList);
                 });
             }
         }
@@ -1059,12 +1086,12 @@ public class NewsFragment extends BaseFragment {
      * 更新完数据库之后更新UI
      */
     private ReceiveNotifyVideoMeetingMessageUpdateCompleteHandler
-        receiveNotifyVideoMeetingMessageUpdateCompleteHandler = ( ) ->{
+            receiveNotifyVideoMeetingMessageUpdateCompleteHandler = ( ) ->{
         //查询是否还有正在进行的视频会商
         int size = TerminalFactory.getSDK().getSQLiteDBManager().getMeetingVideoMeetingMessage().size();
         updateVideoMeetingStateUI(size);
         CopyOnWriteArrayList<VideoMeetingMessage>
-            list = TerminalFactory.getSDK().getSQLiteDBManager().getVideoMeetingMessageLast();
+                list = TerminalFactory.getSDK().getSQLiteDBManager().getVideoMeetingMessageLast();
         if(!list.isEmpty()){
             int count =  getVideoMeetingMessageUnReadCount();
             //加入的消息显示UI
@@ -1085,7 +1112,7 @@ public class NewsFragment extends BaseFragment {
      * 更新完数据库之后更新UI
      */
     private ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler
-        receiveNotifyVideoMeetingMessageAddOrOutCompleteHandler = (message,update,addUnreadCount) ->{
+            receiveNotifyVideoMeetingMessageAddOrOutCompleteHandler = (message,update,addUnreadCount) ->{
         //更新UI
         //正在进行的视频会商
         int size = TerminalFactory.getSDK().getSQLiteDBManager().getMeetingVideoMeetingMessage().size();
@@ -1122,7 +1149,7 @@ public class NewsFragment extends BaseFragment {
      * 减未读数量更新UI
      */
     private ReceiveNotifyVideoMeetingMessageReduceUnreadCountHandler
-        receiveNotifyVideoMeetingMessageReduceUnreadCountHandler = () ->{
+            receiveNotifyVideoMeetingMessageReduceUnreadCountHandler = () ->{
         //更新UI
         boolean canReduce = (!ActivityCollector.isActivityExist(VideoMeetingListActivity.class));
         if(canReduce){
@@ -1266,7 +1293,7 @@ public class NewsFragment extends BaseFragment {
      * @param terminalMessage 消息
      * @param clearUnread 是否清空未读消息
      */
-    private void saveMessageToList(TerminalMessage terminalMessage,boolean clearUnread){
+    private synchronized void saveMessageToList(TerminalMessage terminalMessage,boolean clearUnread){
         boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);//是否为别人发的消息
         if (terminalMessageData.isEmpty()){
             if(isReceiver){
@@ -1276,18 +1303,20 @@ public class NewsFragment extends BaseFragment {
             terminalMessageData.add(terminalMessage);
         }else {
             int unReadCount = 0;
-            long tempGroupMessageVersion = 0;
+            long tempMessageVersion = 0;
             Iterator<TerminalMessage> iterator = terminalMessageData.iterator();
             while (iterator.hasNext()){
                 TerminalMessage next = iterator.next();
                 boolean isRemove = false;
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){//个人消息
+                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
+                    //个人消息
                     //个人消息分四种情况
                     if(next.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
                         //1、列表中是自己给对方发送的，新消息也是自己给对方发送的
                         //2、列表中是对方给我发的，新消息也是对方给我发的
                         if(next.messageFromId == terminalMessage.messageFromId && next.messageToId == terminalMessage.messageToId){
                             isRemove = true;
+
                         }
                         //3、列表中是自己给对方发送的，新消息是对方给我发的
                         //4、列表中是对方给我发的，新消息也是我给对方发的
@@ -1295,20 +1324,28 @@ public class NewsFragment extends BaseFragment {
                             isRemove = true;
                         }
                     }
-                }
-                //组消息, messageToId相同就是同一个组
-                else if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() &&
+
+                } else if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() &&
                         next.messageToId == terminalMessage.messageToId){
+                    //组消息, messageToId相同就是同一个组
                     isRemove = true;
-                    tempGroupMessageVersion = next.messageVersion;
                 }
                 if(isRemove){
                     unReadCount = next.unReadCount;
+                    tempMessageVersion = next.messageVersion;
+                    //记录本地对应某个账号的最大消息版本号，用于获取最新50条个人消息之后，计算对应的未读条数
+
+                    terminalMessage.tempMessageVersion = (next.tempMessageVersion == 0)?next.messageVersion:next.tempMessageVersion;
+                    //个人消息
+//                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()&&
+//                            terminalMessage.messageFromId == 88039962) {
+//                        logger.info("saveMessageToList-tempMessageVersion:"+tempMessageVersion+"-messageVersion:"+terminalMessage.messageVersion);
+//                    }
                     iterator.remove();
                 }
             }
             //未读消息条目是否+1
-            whetherUnReadAdd(unReadCount, terminalMessage,clearUnread,tempGroupMessageVersion);
+            whetherUnReadAdd(unReadCount, terminalMessage,clearUnread,tempMessageVersion);
             terminalMessageData.add(terminalMessage);
         }
     }
@@ -1754,7 +1791,7 @@ public class NewsFragment extends BaseFragment {
      * 收到别人撤回消息的通知
      **/
     private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version, messageId,messageBodyId) -> {
-         updataMessageWithDrawState(messageId,messageBodyId);
+        updataMessageWithDrawState(messageId,messageBodyId);
     };
 
     /**
