@@ -311,12 +311,17 @@ public class PhonePushService extends BaseService{
     }
 
     private void hideAllView(){
-        if(mPopupMiniLive !=null){
-            mPopupMiniLive.setVisibility(View.GONE);
+        try{
+            if(mPopupMiniLive !=null){
+                mPopupMiniLive.setVisibility(View.GONE);
+            }
+            if(mRlPhonePushLive !=null){
+                mRlPhonePushLive.setVisibility(View.GONE);
+            }
+        }catch (Exception e){
+         e.printStackTrace();
         }
-        if(mRlPhonePushLive !=null){
-            mRlPhonePushLive.setVisibility(View.GONE);
-        }
+
     }
 
     private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
@@ -374,10 +379,13 @@ public class PhonePushService extends BaseService{
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
-    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> mHandler.post(() -> {
-        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
-        finishVideoLive();
-    });
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
+        mHandler.post(() -> {
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
+            finishVideoLive();
+        });
+
+    };
 
     /**
      * 自己发起直播的响应
@@ -430,7 +438,7 @@ public class PhonePushService extends BaseService{
             PromptManager.getInstance().startExternNoStorage();
             if(mMediaStream!=null&&mMediaStream.isRecording()){
                 //停止录像
-                mMediaStream.stopRecord();
+                mMediaStream.stopRecordByHandle();
             }
             //上传没有上传的文件，删除已经上传的文件
             MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
@@ -500,7 +508,7 @@ public class PhonePushService extends BaseService{
                 pushStream(mSvLive.getSurfaceTexture());
             }else{
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_failed));
-                finishVideoLive();
+                mHandler.post(() -> finishVideoLive());
                 return;
             }
         }
@@ -521,7 +529,7 @@ public class PhonePushService extends BaseService{
         //开始录像
         if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {
 //            if(!mMediaStream.isRecording()){
-                mMediaStream.startRecord();
+                mMediaStream.startRecordByHandle();
 //            }
         }
     }
@@ -741,21 +749,23 @@ public class PhonePushService extends BaseService{
 
 
     private void finishVideoLive(){
-        mHandler.removeCallbacksAndMessages(null);
-        PromptManager.getInstance().stopRing();//停止响铃
-        stopPush();
-        hideAllView();
-        stopBusiness();
+//        hideAllView();
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            mHandler.removeCallbacksAndMessages(null);
+//            PromptManager.getInstance().stopRing();//停止响铃
+            stopPush();
+            stopBusiness();
+        });
     }
 
     private void pushStream(SurfaceTexture surface){
         if(mMediaStream != null){    // switch from background to front
-            mMediaStream.stopPreview();
+            mMediaStream.stopPreviewByHandle();
 //            if(mMediaStream.isRecording()){
 //                mMediaStream.stopRecord();
 //            }
             mMediaStream.setSurfaceTexture(surface);
-            mMediaStream.startPreview();
+            mMediaStream.startPreviewByHandle();
 //            startRecord();
             if(mMediaStream.isStreaming()){
                 ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
@@ -767,16 +777,22 @@ public class PhonePushService extends BaseService{
     }
 
     private void stopPush(){
-        mHandler.removeMessages(CURRENTTIME);
-        if(mMediaStream != null){
-            mMediaStream.stopPreview();
-            mMediaStream.stopStream();
-            mMediaStream.stopRecord();
-            mMediaStream.release();
-            mMediaStream = null;
-            logger.info("---->>>>页面关闭，停止推送视频");
-        }
-        TerminalFactory.getSDK().getLiveManager().ceaseLiving();
+        logger.info(TAG+"--stopPush");
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                if(pushCallback!=null){
+                    pushCallback = null;
+                }
+                if(mMediaStream != null){
+                    mMediaStream.stopStream();
+                    mMediaStream.stopRecordByHandle();
+                    mMediaStream.stopPreviewByHandle();
+                    mMediaStream.releaseByHandle();
+                    mMediaStream = null;
+                }
+            }
+        });
     }
 
     private void startCamera(){
@@ -784,8 +800,8 @@ public class PhonePushService extends BaseService{
         logger.error("分辨率--width:" + width + "----height:" + height);
         mMediaStream.updateResolution(width, height);
         mMediaStream.setDgree(getDgree());
-        mMediaStream.createCamera();
-        mMediaStream.startPreview();
+        mMediaStream.createCameraByHandle();
+        mMediaStream.startPreviewByHandle();
         startRecord();
         if(mMediaStream.isStreaming()){
             ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));

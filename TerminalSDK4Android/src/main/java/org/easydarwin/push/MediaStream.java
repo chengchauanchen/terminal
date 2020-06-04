@@ -56,7 +56,15 @@ import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV4
 
 @Module
 public class MediaStream {
+    private static final int CREATE_CAMERA = 10;
     private static final int SWITCH_CAMERA = 11;
+    private static final int START_RECORD = 12;
+    private static final int STOP_RECORD = 13;
+    private static final int START_PREVIEW = 14;
+    private static final int STOP_PREVIEW = 15;
+    private static final int DESTROY_CAMERA = 16;
+    private static final int RELEASE = 17;
+
     private final boolean enanleVideo;
     private Pusher mEasyPusher;
     static final String TAG = "MediaStream";
@@ -112,8 +120,41 @@ public class MediaStream {
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == SWITCH_CAMERA) {
-                    switchCameraTask.run();
+                switch (msg.what){
+                    case CREATE_CAMERA:
+                        removeMessages(CREATE_CAMERA);
+                        createCamera();
+                        break;
+                    case SWITCH_CAMERA:
+                        removeMessages(SWITCH_CAMERA);
+                        switchCameraTask.run();
+                        break;
+                    case START_RECORD:
+                        removeMessages(START_RECORD);
+                        startRecord();
+                        break;
+                    case STOP_RECORD:
+                        removeMessages(STOP_RECORD);
+                        stopRecord();
+                        break;
+                    case START_PREVIEW:
+                        removeMessages(START_PREVIEW);
+                        startPreview();
+                        break;
+                    case STOP_PREVIEW:
+                        removeMessages(STOP_PREVIEW);
+                        stopPreview();
+                        break;
+                    case DESTROY_CAMERA:
+                        removeMessages(DESTROY_CAMERA);
+                        destroyCamera();
+                        break;
+                    case RELEASE:
+                        removeMessages(RELEASE);
+                        release();
+                        break;
+
+                    default:break;
                 }
             }
         };
@@ -173,10 +214,10 @@ public class MediaStream {
         this.width = width;
         this.height = height;
         if (mCamera == null) return;
-        stopPreview();
-        destroyCamera();
-        createCamera();
-        startPreview();
+        stopPreviewByHandle();
+        destroyCameraByHandle();
+        createCameraByHandle();
+        startPreviewByHandle();
     }
 
 
@@ -192,19 +233,16 @@ public class MediaStream {
         return maxFps;
     }
 
-    public void createCamera() {
-
-        if (Thread.currentThread() != mCameraThread) {
-            mCameraHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-                    createCamera();
-                }
-            });
-            return;
+    public void createCameraByHandle(){
+        if(mCameraHandler!=null){
+            mCameraHandler.sendEmptyMessageDelayed(CREATE_CAMERA,500);
+//        }else{
+//            createCamera();
         }
+    }
+    public void createCamera() {
         logger.info("createCamera");
+        Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
         if (!enanleVideo) {
             return;
         }
@@ -259,7 +297,7 @@ public class MediaStream {
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String stack = sw.toString();
-            destroyCamera();
+            destroyCameraByHandle();
             e.printStackTrace();
         }
     }
@@ -303,16 +341,15 @@ public class MediaStream {
     private long millis;
     private String fileIndex;
 
-    public synchronized void startRecord() {
-        if (Thread.currentThread() != mCameraThread) {
-            mCameraHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    startRecord();
-                }
-            });
-            return;
+    public void startRecordByHandle(){
+        if(mCameraHandler!=null){
+            mCameraHandler.sendEmptyMessageDelayed(START_RECORD,500);
+        }else{
+            startRecord();
         }
+    }
+
+    public void startRecord() {
         logger.info(TAG + "---startRecord");
         //检测内存卡的size
         if (TextUtils.isEmpty(tempFile)) {
@@ -340,17 +377,15 @@ public class MediaStream {
         }
     }
 
-
-    public synchronized void stopRecord() {
-        if (Thread.currentThread() != mCameraThread) {
-            mCameraHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    stopRecord();
-                }
-            });
-            return;
+    public void stopRecordByHandle(){
+        if(mCameraHandler!=null){
+            mCameraHandler.sendEmptyMessageDelayed(STOP_RECORD,500);
+        }else {
+            stopRecord();
         }
+    }
+
+    public void stopRecord() {
         if (mVC == null || audioStream == null) {
 //            nothing
         } else {
@@ -363,19 +398,18 @@ public class MediaStream {
         tempFile = null;
     }
 
+    public void startPreviewByHandle(){
+        if(mCameraHandler!=null){
+            mCameraHandler.sendEmptyMessageDelayed(START_PREVIEW,500);
+        }else{
+            startPreview();
+        }
+    }
+
     /**
      * 开启预览
      */
-    public synchronized void startPreview() {
-        if (Thread.currentThread() != mCameraThread) {
-            mCameraHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    startPreview();
-                }
-            });
-            return;
-        }
+    public void startPreview() {
         preView = true;
         logger.info("------>>>>startPreview");
         if(audioStream == null){
@@ -493,21 +527,18 @@ public class MediaStream {
             JNIUtil.rotateShortMatrix(src, offset, width / 2, height / 2, degree);
         }
     }
-
+    public void stopPreviewByHandle(){
+        if(mCameraHandler!=null){
+            mCameraHandler.sendEmptyMessageDelayed(STOP_PREVIEW,500);
+        }else{
+            stopPreview();
+        }
+    }
     /**
      * 停止预览
      */
-    public synchronized void stopPreview() {
+    public void stopPreview() {
         logger.info(Thread.currentThread().getName() + "--StopPreview");
-        if (Thread.currentThread() != mCameraThread) {
-            mCameraHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    stopPreview();
-                }
-            });
-            return;
-        }
         preView = false;
         try {
             if (mCamera != null) {
@@ -517,6 +548,7 @@ public class MediaStream {
             }
             if (audioStream != null) {
                 audioStream.removePusher(mEasyPusher);
+                audioStream.stop();
                 audioStream = null;
                 logger.info("Stop AudioStream");
             }
@@ -546,8 +578,12 @@ public class MediaStream {
      * 切换前后摄像头
      */
     public void switchCamera() {
-        if (mCameraHandler.hasMessages(SWITCH_CAMERA)) return;
-        mCameraHandler.sendEmptyMessage(SWITCH_CAMERA);
+        if (mCameraHandler!=null) {
+            if (mCameraHandler.hasMessages(SWITCH_CAMERA)) {
+                return;
+            }
+            mCameraHandler.sendEmptyMessage(SWITCH_CAMERA);
+        }
     }
 
     private Runnable switchCameraTask = new Runnable() {
@@ -562,8 +598,8 @@ public class MediaStream {
             if (!enanleVideo) return;
             Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
             cameraCount = Camera.getNumberOfCameras();//得到摄像头的个数
-            stopPreview();
-            destroyCamera();
+            stopPreviewByHandle();
+            destroyCameraByHandle();
             for (int i = 0; i < cameraCount; i++) {
                 Camera.getCameraInfo(i, cameraInfo);//得到每一个摄像头的信息
 
@@ -571,16 +607,16 @@ public class MediaStream {
                     //现在是后置，变更为前置
                     if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {//代表摄像头的方位，CAMERA_FACING_FRONT前置      CAMERA_FACING_BACK后置
                         mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
-                        createCamera();
-                        startPreview();
+                        createCameraByHandle();
+                        startPreviewByHandle();
                         break;
                     }
                 } else {
                     //现在是前置， 变更为后置
                     if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {//代表摄像头的方位，CAMERA_FACING_FRONT前置      CAMERA_FACING_BACK后置
                         mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
-                        createCamera();
-                        startPreview();
+                        createCameraByHandle();
+                        startPreviewByHandle();
                         break;
                     }
                 }
@@ -594,20 +630,18 @@ public class MediaStream {
         this.recordPath = recordPath;
     }
 
+
+    public void destroyCameraByHandle(){
+        if(mCameraHandler!=null){
+            mCameraHandler.sendEmptyMessageDelayed(DESTROY_CAMERA,500);
+        }else{
+            destroyCamera();
+        }
+    }
     /**
      * 销毁Camera
      */
-    public synchronized void destroyCamera() {
-
-        if (Thread.currentThread() != mCameraThread) {
-            mCameraHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    destroyCamera();
-                }
-            });
-            return;
-        }
+    public void destroyCamera() {
         if (mCamera != null) {
             mCamera.stopPreview();
             try {
@@ -630,12 +664,24 @@ public class MediaStream {
 
 
     public void stopStream() {
-        mEasyPusher.stop();
+        try{
+            mEasyPusher.stop();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         pushStream = false;
     }
 
     public void setSurfaceTexture(SurfaceTexture texture) {
         mSurfaceHolderRef = new WeakReference<>(texture);
+    }
+
+    public void releaseByHandle(){
+        if(mCameraHandler!=null){
+            mCameraHandler.sendEmptyMessageDelayed(RELEASE,500);
+        }else{
+            release();
+        }
     }
 
     public void release() {

@@ -49,7 +49,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
                 searchAdapter.notifyDataSetChanged();
             }
         }else{
-            MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup();
+            MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup(true);
         }
     }
 
@@ -97,7 +97,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
             if (!forceSwitchGroup) {
                 return;
             }
-            MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup();
+            MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup(false);
         }
     };
 

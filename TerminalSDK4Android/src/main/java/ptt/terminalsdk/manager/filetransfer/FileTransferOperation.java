@@ -478,7 +478,7 @@ public class FileTransferOperation {
     /**
      * 上传48小时未上传的文件
      */
-    public void uploadFileByExpire() {
+    public void uploadFileByExpire(boolean showToast) {
         if (!isConnected(context)) {
             logger.info(TAG + "uploadFileByExpire:isConnected:" + isConnected(context));
             return;
@@ -504,7 +504,9 @@ public class FileTransferOperation {
                     if (uploadList.size() > 0) {
                         //有超过48小时未上传的文件
                         uploadFileByPaths(uploadList, 0, 0L,false);
-                        showToast("有48小时未上传的文件，开始上传");
+                        if(showToast){
+                            showToast("有48小时未上传的文件，开始上传");
+                        }
                     } else {
                         //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
                         //                        sendMessgeToUpdateExpireInfo(list.get(0));
@@ -901,7 +903,7 @@ public class FileTransferOperation {
     public void checkStartExpireFileAlarm() {
         BitStarFileRecord expireRecord = TerminalFactory.getSDK().getBean(Params.FILE_EXPIRE_RECORD, null,BitStarFileRecord.class);
         if (expireRecord != null) {
-            uploadFileByExpire();
+            uploadFileByExpire(true);
         }
     }
 

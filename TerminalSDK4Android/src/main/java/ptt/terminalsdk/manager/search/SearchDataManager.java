@@ -1,10 +1,13 @@
 package ptt.terminalsdk.manager.search;
 
+import android.text.TextUtils;
+
 import com.allen.library.observer.CommonObserver;
 
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import cn.vsx.hamster.common.GroupType;
@@ -13,10 +16,15 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllAccountHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import io.reactivex.schedulers.Schedulers;
+import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.receiveHandler.ReceiverSearchGroupDataCompleteHandler;
 
 /**
@@ -32,11 +40,15 @@ public class SearchDataManager {
   public void start(){
     TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
     TerminalFactory.getSDK().registReceiveHandler(receiveGetAllAccountHandler);
+    TerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
+    TerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
   }
 
   public void stop(){
     TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
     TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllAccountHandler);
+    TerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);
+    TerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
   }
 
   //所有组
@@ -44,7 +56,7 @@ public class SearchDataManager {
     @Override
     public void handler(List<Group> groups) {
       logger.info("SearchTabFragment获取组数据:" + groups);
-      getDbAllGroup();
+      getDbAllGroup(true);
     }
   };
 
@@ -57,10 +69,64 @@ public class SearchDataManager {
     }
   };
 
+    /**
+     * 获取到临时组数据，更新本地的数据库
+     */
+    private ReceivegUpdateGroupHandler receivegUpdateGroupHandler = new ReceivegUpdateGroupHandler(){
+        @Override
+        public void handler(int depId, String depName, List<Department> departments, List<Group> groups){
+            //更新临时组的数据,比对数据库中的数据，清除或者添加临时组数据
+            if (depId == -1 && groups!=null) {
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    List<GroupSearchBean> tempList=new ArrayList<GroupSearchBean>(groupDatas);
+                    if(tempList.isEmpty()){
+                        tempList.addAll(TerminalFactory.getSDK().getSQLiteDBManager().getAllGroup(new ArrayList<>(),0));
+                    }
+                    //删除已经解散的（groups中没有的临时组）
+                    Iterator<GroupSearchBean> iterator = tempList.iterator();
+                    while (iterator.hasNext()){
+                        GroupSearchBean bean = iterator.next();
+                        if(bean!=null && TextUtils.equals(GroupType.TEMPORARY.toString(),bean.getGroupType())
+                                && !groups.contains(bean)){
+                            iterator.remove();
+                        }
+                    }
+                    //添加有的（本地没有的临时组，可能是离线状态下，拉进的临时组）
+                    for (Group bean: groups) {
+                       if(bean!=null && !tempList.contains(new GroupSearchBean(bean.getNo()))){
+                           GroupSearchBean groupSearchBean = DataUtil.groupToGroupSearchBean(bean);
+                           if(groupSearchBean!=null){
+                               tempList.add(groupSearchBean);
+                           }
+                       }
+                    }
+                    //更新数据库，更新内存，更新UI
+                    TerminalFactory.getSDK().getSQLiteDBManager().updateAllGroup(new ArrayList<Group>(tempList),true);
+                    groupDatas.clear();
+                    groupDatas.addAll(tempList);
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiverSearchGroupDataCompleteHandler.class);
+                });
+            }
+        }
+    };
+
+    /**
+     * 网络状态
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if(connected){
+                //用于更新临时组数据
+                MyTerminalFactory.getSDK().getConfigManager().updateGroup(-1, "临时组");
+            }
+        }
+    };
+
   /**
    * 获取本地数据库 组数据
    */
-  public synchronized void getDbAllGroup() {
+  public synchronized void getDbAllGroup(boolean isUpdateTempGroup) {
     SearchUtil.getDbAllGroup()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
@@ -82,6 +148,12 @@ public class SearchDataManager {
               groupDatas.clear();
               groupDatas.addAll(allRowSize);
               TerminalFactory.getSDK().notifyReceiveHandler(ReceiverSearchGroupDataCompleteHandler.class);
+              if(isUpdateTempGroup){
+                  TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                      //用于更新临时组数据
+                      MyTerminalFactory.getSDK().getConfigManager().updateGroup(-1, "临时组");
+                  });
+              }
           }
         });
   }

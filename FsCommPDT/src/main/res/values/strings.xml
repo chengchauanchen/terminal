@@ -705,4 +705,5 @@
     <string name="text_account_data_change_please_relogin">您的账号数据有更新，请重新登录</string>
     <string name="already_remove">已失效</string>
     <string name="notify_invalid_listener_group">管理员远程指定了您的监听组%1$s监听状态设置已失效</string>
+    <string name="text_temporary_authorization">临时授权</string>
 </resources>

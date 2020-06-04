@@ -14,10 +14,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.allen.library.observer.CommonObserver;
+import com.blankj.utilcode.util.ActivityUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
@@ -41,6 +43,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.GroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
@@ -423,8 +426,17 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                         setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
                         //这里播放提示音大概率会没有声音，原因是soundpool播放了多路声音，这个声音被后面的覆盖(后面调的播放，前面的不播)
                         //有两种解决办法，1.延迟播放；2.将池子的大小设为2(优先级的参数目前是无效的)
-                        ToastUtil.showToast(getActivity(), tempGroupName + "到期");
-                        PromptManager.getInstance().playTempGroupExpire();
+                        boolean is = GroupMemberActivity.class.equals(ActivityUtils.getTopActivity().getClass());
+                        logger.info("fragment-ReceiveMemberAboutTempGroupHandler-is"+is);
+                        if(!is){
+                            ToastUtil.showToast(getActivity(), tempGroupName + "到期");
+                            TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    PromptManager.getInstance().playTempGroupExpire();
+                                }
+                            },2*1000);
+                        }
                         //获取该组信息，并更新数据库，最后更新UI
                         TerminalFactory.getSDK().getThreadPool().execute(() -> {
                             TerminalFactory.getSDK().getSQLiteDBManager().deleteGroupByNo(tempGroupNo);

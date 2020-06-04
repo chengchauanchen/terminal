@@ -8,7 +8,6 @@ import android.widget.Toast;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
-
 import org.easydarwin.push.InitCallback;
 import org.easydarwin.push.MediaStream;
 
@@ -41,19 +40,19 @@ public class VideoProxy{
     }
 
     public void createCamera() {
-        mediaStream.createCamera();
+        mediaStream.createCameraByHandle();
     }
 
     public void destroyCamera() {
-        mediaStream.destroyCamera();
+        mediaStream.destroyCameraByHandle();
     }
 
     public void startPreview() {
-        mediaStream.startPreview();
+        mediaStream.startPreviewByHandle();
     }
 
     public void stopPreview() {
-        mediaStream.stopPreview();
+        mediaStream.stopPreviewByHandle();
     }
 
 

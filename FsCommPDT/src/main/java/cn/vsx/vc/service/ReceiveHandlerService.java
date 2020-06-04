@@ -870,7 +870,12 @@ public class ReceiveHandlerService extends Service{
                         //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
                         myHandler.postDelayed(() -> {
                             data.add(terminalMessage);
-                            showVideoDialogView();
+                            //判断显示的时候是否已经进入其他业务，或者
+                            if(!MyApplication.instance.checkBusinessInServiceIsWorking()){
+                                showVideoDialogView();
+                            }else{
+                                myHandler.removeMessages(DISSMISS_CURRENT_DIALOG);
+                            }
                         }, 5000);
                         //30s没观看就取消当前弹窗
                         Message message = Message.obtain();

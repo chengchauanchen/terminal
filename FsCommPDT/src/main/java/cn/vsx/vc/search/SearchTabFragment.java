@@ -200,7 +200,7 @@ public class SearchTabFragment extends BaseSearchFragment {
 
     @Override
     public void initData() {
-        MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup();
+        MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup(true);
         MyTerminalFactory.getSDK().getSearchDataManager().getDbAllAccount();
         mHandler.sendEmptyMessage(HANDLE_CODE_LOAD_ALL_DATA);
     }

@@ -281,20 +281,24 @@ public abstract class BaseService extends Service{
      * 移除view并停止service
      */
     protected void removeView(){
-        logger.info(TAG+"--ReceiverRemoveWindowViewHandler:"+dialogAdd);
-        mHandler.removeCallbacksAndMessages(null);
-        if(dialogAdd){
-            windowManager.removeView(rootView);
-            dialogAdd = false;
-            MyApplication.instance.viewAdded = false;
-        }
-        MyApplication.instance.isMiniLive = false;
-        PromptManager.getInstance().stopRing();
-        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
-        stopSelf();
-        finishTransparentActivity();
+        try{
+            logger.info(TAG+"--ReceiverRemoveWindowViewHandler:"+dialogAdd);
+            mHandler.removeCallbacksAndMessages(null);
+            if(dialogAdd){
+                windowManager.removeView(rootView);
+                dialogAdd = false;
+                MyApplication.instance.viewAdded = false;
+            }
+            MyApplication.instance.isMiniLive = false;
+            PromptManager.getInstance().stopRing();
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
+            stopSelf();
+            finishTransparentActivity();
 
-        AppKeyUtils.setAppKey(null);//退出业务将appKey重置
+            AppKeyUtils.setAppKey(null);//退出业务将appKey重置
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**

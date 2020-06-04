@@ -12,14 +12,12 @@ import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAboutGroupChangeMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateMonitorGroupViewHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.fragment.BaseFragment;
@@ -41,7 +39,6 @@ public abstract class BaseSearchFragment extends BaseFragment {
 
     public void registReceiveHandler() {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyAboutGroupChangeMessageHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
@@ -50,7 +47,6 @@ public abstract class BaseSearchFragment extends BaseFragment {
 
     public void unregistReceiveHandler() {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyAboutGroupChangeMessageHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
@@ -109,14 +105,6 @@ public abstract class BaseSearchFragment extends BaseFragment {
                 }
                 myHandler.post(() -> searchAdapter.notifyDataSetChanged());
             }
-        }
-    };
-
-    private ReceivegUpdateGroupHandler receivegUpdateGroupHandler = new ReceivegUpdateGroupHandler(){
-        @Override
-        public void handler(int depId, String depName, List<Department> departments, List<Group> groups){
-            //更新临时组的数据
-            // updateData( depId,  depName, departments, groups);
         }
     };
 

@@ -291,7 +291,7 @@ public class PhonePushByNoRegistService extends BaseService{
             PromptManager.getInstance().startExternNoStorage();
             if(mMediaStream!=null&&mMediaStream.isRecording()){
                 //停止录像
-                mMediaStream.stopRecord();
+                mMediaStream.stopRecordByHandle();
             }
             //上传没有上传的文件，删除已经上传的文件
             MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
@@ -368,7 +368,7 @@ public class PhonePushByNoRegistService extends BaseService{
         //开始录像
         if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {
 //            if(!mMediaStream.isRecording()){
-                mMediaStream.startRecord();
+                mMediaStream.startRecordByHandle();
 //            }
         }
     }
@@ -568,12 +568,12 @@ public class PhonePushByNoRegistService extends BaseService{
 
     private void pushStream(SurfaceTexture surface){
         if(mMediaStream != null){    // switch from background to front
-            mMediaStream.stopPreview();
+            mMediaStream.stopPreviewByHandle();
 //            if(mMediaStream.isRecording()){
 //                mMediaStream.stopRecord();
 //            }
             mMediaStream.setSurfaceTexture(surface);
-            mMediaStream.startPreview();
+            mMediaStream.startPreviewByHandle();
 //            startRecord();
             if(mMediaStream.isStreaming()){
                 ToastUtil.showToast(PhonePushByNoRegistService.this, getResources().getString(R.string.pushing_stream));
@@ -587,10 +587,10 @@ public class PhonePushByNoRegistService extends BaseService{
     private void stopPush(){
         mHandler.removeMessages(CURRENTTIME);
         if(mMediaStream != null){
-            mMediaStream.stopPreview();
+            mMediaStream.stopPreviewByHandle();
             mMediaStream.stopStream();
-            mMediaStream.stopRecord();
-            mMediaStream.release();
+            mMediaStream.stopRecordByHandle();
+            mMediaStream.releaseByHandle();
             mMediaStream = null;
             logger.info("---->>>>页面关闭，停止推送视频");
         }
@@ -602,8 +602,8 @@ public class PhonePushByNoRegistService extends BaseService{
         logger.error("分辨率--width:" + width + "----height:" + height);
         mMediaStream.updateResolution(width, height);
         mMediaStream.setDgree(getDgree());
-        mMediaStream.createCamera();
-        mMediaStream.startPreview();
+        mMediaStream.createCameraByHandle();
+        mMediaStream.startPreviewByHandle();
         startRecord();
         if(mMediaStream.isStreaming()){
             ToastUtil.showToast(PhonePushByNoRegistService.this, getResources().getString(R.string.pushing_stream));
