@@ -1157,6 +1157,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logger.info("调用了disConnectToServer");
 		//停止与服务器的连接
 		try {
+			if(getClientChannel()!=null){
+				getClientChannel().stop();
+			}
+			clientChannel = null;
 			if (bindService && messageServiceConn != null) {
 				application.unbindService(messageServiceConn);
 				application.stopService(new Intent(application, MessageService.class));
@@ -1227,6 +1231,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	 */
 	private void unBindMessageService() {
 		try{
+			if(getClientChannel()!=null){
+				getClientChannel().stop();
+			}
+			clientChannel = null;
 			if (bindService && messageServiceConn != null) {
 				application.unbindService(messageServiceConn);
 				logger.error("停止与服务器的连接");

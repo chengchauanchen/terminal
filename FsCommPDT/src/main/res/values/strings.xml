@@ -186,6 +186,9 @@
     <string name="text_temporary_group_create_fail">创建失败!</string>
     <string name="text_disbanded_successfully">解散成功</string>
     <string name="dialog_delete_temporary_group_title">确定解散临时组？</string>
+    <string name="text_temporary_group_destroying">正在解散...</string>
+    <string name="text_disbanded_fail">解散失败!</string>
+    <string name="text_disbanded_fail_by_send_fail">解散临时组命令发送失败</string>
     <string name="text_sure">确定</string>
     <string name="text_cancel">取消</string>
     <string name="text_forward">转发</string>

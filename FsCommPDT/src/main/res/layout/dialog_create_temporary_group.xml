@@ -12,8 +12,7 @@
         android:layout_height="@dimen/x40"
         android:layout_above="@+id/text_context"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/dialog_icon_creatting"
-        />
+        android:src="@drawable/dialog_icon_creatting" />
 
     <TextView
         android:id="@+id/text_context"
