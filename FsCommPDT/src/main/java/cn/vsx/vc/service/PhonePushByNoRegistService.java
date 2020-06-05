@@ -559,11 +559,13 @@ public class PhonePushByNoRegistService extends BaseService{
 
 
     private void finishVideoLive(){
-        mHandler.removeCallbacksAndMessages(null);
-        PromptManager.getInstance().stopRing();//停止响铃
-        stopPush();
-        hideAllView();
-        stopBusiness();
+//        hideAllView();
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            mHandler.removeCallbacksAndMessages(null);
+//            PromptManager.getInstance().stopRing();//停止响铃
+            stopPush();
+            stopBusiness();
+        });
     }
 
     private void pushStream(SurfaceTexture surface){
@@ -585,16 +587,23 @@ public class PhonePushByNoRegistService extends BaseService{
     }
 
     private void stopPush(){
-        mHandler.removeMessages(CURRENTTIME);
-        if(mMediaStream != null){
-            mMediaStream.stopPreviewByHandle();
-            mMediaStream.stopStream();
-            mMediaStream.stopRecordByHandle();
-            mMediaStream.releaseByHandle();
-            mMediaStream = null;
-            logger.info("---->>>>页面关闭，停止推送视频");
-        }
-        TerminalFactory.getSDK().getLiveManager().ceaseLiving();
+        logger.info(TAG+"--stopPush");
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                if(pushCallback!=null){
+                    pushCallback = null;
+                }
+                if(mMediaStream != null){
+                    mMediaStream.stopStream();
+                    mMediaStream.stopRecordByHandle();
+                    mMediaStream.stopPreviewByHandle();
+                    mMediaStream.releaseByHandle();
+                    mMediaStream = null;
+                }
+                TerminalFactory.getSDK().getLiveManager().ceaseLiving();
+            }
+        });
     }
 
     private void startCamera(){
