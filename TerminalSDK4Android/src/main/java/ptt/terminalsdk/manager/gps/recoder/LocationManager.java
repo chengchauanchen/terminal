@@ -551,13 +551,12 @@ public class LocationManager  {
                     logger.info(TAG + "开始上传位置信息---Longitude:" + location.getLongitude() + "---Latitude：" + location.getLatitude());
                     lastUpLocationTime = System.currentTimeMillis();
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveChangePersonLocationHandler.class,location.getLatitude(),location.getLongitude());
-                    String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
-                    int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT,0);
+                    String ip = MyTerminalFactory.getSDK().getParam(Params.HTTP_IP);
+                    int port = MyTerminalFactory.getSDK().getParam(Params.HTTP_PORT,0);
                     if(TextUtils.isEmpty(ip)||port<=0){
                         return;
                     }
-//			final String url = "http://192.168.1.187:6666/save";
-                    final String url = "http://"+ip+":"+port+"/save";
+                    final String url = "http://"+ip+":"+port+"/gatherService/save";
                     Map<String,Object> params = new HashMap<>();
                     params.put("terminalno", MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
                     params.put("memberuniqueno", MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L));
