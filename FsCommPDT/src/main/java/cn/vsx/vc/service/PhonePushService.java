@@ -788,9 +788,11 @@ public class PhonePushService extends BaseService{
                     mMediaStream.stopStream();
                     mMediaStream.stopRecordByHandle();
                     mMediaStream.stopPreviewByHandle();
+                    mMediaStream.destroyCameraByHandle();
                     mMediaStream.releaseByHandle();
                     mMediaStream = null;
                 }
+                TerminalFactory.getSDK().getLiveManager().ceaseLiving();
             }
         });
     }

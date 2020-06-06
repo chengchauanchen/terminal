@@ -598,6 +598,7 @@ public class PhonePushByNoRegistService extends BaseService{
                     mMediaStream.stopStream();
                     mMediaStream.stopRecordByHandle();
                     mMediaStream.stopPreviewByHandle();
+                    mMediaStream.destroyCameraByHandle();
                     mMediaStream.releaseByHandle();
                     mMediaStream = null;
                 }
