@@ -67,7 +67,7 @@ public class PersonInfoLayout extends LinearLayout {
         userId = view.findViewById(R.id.user_id);
         userId.setText("警号:"+ HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
         userName.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
-        logger.info("用户头像："+TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL));
+//        logger.info("用户头像："+TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL));
         int drawable = BitmapUtil.getUserPhoto();
         Glide.with(context)
                 .load(TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL))

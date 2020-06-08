@@ -13,6 +13,7 @@ import org.ddpush.im.client.v1.UDPClientBase;
 import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -91,8 +92,11 @@ public class MyUDPClient extends UDPClientBase implements IConnectionClient{
 
     @Override
     public void registMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler){
-        for (ServerMessageReceivedHandlerAidl handler0 : serverMessageReceivedHandlerAidls){
-            if (handler0.asBinder() != handler.asBinder()){
+        Iterator<ServerMessageReceivedHandlerAidl> iterator = serverMessageReceivedHandlerAidls.iterator();
+        while (iterator.hasNext()) {
+            ServerMessageReceivedHandlerAidl next = iterator.next();
+            if (next.asBinder() == handler.asBinder()){
+                iterator.remove();
             }
         }
         if (!serverMessageReceivedHandlerAidls.contains(handler)) {

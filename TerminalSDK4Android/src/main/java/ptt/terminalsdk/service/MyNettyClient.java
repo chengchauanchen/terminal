@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.ddpush.im.client.v1.netty.NettyClient;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -63,8 +64,11 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 
     @Override
     public void registMessageReceivedHandler(ServerMessageReceivedHandlerAidl handler){
-        for (ServerMessageReceivedHandlerAidl handler0 : serverMessageReceivedHandlerAidls){
-            if (handler0.asBinder() != handler.asBinder()){
+        Iterator<ServerMessageReceivedHandlerAidl> iterator = serverMessageReceivedHandlerAidls.iterator();
+        while (iterator.hasNext()) {
+            ServerMessageReceivedHandlerAidl next = iterator.next();
+            if (next.asBinder() == handler.asBinder()){
+                iterator.remove();
             }
         }
         if (!serverMessageReceivedHandlerAidls.contains(handler)) {

@@ -1161,9 +1161,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				getClientChannel().stop();
 			}
 			clientChannel = null;
+			application.stopService(new Intent(application, MessageService.class));
 			if (bindService && messageServiceConn != null) {
 				application.unbindService(messageServiceConn);
-				application.stopService(new Intent(application, MessageService.class));
 				logger.error("停止与服务器的连接");
 			}
 			bindService = false;
@@ -1239,6 +1239,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				application.unbindService(messageServiceConn);
 				logger.error("停止与服务器的连接");
 			}
+			application.stopService(new Intent(application, MessageService.class));
 		}catch (Exception e){
 			logger.error(e.toString());
 		}finally {
