@@ -27,6 +27,7 @@ import org.easydarwin.push.LocalVideoPushStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.okhttp.RateLimitingRequestBody;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
@@ -52,6 +54,8 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberUploadFileMe
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateUploadFileRateLimitHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -59,12 +63,14 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import ptt.terminalsdk.broadcastreceiver.FileExpireReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiveGenerateFileCompleteHandler;
 import ptt.terminalsdk.tools.FileTransgerUtil;
 import ptt.terminalsdk.tools.SDCardUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.tools.VideoFileUtil;
 
 import static android.content.Context.ALARM_SERVICE;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
 import static cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory.USB;
 
 public class FileTransferOperation {
@@ -160,7 +166,7 @@ public class FileTransferOperation {
                         notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
                     }
                     //推送视频文件到流媒体服务器
-                    //                    pushStreamOfVideoFile(list);
+//                    pushStreamOfVideoFile(list);
                 }
             }
         }
@@ -172,8 +178,8 @@ public class FileTransferOperation {
     private ReceiveUpdateUploadFileRateLimitHandler receiveUpdateUploadFileRateLimitHandler = new ReceiveUpdateUploadFileRateLimitHandler() {
         @Override
         public void handler(boolean needLimit) {
-            if(rateLimitingRequestBody!=null){
-                rateLimitingRequestBody.setMaxRate(needLimit?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+            if (rateLimitingRequestBody != null) {
+                rateLimitingRequestBody.setMaxRate(needLimit ? UPLOAD_FILE_RATE_LIMIT : UPLOAD_FILE_RATE_LIMIT_NO);
             }
         }
     };
@@ -196,7 +202,7 @@ public class FileTransferOperation {
             } else {
                 //推送下个视频文件
                 pushIndex++;
-                //                requestPushStream();
+//                requestPushStream();
                 pushVideoFile();
             }
         }
@@ -259,11 +265,13 @@ public class FileTransferOperation {
      * @param path
      */
     public void generateFileComplete(String scanPath, String path) {
-        logger.info(TAG + "generateFileComplete scanPath" + scanPath+"path:"+path);
+        logger.info(TAG + "generateFileComplete scanPath" + scanPath + "path:" + path);
         //扫描卡中的文件
         SDCardUtil.scanMtpAsync(context, scanPath);
         //上传文件目录和保存文件信息到本地
         uploadFileTreeAndSaveFileToSqlite(path);
+        //通知UI更新文件的显示
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGenerateFileCompleteHandler.class);
     }
 
     /**
@@ -324,6 +332,7 @@ public class FileTransferOperation {
             }
         });
     }
+
     /**
      * 根据文件路径上传文件
      *
@@ -331,7 +340,7 @@ public class FileTransferOperation {
      * @param requestMemberId
      * @param isDelete        是否在上传成功之后删除文件
      */
-    public void uploadFileByPath(final String path, final int requestMemberId,final long requestUniqueNo, final boolean isDelete) {
+    public void uploadFileByPath(final String path, final int requestMemberId, final long requestUniqueNo, final boolean isDelete) {
         if (!isConnected(context)) {
             logger.info(TAG + "uploadFileByPath:isConnected:" + isConnected(context));
             return;
@@ -465,12 +474,12 @@ public class FileTransferOperation {
      * @param records
      * @param isDelete 是否在上传成功之后删除文件
      */
-    public synchronized void uploadFileByPaths(CopyOnWriteArrayList<BitStarFileRecord> records, int requestMemberId,final long requestUniqueNo, boolean isDelete) {
+    public synchronized void uploadFileByPaths(CopyOnWriteArrayList<BitStarFileRecord> records, int requestMemberId, final long requestUniqueNo, boolean isDelete) {
         if (records != null && records.size() > 0) {
             for (BitStarFileRecord record : records) {
                 //上传文件
-                //                isDelete?FileTransgerUtil.isOutOf48Hours(record.getFileTime()):如果确认删除 也只是删除48小时之前的文件
-                uploadFileByPath(record.getFilePath(), requestMemberId,requestUniqueNo, isDelete);
+//                isDelete?FileTransgerUtil.isOutOf48Hours(record.getFileTime()):如果确认删除 也只是删除48小时之前的文件
+                uploadFileByPath(record.getFilePath(), requestMemberId, requestUniqueNo, isDelete);
             }
         }
     }
@@ -503,16 +512,16 @@ public class FileTransferOperation {
                     }
                     if (uploadList.size() > 0) {
                         //有超过48小时未上传的文件
-                        uploadFileByPaths(uploadList, 0, 0L,false);
+                        uploadFileByPaths(uploadList, 0, 0L, false);
                         if(showToast){
                             showToast("有48小时未上传的文件，开始上传");
                         }
                     } else {
                         //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
-                        //                        sendMessgeToUpdateExpireInfo(list.get(0));
+//                        sendMessgeToUpdateExpireInfo(list.get(0));
                         updateExpireFileInfo(list.get(0));
                     }
-                }else{
+                } else {
                     updateExpireFileInfo(null);
                 }
             }
@@ -533,33 +542,33 @@ public class FileTransferOperation {
                     record.setFileType(FileTransgerUtil.getBITFileType(path));
                     record.setFileTime(System.currentTimeMillis());
                     record.setFileState(UPLOAD_STATE_NO);
-                    if(isUavDevice()){
+                    if (isUavDevice()) {
                         record.setDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-                        if(TextUtils.equals(FileTransgerUtil.TYPE_VIDEO,FileTransgerUtil.getBITFileType(record.getFileName()))){
+                        if (TextUtils.equals(FileTransgerUtil.TYPE_VIDEO, FileTransgerUtil.getBITFileType(record.getFileName()))) {
                             Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MICRO_KIND);
                             //视频文件
-                            if(bitmap != null){
+                            if (bitmap != null) {
                                 record.setWidth(bitmap.getWidth());
                                 record.setHeight(bitmap.getHeight());
                                 bitmap.recycle();
                             }
                             int videoDuration = VideoFileUtil.getVideoDuration(path);
-                            if(videoDuration>0){
+                            if (videoDuration > 0) {
                                 record.setDuration(videoDuration);
                                 TerminalFactory.getSDK().getSQLiteDBManager().addBitStarFileRecord(record);
                                 //发送保存超过48小时对比文件信息
                                 saveExpireFileInfoForFirstTimes(record);
                                 //                    sendMessgeToSaveExpireInfoForFirstTimes(record);
-                            }else {
+                            } else {
                                 //该视频文件有问题，视频文件删除
                                 File file = new File(path);
-                                if(file.exists()){
+                                if (file.exists()) {
                                     file.delete();
                                 }
                             }
-                        }else {
+                        } else {
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
-                            if(bitmap != null){
+                            if (bitmap != null) {
                                 record.setWidth(bitmap.getWidth());
                                 record.setHeight(bitmap.getHeight());
                                 bitmap.recycle();
@@ -570,7 +579,7 @@ public class FileTransferOperation {
                             //                    sendMessgeToSaveExpireInfoForFirstTimes(record);
                         }
 
-                    }else {
+                    } else {
                         TerminalFactory.getSDK().getSQLiteDBManager().addBitStarFileRecord(record);
                         //发送保存超过48小时对比文件信息
                         saveExpireFileInfoForFirstTimes(record);
@@ -675,17 +684,17 @@ public class FileTransferOperation {
         //        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(getExternalUsableStorageDirectory())) {
         List<FileBean> list = new ArrayList<>();
         //获取保存的没有上传的文件目录信息
-        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean(),FileTreeBean.class);
-        if(fileTreeBean.getFileTree()!=null){
+        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST, new FileTreeBean(), FileTreeBean.class);
+        if (fileTreeBean.getFileTree() != null) {
             list.addAll(fileTreeBean.getFileTree());
         }
         FileBean bean = getSingleFileTreeBean(path);
-        if(bean!=null){
+        if (bean != null) {
             list.add(bean);
         }
         //保存没有上传的文件目录信息
         fileTreeBean.setFileTree(list);
-        TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
+        TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST, fileTreeBean);
         logger.info(TAG + "saveAndGetBITFileTreeBean:list:" + list);
         return list;
     }
@@ -693,35 +702,36 @@ public class FileTransferOperation {
     /**
      * 文件的目录信息上传成功之后删除保存的记录
      */
-    private void deleteBITFileTreeBean(List<FileBean> list){
-        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean(),FileTreeBean.class);
-        List<FileBean> allList =  fileTreeBean.getFileTree();
-        if(allList != null && allList.size()>0){
-            if(list!=null&&list.size()>0){
-                for (FileBean bean :list) {
-                    if(allList.contains(bean)){
+    private void deleteBITFileTreeBean(List<FileBean> list) {
+        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST, new FileTreeBean(), FileTreeBean.class);
+        List<FileBean> allList = fileTreeBean.getFileTree();
+        if (allList != null && allList.size() > 0) {
+            if (list != null && list.size() > 0) {
+                for (FileBean bean : list) {
+                    if (allList.contains(bean)) {
                         allList.remove(bean);
                     }
                 }
                 fileTreeBean.setFileTree(allList);
-                TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
+                TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST, fileTreeBean);
             }
         }
     }
 
     /**
      * 获取单个文件的目录信息
+     *
      * @param path
      * @return
      */
-    private FileBean getSingleFileTreeBean(String path){
-        if(TextUtils.isEmpty(path)){
+    private FileBean getSingleFileTreeBean(String path) {
+        if (TextUtils.isEmpty(path)) {
             return null;
         }
         File file = new File(path);
         if (file != null && file.exists()) {
             return FileTransgerUtil.getFileInfo(path, file);
-        }else{
+        } else {
             return null;
         }
     }
@@ -733,49 +743,70 @@ public class FileTransferOperation {
      */
     private List<FileBean> getBITFileTreeBeanByAll() {
         int code = MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory();
-        //        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(code)) {
+//        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(code)) {
         int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         File file = new File(MyTerminalFactory.getSDK().getBITRecordesDirectoty(code));
         if (!file.exists()) {
             file.mkdir();
         }
         return FileTransgerUtil.getFileTree(file, new ArrayList<FileBean>(), memberId);
-        //        } else {
-        //            return null;
-        //        }
+//        } else {
+//            return null;
+//        }
     }
 
     /**
      * 保存初始化存储空间的目录信息
      */
-    public void initExternalUsableStorage(){
-        int recordFileStorageType = TerminalFactory.getSDK().getParam(Params.RECORD_FILE_STORAGE,-1);
-        if(recordFileStorageType == -1){
-            TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE ,getExternalUsableStorage());
+    public void initExternalUsableStorage() {
+        if(checkOnlyUseSdCardStorage()){
+            TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE, BitStarFileDirectory.SDCARD.getCode());
+            return;
+        }
+        int recordFileStorageType = TerminalFactory.getSDK().getParam(Params.RECORD_FILE_STORAGE, -1);
+        if (recordFileStorageType == -1) {
+            TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE, getExternalUsableStorage());
         }
     }
 
     /**
      * 获取最大的存储空间的目录
+     *
      * @return
      */
-    public int getExternalUsableStorage(){
-        long usb = MyTerminalFactory.getSDK().getExternalUsableSize(USB.getCode());
+    public int getExternalUsableStorage() {
+        //判断是否是执法记录仪，并且是新洲环境
+        if(checkOnlyUseSdCardStorage()){
+            return  BitStarFileDirectory.SDCARD.getCode();
+        }
+        long usb = MyTerminalFactory.getSDK().getExternalUsableSize(BitStarFileDirectory.USB.getCode());
         long sdCard = MyTerminalFactory.getSDK().getExternalUsableSize(BitStarFileDirectory.SDCARD.getCode());
-        return (usb>sdCard)?USB.getCode():BitStarFileDirectory.SDCARD.getCode();
+        return (usb > sdCard) ? BitStarFileDirectory.USB.getCode() : BitStarFileDirectory.SDCARD.getCode();
+    }
+
+    /**
+     * 判断是否是只能使用sdcard存储文件
+     * @return
+     */
+    public boolean checkOnlyUseSdCardStorage(){
+        String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
+        return (!TextUtils.isEmpty(deviceType)&&TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())
+                &&!TextUtils.isEmpty(apkType)&&TextUtils.equals(apkType, AuthManagerTwo.XINZHOU));
     }
 
     /**
      * 获取存储空间的目录
+     *
      * @return
      */
-    public int getExternalUsableStorageDirectory(){
-        int recordFileStorageType = TerminalFactory.getSDK().getParam(Params.RECORD_FILE_STORAGE,-1);
-        if(recordFileStorageType!=-1){
+    public int getExternalUsableStorageDirectory() {
+        int recordFileStorageType = TerminalFactory.getSDK().getParam(Params.RECORD_FILE_STORAGE, -1);
+        if (recordFileStorageType != -1) {
             return recordFileStorageType;
-        }else{
+        } else {
             final int type = getExternalUsableStorage();
-            TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE ,type);
+            TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE, type);
             return type;
         }
     }
@@ -784,47 +815,47 @@ public class FileTransferOperation {
      * 检测存储空间是否够用
      */
     public synchronized void checkExternalUsableSize() {
-        long usb = MyTerminalFactory.getSDK().getExternalUsableSize(USB.getCode())/ 1024 / 1024;
-        long sdCard = MyTerminalFactory.getSDK().getExternalUsableSize(BitStarFileDirectory.SDCARD.getCode())/ 1024 / 1024;
+        //判断是否是只用sdcard
+        long sdCard = MyTerminalFactory.getSDK().getExternalUsableSize(BitStarFileDirectory.SDCARD.getCode()) / 1024 / 1024;
+        if(checkOnlyUseSdCardStorage()){
+            if(sdCard < 200){
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExternStorageSizeHandler.class, sdCard);
+            }
+            return;
+        }
+        //如果是内部存储和sdcard都使用，就需要检测是否切换使用空间
+        long usb = MyTerminalFactory.getSDK().getExternalUsableSize(USB.getCode()) / 1024 / 1024;
         int code = getExternalUsableStorageDirectory();
-        long memorySize = (code == USB.getCode())?usb:sdCard;
-        boolean isNeedNotify = (usb<200&&sdCard<200);
+        long memorySize = (code == USB.getCode()) ? usb : sdCard;
+        boolean isNeedNotify = (usb < 200 && sdCard < 200);
         //检查是否切换存储空间目录
-        if(memorySize<100){
-            changeExternalStorage(code,usb,sdCard,200);
+        if (memorySize < 100) {
+            changeExternalStorage(code, usb, sdCard, 200);
         }
         //通知页面停止相关操作
-        if(isNeedNotify){
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExternStorageSizeHandler.class,memorySize);
+        if (isNeedNotify) {
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExternStorageSizeHandler.class, memorySize);
         }
     }
 
     /**
      * 当空间不足时切换
+     *
      * @param code
      */
-    public boolean changeExternalStorage(int code,long usbSize,long sdCardSize,int checkSize){
+    public synchronized boolean changeExternalStorage(int code, long usbSize, long sdCardSize, int checkSize) {
         final boolean[] flag = {false};
-        if(code == USB.getCode()&&sdCardSize>checkSize){
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(TerminalFactory.getSDK().checkeExternalStorageIsAvailable(BitStarFileDirectory.SDCARD.getCode())){
-                        TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE ,BitStarFileDirectory.SDCARD.getCode());
-                        flag[0] = true;
-                    }
-                }
-            });
-        }else if(code == BitStarFileDirectory.SDCARD.getCode()&&usbSize>checkSize){
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(TerminalFactory.getSDK().checkeExternalStorageIsAvailable(BitStarFileDirectory.USB.getCode())){
-                        TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE ,USB.getCode());
-                        flag[0] = true;
-                    }
-                }
-            });
+        if (code == USB.getCode() && sdCardSize > checkSize) {
+            if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(BitStarFileDirectory.SDCARD.getCode())) {
+                TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE, BitStarFileDirectory.SDCARD.getCode());
+                flag[0] = true;
+            }
+
+        } else if (code == BitStarFileDirectory.SDCARD.getCode() && usbSize > checkSize) {
+            if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(BitStarFileDirectory.USB.getCode())) {
+                TerminalFactory.getSDK().putParam(Params.RECORD_FILE_STORAGE, USB.getCode());
+                flag[0] = true;
+            }
         }
         return flag[0];
     }
@@ -846,7 +877,7 @@ public class FileTransferOperation {
                 CopyOnWriteArrayList<BitStarFileRecord> noList = getRecordByState(FileTransferOperation.UPLOAD_STATE_NO);
                 logger.info(TAG + "externNoStorageOperation:no_upload:" + noList);
                 //上传文件,删除
-                uploadFileByPaths(noList, 0, 0L,true);
+                uploadFileByPaths(noList, 0, 0L, true);
             }
         });
     }
@@ -901,7 +932,7 @@ public class FileTransferOperation {
      * 启动应用时保证48小时定时任务开启
      */
     public void checkStartExpireFileAlarm() {
-        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getBean(Params.FILE_EXPIRE_RECORD, null,BitStarFileRecord.class);
+        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getBean(Params.FILE_EXPIRE_RECORD, null, BitStarFileRecord.class);
         if (expireRecord != null) {
             uploadFileByExpire(true);
         }
@@ -921,7 +952,7 @@ public class FileTransferOperation {
      * @param record
      */
     private void saveExpireFileInfoForFirstTimes(BitStarFileRecord record) {
-        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getBean(Params.FILE_EXPIRE_RECORD, null,BitStarFileRecord.class);
+        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getBean(Params.FILE_EXPIRE_RECORD, null, BitStarFileRecord.class);
         if (expireRecord == null) {
             logger.info(TAG + "saveExpireFileInfoForFirstTimes:record" + record);
             //保存超过48小时对比文件信息
@@ -943,7 +974,7 @@ public class FileTransferOperation {
             cancelFileExpireAlarmManager();
             //开启倒计时
             startFileExpireAlarmManager(record.getFileTime() + EXPIRE_TIME);
-        }else{
+        } else {
             //清空超过48小时对比文件信息
             TerminalFactory.getSDK().putBean(Params.FILE_EXPIRE_RECORD, null);
             //关闭倒计时
@@ -1088,31 +1119,33 @@ public class FileTransferOperation {
 
     /**
      * toast
+     *
      * @param content
      */
     private void showToast(final String content) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                ToastUtil.showToast(MyTerminalFactory.getSDK().getApplication(),content);
+                ToastUtil.showToast(MyTerminalFactory.getSDK().getApplication(), content);
             }
         });
     }
 
     /**
      * 通知PC文件上传失败
+     *
      * @param fileName
      * @param requestUniqueNo
      * @param resultCode
      * @param resultDesc
      */
-    private void notifyMemberUploadFileFail(String fileName,long requestUniqueNo,int resultCode,String resultDesc){
+    private void notifyMemberUploadFileFail(String fileName, long requestUniqueNo, int resultCode, String resultDesc) {
         //被动上传文件（PC拉取文件）
-        if(requestUniqueNo !=0){
+        if (requestUniqueNo != 0) {
 
             //文件不存在，通知PC上传失败
-            TerminalFactory.getSDK().getFileTransferManager().notifyMemberUploadFileFail(fileName,requestUniqueNo,
-                resultCode,resultDesc);
+            TerminalFactory.getSDK().getFileTransferManager().notifyMemberUploadFileFail(fileName, requestUniqueNo,
+                    resultCode, resultDesc);
         }
     }
 
@@ -1169,18 +1202,20 @@ public class FileTransferOperation {
 
     /**
      * 获取限速大小
+     *
      * @return
      */
     private boolean getUpLoadFileNeedRateLimit() {
         VideoLivePushingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine();
-        return (liveStateMachine != null && liveStateMachine.getCurrentState()!= VideoLivePushingState.IDLE);
+        return (liveStateMachine != null && liveStateMachine.getCurrentState() != VideoLivePushingState.IDLE);
     }
 
     /**
      * 是否是执法记录仪
+     *
      * @return
      */
-    private boolean isRecorderDevice(){
+    private boolean isRecorderDevice() {
         String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         return TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode();
     }
@@ -1198,4 +1233,39 @@ public class FileTransferOperation {
         String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         return TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_UAV.getCode();
     }
+
+    /**
+     * 获取usb中的数据Observable
+     * code
+     * fileType
+     *
+     * @return
+     */
+    public Observable<List<File>> getFileDataByCode(int code, String fileType) {
+        return Observable.fromCallable(() -> {
+            List<File> result = new ArrayList<>();
+            try {
+                boolean enable = TerminalFactory.getSDK().checkeExternalStorageIsAvailable(code);
+                if (enable) {
+                    File file = null;
+                    if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_VIDEO)) {
+                        file = new File(TerminalFactory.getSDK().getBITVideoRecordesDirectoty(code));
+                    } else if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_IMAGE)) {
+                        file = new File(TerminalFactory.getSDK().getBITPhotoRecordedDirectoty(code));
+                    } else if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_AUDIO)) {
+                        file = new File(TerminalFactory.getSDK().getBITAudioRecordedDirectoty(code));
+                    }
+                    if (file != null && file.exists() && file.isDirectory()) {
+                        result.clear();
+                        result.addAll(Arrays.asList(file.listFiles()));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            logger.info(TAG + "getFileDataByCode--code:"+code+"--fileType:" + fileType+"--size:" + result.size());
+            return result;
+        }).subscribeOn(Schedulers.io());
+    }
+
 }

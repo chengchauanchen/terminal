@@ -1,10 +1,14 @@
 package cn.vsx.vc.utils;
 
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import cn.vsx.vc.fragment.AppListFragment;
 import cn.vsx.vc.fragment.BindFragment;
+import cn.vsx.vc.fragment.FileListFragment;
+import cn.vsx.vc.fragment.FilePictureShowFragment;
+import cn.vsx.vc.fragment.FileVideoShowFragment;
 import cn.vsx.vc.fragment.GroupChangeFragment;
 import cn.vsx.vc.fragment.GroupSearchFragment;
 import cn.vsx.vc.fragment.InputPoliceIdFragment;
@@ -18,7 +22,7 @@ import cn.vsx.vc.fragment.SetServerFragment;
 
 public class FragmentUtil {
 
-    public static Fragment getFragmentByTag(String tag){
+    public static Fragment getFragmentByTag(String tag, Bundle bundle){
         Fragment mFragment = null;
         switch (tag){
             case Constants.FRAGMENT_TAG_MENU:
@@ -41,6 +45,10 @@ public class FragmentUtil {
             case Constants.FRAGMENT_TAG_INPUT:
                 //QR
                 mFragment = InputPoliceIdFragment.newInstance();
+                break;
+            case Constants.FRAGMENT_TAG_FILE_LIST:
+                //录像、照片
+                mFragment = FileListFragment.newInstance();
                 break;
             case Constants.FRAGMENT_TAG_SET:
                 //设置
@@ -70,6 +78,18 @@ public class FragmentUtil {
                 //组-搜索
                 mFragment = GroupSearchFragment.newInstance();
                 break;
+            case Constants.FRAGMENT_TAG_FILE_VIDEO_SHOW:
+                //文件查看-录像
+                mFragment = FileVideoShowFragment.newInstance();
+                break;
+            case Constants.FRAGMENT_TAG_FILE_PICTURE_SHOW:
+                //文件查看-图片
+                mFragment = FilePictureShowFragment.newInstance();
+                break;
+                default:break;
+        }
+        if(mFragment!=null&&bundle!=null){
+            mFragment.setArguments(bundle);
         }
         return  mFragment;
     }

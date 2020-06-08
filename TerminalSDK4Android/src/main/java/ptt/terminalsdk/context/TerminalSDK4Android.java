@@ -692,25 +692,25 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	/**得到存放录制视频和照片的文件目录*/
 	@Override
     public String getBITRecordesDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName()+ File.separator;
+		return getBITDirectoryByCode(code) + File.separator  + application.getPackageName()+ File.separator;
 	}
 
 	/**得到存放录制视频文件的目录*/
 	@Override
     public String getBITVideoRecordesDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/VideoRecord"+ File.separator;
+		return getBITDirectoryByCode(code) + File.separator +  application.getPackageName() + "/VideoRecord"+ File.separator;
 	}
 
 	/**得到存放照片文件的目录*/
 	@Override
     public String getBITPhotoRecordedDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/PhotoRecord"+ File.separator;
+		return getBITDirectoryByCode(code) + File.separator +  application.getPackageName() + "/PhotoRecord"+ File.separator;
 	}
 
 	/**得到存放录音文件的目录*/
 	@Override
     public String getBITAudioRecordedDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/AudioRecord"+ File.separator;
+		return getBITDirectoryByCode(code) + File.separator +  application.getPackageName() + "/AudioRecord"+ File.separator;
 	}
 	/**判断外部存储可用*/
 	@Override
@@ -1452,14 +1452,14 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	protected String newIMEI() {
 		try {
 			//实例化TelephonyManager对象
-			TelephonyManager telephonyManager = (TelephonyManager) application.getSystemService(Context.TELEPHONY_SERVICE);
+//			TelephonyManager telephonyManager = (TelephonyManager) application.getSystemService(Context.TELEPHONY_SERVICE);
 			//获取IMEI号
-			String imei = telephonyManager.getDeviceId();
+			String imei = AppUtil.getIMEI(application);
 			//在次做个验证，也不是什么时候都能获取到的啊
-			if (imei == null) {
+			if (TextUtils.isEmpty(imei)) {
 				imei = "";
 			}
-			return DataUtil.getIMEI15(imei);
+			return imei;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "";

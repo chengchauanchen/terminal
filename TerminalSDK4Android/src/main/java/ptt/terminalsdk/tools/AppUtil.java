@@ -1,6 +1,7 @@
 package ptt.terminalsdk.tools;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -8,14 +9,252 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.PowerManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import org.apache.log4j.Logger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AppUtil {
+
+    protected static Logger logger = Logger.getLogger(AppUtil.class);
+    public static final String TAG = "AppUtil---";
+    /**
+     * 获取当前手机系统版本号
+     *
+     * @return 系统版本号
+     */
+    public static String getSystemVersion() {
+        return Build.DISPLAY;
+        //return android.os.Build.VERSION.RELEASE;
+
+    }
+
+
+    /**
+     * 获取手机型号
+     *
+     * @return 手机型号
+     */
+    public static String getSystemModel() {
+        return Build.MODEL;
+    }
+
+    /**
+     * 获取手机厂商
+     *
+     * @return 手机厂商
+     */
+    public static String getDeviceBrand() {
+        return Build.BRAND;
+    }
+    /**
+     * 获取SN
+     *
+     * @return
+     */
+    public static String getSn(Context ctx) {
+        String serial = null;
+        try {
+            Class<?> c = Class.forName("android.os.SystemProperties");
+            Method get = c.getMethod("get", String.class);
+            serial = (String) get.invoke(c, "ro.serialno");
+
+        } catch (Exception ignored) {
+
+        }
+
+        return serial;
+    }
+
+
+    /**
+     * 系统4.0的时候
+     * 获取手机IMEI 或者MEID
+     *
+     * @return 手机IMEI
+     */
+    @SuppressLint("MissingPermission")
+    public static String getImeiOrMeid(Context ctx) {
+        try{
+            TelephonyManager manager = (TelephonyManager) ctx.getSystemService(Activity.TELEPHONY_SERVICE);
+            if (manager != null) {
+                return manager.getDeviceId();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 拿到imei或者meid后判断是有多少位数
+     *
+     * @param ctx
+     * @return
+     */
+    public static int getNumber(Context ctx) {
+        return getImeiOrMeid(ctx).trim().length();
+    }
+
+
+    /**
+     *  5.0统一使用这个获取IMEI IMEI2 MEID
+     *
+     * @param ctx
+     * @return
+     */
+    @SuppressLint("MissingPermission")
+    @TargetApi(Build.VERSION_CODES.M)
+    public static Map getImeiforM(Context ctx) {
+        Map<String, String> map = new HashMap<String, String>();
+        TelephonyManager mTelephonyManager = (TelephonyManager) ctx.getSystemService(Activity.TELEPHONY_SERVICE);
+        Class<?> clazz = null;
+        Method method = null;//(int slotId)
+        try {
+            clazz = Class.forName("android.os.SystemProperties");
+            method = clazz.getMethod("get", String.class, String.class);
+            String gsm = (String) method.invoke(null, "ril.gsm.imei", "");
+//            String meid = (String) method.invoke(null, "ril.cdma.meid", "");
+//            map.put("meid", meid);
+            if (!TextUtils.isEmpty(gsm)) {
+                //the value of gsm like:xxxxxx,xxxxxx
+                String imeiArray[] = gsm.split(",");
+                if (imeiArray != null && imeiArray.length > 0) {
+                    map.put("imei1", imeiArray[0]);
+                    if (imeiArray.length > 1) {
+                        map.put("imei2", imeiArray[1]);
+                    } else {
+                        map.put("imei2", mTelephonyManager.getDeviceId(1));
+                    }
+                } else {
+                    map.put("imei1", mTelephonyManager.getDeviceId(0));
+                    map.put("imei2", mTelephonyManager.getDeviceId(1));
+                }
+            } else {
+                map.put("imei1", mTelephonyManager.getDeviceId(0));
+                map.put("imei2", mTelephonyManager.getDeviceId(1));
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    @SuppressLint("MissingPermission")
+    @TargetApi(Build.VERSION_CODES.O)
+    public static Map getIMEIforO(Context context) {
+        Map<String, String> map = new HashMap<String, String>();
+        String imei1 = "";
+        String imei2 = "";
+        try{
+            TelephonyManager tm = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+            int count = tm.getPhoneCount();
+            logger.info(TAG+"getPhoneCount:"+count);
+            if(tm.getPhoneCount()>1){
+                imei1 = tm.getImei(0);
+                imei2 = tm.getImei(1);
+            }else{
+                imei1 = tm.getImei();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        map.put("imei1", imei1);
+        map.put("imei2", imei2);
+        return map;
+    }
+
+
+    /**
+     * 获取版本号
+     *
+     * @param context
+     * @return
+     */
+    public static int getVerCode(Context context) {
+        int vercoe = 0;
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            vercoe = packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+
+        }
+        return vercoe;
+    }
+
+    public static String getIMEI(Context ctx){
+        String imei = "";
+        try{
+            if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M){  //5.0以下 直接获取
+                logger.info(TAG+"getIMEI-getImeiOrMeid");
+                imei = getImeiOrMeid(ctx);
+            }else if(Build.VERSION.SDK_INT<Build.VERSION_CODES.O){ //6.0，7.0系统
+                Map imeiMaps = getImeiforM(ctx);
+                logger.info(TAG+"getIMEI-getImeiforM-map:"+imeiMaps);
+                imei = getTransform(imeiMaps);
+            }else{
+                Map imeiMaps = getIMEIforO(ctx);
+                logger.info(TAG+"getIMEI-getIMEIforO-map:"+imeiMaps);
+                imei = getTransform(imeiMaps);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return imei;
+    }
+
+    private static String getTransform( Map imeiMaps){
+        String imei = "";
+        if(imeiMaps!=null && !imeiMaps.isEmpty()){
+            String imei1 = (String) imeiMaps.get("imei1");
+            String imei2 = (String) imeiMaps.get("imei2");
+            if(TextUtils.isEmpty(imei1)&&TextUtils.isEmpty(imei2)){
+                return imei;
+            }
+            if(!TextUtils.isEmpty(imei1)&&TextUtils.isEmpty(imei2)){
+                imei =  imei1;
+            } else if(TextUtils.isEmpty(imei1)&&!TextUtils.isEmpty(imei2)){
+                imei =  imei2;
+            }else{
+                if (imei1.trim().length() == 15 && imei2.trim().length() == 15) {
+                    imei = imei1;
+                }else{
+                    if(imei1.trim().length() == 15){
+                        //如果只有imei1是有效的
+                        imei = imei1;
+                    }else if (imei2.trim().length() == 15){
+                        //如果只有imei2是有效的
+                        imei = imei2;
+                    }else{
+                        //如果都无效那么都为meid。只取一个就可以
+                        imei = imei1;
+                    }
+                }
+            }
+        }
+        return imei;
+    }
 
     /**
      * 判断Activity是否关闭

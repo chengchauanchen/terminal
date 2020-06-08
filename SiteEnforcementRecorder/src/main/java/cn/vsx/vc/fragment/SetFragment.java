@@ -93,15 +93,15 @@ public class SetFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.tv_set_infra_red:
                 //红外设置
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_INFRA_RED);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_INFRA_RED,new Bundle());
                 break;
             case R.id.tv_set_living_stop_time:
                 //实时视频上报时长设置
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_SET_LIVING_STOP_TIME);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_SET_LIVING_STOP_TIME,new Bundle());
                 break;
             case R.id.tv_set_server:
                 //ip、端口号设置
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_SET_SERVER);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_SET_SERVER,new Bundle());
                 break;
             case R.id.tv_set_vpn:
                 //vpn设置
@@ -109,7 +109,7 @@ public class SetFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.tv_app_list:
                 //应用列表
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_APP_LIST);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_APP_LIST,new Bundle());
                 break;
 
         }

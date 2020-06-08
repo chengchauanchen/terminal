@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:clickable="true"
+    android:focusable="true">
+
+    <TextureView
+        android:id="@+id/texture_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:keepScreenOn="true" />
+
+    <TextView
+        android:id="@+id/tv_quiet_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_20"
+        android:layout_marginTop="@dimen/dp_20"
+        android:drawableLeft="@drawable/no_voice"
+        android:drawablePadding="@dimen/dp_10"
+        android:gravity="center"
+        android:text="@string/quiet_play"
+        android:textColor="@color/white_60"
+        android:textSize="@dimen/sp_16"
+        android:visibility="gone" />
+
+
+    <ImageView
+        android:id="@+id/iv_pause"
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
+        android:layout_centerInParent="true"
+        android:src="@drawable/on_pause"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/ll_seek_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dp_15"
+        android:background="@color/gray_dark"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iv_pause_continue"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:src="@drawable/continue_play" />
+
+        <TextView
+            android:id="@+id/tv_current_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/dp_20"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_15" />
+
+        <SeekBar
+            android:id="@+id/seek_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:maxHeight="@dimen/dp_2"
+            android:minHeight="@dimen/dp_2"
+            android:progressDrawable="@drawable/seek_bar_style"
+            android:thumb="@drawable/select_seekbar" />
+
+        <TextView
+            android:id="@+id/tv_max_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="@dimen/dp_20"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_15" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_volume"
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="@dimen/dp_40"
+        android:layout_centerInParent="true"
+        android:background="@color/transparent_40"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_volume"
+            android:layout_width="@dimen/dp_14"
+            android:layout_height="@dimen/dp_24"
+            android:background="@drawable/volume_adjust" />
+
+        <TextView
+            android:id="@+id/tv_volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="100%"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14"
+            android:textStyle="normal" />
+    </LinearLayout>
+
+</RelativeLayout>

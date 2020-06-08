@@ -166,15 +166,15 @@ public class BindFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.ll_bind_nfc:
                 //判断是否打开了NFC
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_NFC);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_NFC,new Bundle());
                 break;
             case R.id.ll_bind_qr_scan:
                 //显示打开生成二维码页面
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_QR);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_QR,new Bundle());
                 break;
             case R.id.ll_bind_input:
                 //显示打开输入警号页面
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_INPUT);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_INPUT,new Bundle());
                 break;
         }
     }

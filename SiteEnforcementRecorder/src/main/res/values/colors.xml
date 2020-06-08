@@ -554,7 +554,14 @@
     <color name="blue_42_50">#8042a5f6</color>
     <color name="load_result_error">#ff4f4f</color>
     <color name="green_22">#22d922</color>
+    <color name="bg_file_list">#0d182b</color>
 
-
+    <color name="file_title_checked_text">#42A5F6</color>
+    <color name="file_title_unchecked_text">#99FFFFFF</color>
+    <color name="file_line_blue">#42A5F6</color><!--通讯下划线蓝色 -->
+    <color name="white_60">#99ffffff</color>
+    <color name="gray_dark">#00ffffff</color>
+    <color name="white_c9">#C9C7C7</color>
+    <color name="transparent_40">#66000000</color>
 
 </resources>

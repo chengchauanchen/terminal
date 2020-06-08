@@ -342,24 +342,29 @@ public class BITMediaStream {
         logger.info(TAG+"---startRecord");
         //检测内存卡的size
         FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-        operation.checkExternalUsableSize();
-        String dataStr = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        long millis = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getInt("record_interval", VIDEO_RECODE_PER_TIME);
-        String fileIndex = FileTransgerUtil.getRecodeFileIndex(1);
-        String fileName = FileTransgerUtil.getVideoRecodeFileName(dataStr,fileIndex);
-        File videoRecord = new File(MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory()), fileName);
-        if (!videoRecord.exists()) {
-            videoRecord.getParentFile().mkdirs();
+        boolean onlyUserSdCard = operation.checkOnlyUseSdCardStorage();
+        if(!onlyUserSdCard){
+            operation.checkExternalUsableSize();
         }
-        tempFile = videoRecord.toString();
-        mMuxer = new BITEasyMuxer(tempFile , millis);
-        mMuxer.setmContext(mApplicationContext);
-        mMuxer.setDateStr(dataStr, fileIndex);
-        if (mVC == null || audioStream == null) {
-            throw new IllegalStateException("you need to start preview before startRecord!");
+        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(operation.getExternalUsableStorageDirectory())) {
+            String dataStr = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            long millis = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getInt("record_interval", VIDEO_RECODE_PER_TIME);
+            String fileIndex = FileTransgerUtil.getRecodeFileIndex(1);
+            String fileName = FileTransgerUtil.getVideoRecodeFileName(dataStr,fileIndex);
+            File videoRecord = new File(MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory()), fileName);
+            if (!videoRecord.exists()) {
+                videoRecord.getParentFile().mkdirs();
+            }
+            tempFile = videoRecord.toString();
+            mMuxer = new BITEasyMuxer(tempFile , millis);
+            mMuxer.setmContext(mApplicationContext);
+            mMuxer.setDateStr(dataStr, fileIndex);
+            if (mVC == null || audioStream == null) {
+                throw new IllegalStateException("you need to start preview before startRecord!");
+            }
+            mVC.setMuxer(mMuxer);
+            audioStream.setMuxer(mMuxer);
         }
-        mVC.setMuxer(mMuxer);
-        audioStream.setMuxer(mMuxer);
     }
 
 

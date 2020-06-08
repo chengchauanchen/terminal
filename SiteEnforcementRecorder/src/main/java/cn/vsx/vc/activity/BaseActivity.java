@@ -17,6 +17,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -33,6 +34,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.Window;
@@ -406,7 +408,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
-
         setContentView(getLayoutResId());
         logger.info(TAG + "onCreate:" + MyApplication.instance.mAppStatus);
         // 判断如果被强杀，就回到 MainActivity 中去，否则可以初始化
@@ -740,12 +741,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             case KeyEvent.KEYCODE_DPAD_UP:
                 //ok按键
 //                dismissDialog();
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_MENU);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_MENU,new Bundle());
                 return true;
             case 285:
                 //短按是菜单键
                 if (!menuKeyIsLongPress) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_MENU);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_MENU,new Bundle());
                 }
                 menuKeyIsLongPress = false;
                 return true;
@@ -852,7 +853,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                         //登录
                         checkLogin(true, LOGIN_DELAY_TIME);
                         //权限打开之后判断是否需要上传位置信息，这种情况是之前没有打开权限使得登录或者成员信息改变的时候不能上传位置信息，到了主页面才申请权限的情况
-                        MyTerminalFactory.getSDK().getLocationManager().requestLocationByJudgePermission();
+                        MyTerminalFactory.getSDK().getLocationManager().startLocation(true,false,false,false);
                     }
                 } else {
                     CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
@@ -869,7 +870,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                             CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                         } else {
                             //权限打开之后判断是否需要上传位置信息，这种情况是之前没有打开权限使得登录或者成员信息改变的时候不能上传位置信息，到了主页面才申请权限的情况
-                            MyTerminalFactory.getSDK().getLocationManager().requestLocationByJudgePermission();
+                            MyTerminalFactory.getSDK().getLocationManager().startLocation(true,false,false,false);
                         }
                     } else {
                         if (onCameraDenied) {
@@ -879,7 +880,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                                 }
                             } else {
                                 //权限打开之后判断是否需要上传位置信息，这种情况是之前没有打开权限使得登录或者成员信息改变的时候不能上传位置信息，到了主页面才申请权限的情况
-                                MyTerminalFactory.getSDK().getLocationManager().requestLocationByJudgePermission();
+                                MyTerminalFactory.getSDK().getLocationManager().startLocation(true,false,false,false);
                             }
                         } else {
                             CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
@@ -1613,5 +1614,24 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             e.printStackTrace();
         }
     }
+
+    protected void setUsbFunction(String mode, boolean unlock) {
+        logger.info(TAG+"setUsbFunction--mode:"+mode+"---unlock:" + unlock);
+        try {
+            //mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_MASS_STORAGE,true);
+            UsbManager um = getSystemService(UsbManager.class);
+            Method m = um.getClass().getDeclaredMethod("setCurrentFunction", new Class[]{String.class, boolean.class});
+            m.setAccessible(true);
+            if (null == um)
+                Log.e("setUsbFunction", "UsbManager : null");
+            m.invoke(um, mode, unlock);
+            Log.i(TAG, "setUsbFunction:  done");
+        } catch (Exception e) {
+            logger.info(TAG+"setUsbFunction--e:"+e);
+        }
+
+    }
+
+
 
 }

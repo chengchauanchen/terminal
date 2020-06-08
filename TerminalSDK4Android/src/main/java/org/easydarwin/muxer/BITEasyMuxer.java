@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -119,29 +120,34 @@ public class BITEasyMuxer implements BaseEasyMuxer{
             logger.info(TAG+"超过每段视频的时间，重新创建视频片段的文件");
                 //录制过程中检测内存卡的size
             FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-            operation.checkExternalUsableSize();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            boolean onlyUserSdCard = operation.checkOnlyUseSdCardStorage();
+            if(!onlyUserSdCard){
+                operation.checkExternalUsableSize();
+            }
+            if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(operation.getExternalUsableStorageDirectory())) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
 //                if (VERBOSE)
-                logger.info(TAG+String.format("record file reach expiration.create new file:" + fileIndex));
-                mMuxer.stop();
-                mMuxer.release();
-                mMuxer = null;
-                mVideoTrackIndex = mAudioTrackIndex = -1;
-                String directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
-                //生成文件
-                operation.generateFileComplete(directoty,mFilePath+ FileTransgerUtil._TYPE_VIDEO_SUFFIX);
-                try {
-                    checkIndexOutOfBounds();
-                    logger.info(TAG+"5分钟后生成新的退图像文件，之前的 mFilePath====" + mFilePath);
-                    String fileName = FileTransgerUtil.getVideoRecodeFileName(dateStr , fileIndex );
-                    File videoRecord =  new File(directoty, fileName);
-                    mFilePath =videoRecord.toString();
-                    logger.info(TAG+"5分钟后生成新的退图像文件， mFilePath====" + mFilePath);
-                    mMuxer = new MediaMuxer(mFilePath + ".mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-                    addTrack(mVideoFormat, true);
-                    addTrack(mAudioFormat, false);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.info(TAG+String.format("record file reach expiration.create new file:" + fileIndex));
+                    mMuxer.stop();
+                    mMuxer.release();
+                    mMuxer = null;
+                    mVideoTrackIndex = mAudioTrackIndex = -1;
+                    String directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
+                    //生成文件
+                    operation.generateFileComplete(directoty,mFilePath+ FileTransgerUtil._TYPE_VIDEO_SUFFIX);
+                    try {
+                        checkIndexOutOfBounds();
+                        logger.info(TAG+"5分钟后生成新的退图像文件，之前的 mFilePath====" + mFilePath);
+                        String fileName = FileTransgerUtil.getVideoRecodeFileName(dateStr , fileIndex );
+                        File videoRecord =  new File(directoty, fileName);
+                        mFilePath =videoRecord.toString();
+                        logger.info(TAG+"5分钟后生成新的退图像文件， mFilePath====" + mFilePath);
+                        mMuxer = new MediaMuxer(mFilePath + ".mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+                        addTrack(mVideoFormat, true);
+                        addTrack(mAudioFormat, false);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

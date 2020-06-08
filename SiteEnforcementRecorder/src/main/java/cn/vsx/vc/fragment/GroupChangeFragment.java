@@ -185,7 +185,7 @@ public class GroupChangeFragment extends Fragment implements View.OnClickListene
                 break;
             case R.id.iv_close:
                 //搜索
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_GROUP_SEARCH);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_GROUP_SEARCH,new Bundle());
                 break;
         }
     }

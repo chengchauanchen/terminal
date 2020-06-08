@@ -59,4 +59,16 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <style name="contacts_title_checked_text">
+        <item name="android:textColor">@color/file_title_checked_text</item>
+    </style>
+
+    <style name="contacts_title_unchecked_text">
+        <item name="android:textColor">@color/file_title_unchecked_text</item>
+    </style>
+
+    <style name="TabLayoutTextStyle">
+        <item name="android:textSize">@dimen/sp_20</item>
+    </style>
+
 </resources>

@@ -270,6 +270,16 @@ public class PromptManager {
     }
 
     /**
+     * 存储空间没有找到
+     */
+    public void startExternNoFind() {
+        if (soundPool != null) {
+            logger.info("存储空间没有找到！");
+            soundPool.play(soundMap.get(R.raw.exten_no_find), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
      * 存储空间严重不足
      */
     public void startExternNoStorage() {
@@ -480,6 +490,7 @@ public class PromptManager {
         soundMap.put(R.raw.change_group_ok, soundPool.load(MyApplication.instance, R.raw.change_group_ok, 1));
         soundMap.put(R.raw.request_call_wait, soundPool.load(MyApplication.instance, R.raw.request_call_wait, 1));
         soundMap.put(R.raw.passive_dropped_warning, soundPool.load(MyApplication.instance, R.raw.passive_dropped_warning, 1));
+        soundMap.put(R.raw.exten_no_find, soundPool.load(MyApplication.instance, R.raw.exten_no_find, 1));
         soundMap.put(R.raw.exten_no_storage, soundPool.load(MyApplication.instance, R.raw.exten_no_storage, 1));
         soundMap.put(R.raw.exten_storage_not_engou, soundPool.load(MyApplication.instance, R.raw.exten_storage_not_engou, 1));
         soundMap.put(R.raw.photograph, soundPool.load(MyApplication.instance, R.raw.photograph, 1));
