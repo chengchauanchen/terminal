@@ -42,11 +42,5 @@
             android:textSize="@dimen/sp_16"
             android:visibility="gone"/>
         <!--<include layout="@layout/layout_volume"/>-->
-        <cn.vsx.vc.view.VolumeViewLayout
-            android:id="@+id/volume_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone"/>
     </RelativeLayout>
 </LinearLayout>

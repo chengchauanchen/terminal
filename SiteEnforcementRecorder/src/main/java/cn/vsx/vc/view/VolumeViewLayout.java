@@ -83,19 +83,21 @@ public class VolumeViewLayout extends LinearLayout {
         @Override
         public void handler(boolean isVolumeOff,int status) {
             myHandler.removeMessages(RECEIVEVOICECHANGED);
-            if (status == 0){
-                setVisibility(View.GONE);
+            myHandler.post(() -> {
+                if (status == 0){
+                    setVisibility(View.GONE);
 //                ll_sliding_chenge_volume.setVisibility(View.GONE);
-            }else if (status ==1){
-                setVisibility(View.VISIBLE);
+                }else if (status ==1){
+                    setVisibility(View.VISIBLE);
 //                ll_sliding_chenge_volume.setVisibility(View.VISIBLE);
 
-            }
-            tv_volume_fw.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
-            if (timerTask!= null){
-                timerTask.cancel();
-                timerTask = null;
-            }
+                }
+                tv_volume_fw.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
+                if (timerTask!= null){
+                    timerTask.cancel();
+                    timerTask = null;
+                }
+            });
             myHandler.sendEmptyMessageDelayed(RECEIVEVOICECHANGED,2000);
         }
     };

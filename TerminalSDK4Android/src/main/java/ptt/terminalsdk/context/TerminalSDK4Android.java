@@ -692,25 +692,26 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	/**得到存放录制视频和照片的文件目录*/
 	@Override
     public String getBITRecordesDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator  + application.getPackageName()+ File.separator;
+
+		return getBITDirectoryByCode(code) + File.separator  +  (needAndroidDataPath()?"Android/data/":"") + application.getPackageName()+ File.separator;
 	}
 
 	/**得到存放录制视频文件的目录*/
 	@Override
     public String getBITVideoRecordesDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator +  application.getPackageName() + "/VideoRecord"+ File.separator;
+		return getBITDirectoryByCode(code) + File.separator +   (needAndroidDataPath()?"Android/data/":"") + application.getPackageName() + "/VideoRecord"+ File.separator;
 	}
 
 	/**得到存放照片文件的目录*/
 	@Override
     public String getBITPhotoRecordedDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator +  application.getPackageName() + "/PhotoRecord"+ File.separator;
+		return getBITDirectoryByCode(code) + File.separator +   (needAndroidDataPath()?"Android/data/":"") + application.getPackageName() + "/PhotoRecord"+ File.separator;
 	}
 
 	/**得到存放录音文件的目录*/
 	@Override
     public String getBITAudioRecordedDirectoty(int code){
-		return getBITDirectoryByCode(code) + File.separator +  application.getPackageName() + "/AudioRecord"+ File.separator;
+		return getBITDirectoryByCode(code) + File.separator +   (needAndroidDataPath()?"Android/data/":"") + application.getPackageName() + "/AudioRecord"+ File.separator;
 	}
 	/**判断外部存储可用*/
 	@Override
@@ -1735,4 +1736,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		return localVersion;
 	}
+
+	private boolean needAndroidDataPath(){
+		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		if(!TextUtils.isEmpty(deviceType)){
+			if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())
+					&& TextUtils.equals("CL310A",Build.MODEL)){
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

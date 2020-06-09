@@ -36,7 +36,6 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.listener.PlayVideoStateListener;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentPopBackStackHandler;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.StringUtil;
 
@@ -60,8 +59,8 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
 //    VideoView video_view;
 
     //音量
-    @Bind(R.id.volume_layout)
-    VolumeViewLayout volumeViewLayout;
+//    @Bind(R.id.volume_layout)
+//    VolumeViewLayout volumeViewLayout;
 
     @Bind(R.id.tv_quiet_play)
     TextView mTvQuietPlay;
@@ -84,9 +83,9 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
             super.handleMessage(msg);
             switch(msg.what){
                 case RECEIVEVOICECHANGED:
-                    if(volumeViewLayout!=null){
-                        volumeViewLayout.setVisibility(View.GONE);
-                    }
+//                    if(volumeViewLayout!=null){
+//                        volumeViewLayout.setVisibility(View.GONE);
+//                    }
                     break;
                 case UPDATEQUITPLAY:
                     removeMessages(UPDATEQUITPLAY);
@@ -163,6 +162,7 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
 
         myAdapter =  new MyAdapter(videoViews);
         viewPager.setAdapter(myAdapter);
+        viewPager.setOffscreenPageLimit(0);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -265,7 +265,7 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
             int width = StringUtil.stringToInt(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));//宽
             int height = StringUtil.stringToInt(mmr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));//高
             int screenWidth = ScreenUtils.getScreenWidth();
-            if(videoView!=null){
+            if(videoView!=null&&width>0){
                 android.view.ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(screenWidth, screenWidth*height/width);
 //                lp.width = screenWidth;
 //                lp.height = screenWidth*height/width;
@@ -297,8 +297,6 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
         @Override
         public View instantiateItem(ViewGroup container, int position){
             VideoView videoView = data.get(position);
-//            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-//            lp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
             container.addView(videoView);
             return videoView;
         }
@@ -410,6 +408,10 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
                         videoView.setVideoPath(path);
                         videoView.seekTo(0);
                         setTextureViewSize(videoView,path);
+                        videoView.setOnErrorListener((mp, what, extra) -> {
+                            videoView.stopPlayback();
+                            return true;
+                        });
                         videoViews.add(videoView);
                     }
                 }
@@ -436,9 +438,9 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
         super.onDestroyView();
         try{
             ButterKnife.unbind(this);
-            if(volumeViewLayout!=null){
-                volumeViewLayout.unRegistLintener();
-            }
+//            if(volumeViewLayout!=null){
+//                volumeViewLayout.unRegistLintener();
+//            }
             mHandler.removeCallbacksAndMessages(null);
             MyTerminalFactory.getSDK().getAudioProxy().setVolume(IAudioProxy.VOLUME_DEFAULT);
         }catch(IllegalStateException e){

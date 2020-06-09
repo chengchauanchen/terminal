@@ -12,7 +12,6 @@ import android.util.Log;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechUtility;
 import com.uuzuche.lib_zxing.activity.ZXingLibrary;
-import com.vsxin.mscv5.app.SpeechApp;
 
 import org.apache.log4j.Logger;
 

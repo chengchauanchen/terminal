@@ -25,6 +25,7 @@ import cn.vsx.vc.receiveHandle.ReceiverFragmentPopBackStackHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DeviceUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -40,6 +41,9 @@ public class SetFragment extends Fragment implements View.OnClickListener {
     TextView tvTitle;
     @Bind(R.id.tv_set_living_stop_time)
     TextView tvSetLivingStopTime;
+
+    @Bind(R.id.tv_set_infra_red)
+    TextView tvSetInfraRed;
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
     public static SetFragment newInstance() {
@@ -76,6 +80,7 @@ public class SetFragment extends Fragment implements View.OnClickListener {
         tvTitle.setText(getString(R.string.text_set));
         tvTitle.setPadding(0, 0, 0, 0);
         checkLoginState();
+        tvSetInfraRed.setVisibility((DeviceUtil.showSettingInfraRed())?View.VISIBLE:View.GONE);
     }
 
     private void initListener() {

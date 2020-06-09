@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="cn.vsx.vc"
     android:sharedUserId="android.uid.system">
+  <!--package="cn.vsx.vc">-->
 
   <!-- android:sharedUserId="android.uid.system" -->
   <uses-permission android:name="android.permission.INTERNET"/>
@@ -118,9 +119,6 @@
         <category android:name="android.intent.category.LAUNCHER"/>
         <category android:name="android.intent.category.HOME" />
         <category android:name="android.intent.category.DEFAULT" />
-        <!-- 发布到平台应用商店 -->
-        <!--<action android:name="pstore.intent.action.MAIN"/>-->
-        <!--<category android:name="pstore.intent.category.APP"/>-->
       </intent-filter>
     </activity>
     <activity

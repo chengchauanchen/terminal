@@ -83,7 +83,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateUploadFileRateLimitHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
@@ -97,6 +96,7 @@ import cn.vsx.vc.receiveHandle.ReceiverFragmentBackPressedByGroupChangeHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentClearHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentPopBackStackHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
+import cn.vsx.vc.receiveHandle.ReceiverNfcStatusHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
@@ -112,6 +112,7 @@ import cn.vsx.vc.utils.APPStateUtil;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.DeviceUtil;
 import cn.vsx.vc.utils.FragmentUtil;
 import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.NfcUtil;
@@ -297,12 +298,14 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseSetLivingTimeMessageHandler);//响应设置终端上报时长
             MyTerminalFactory.getSDK().registReceiveHandler(receiverUpdateInfraRedHandler);
             MyTerminalFactory.getSDK().registReceiveHandler(receiverUsbConnetStateHandler);//USB连接状态
+            MyTerminalFactory.getSDK().registReceiveHandler(receiverNfcStatusHandler);//NFC状态
             batteryBroadcastReceiver = new BatteryBroadcastReceiver();
             usbConnetStateReceiver = new UsbConnetStateReceiver();
             registBatterBroadcastReceiver(batteryBroadcastReceiver);//注册电量的广播
             registUsbConnetStateReceiver(usbConnetStateReceiver);//注册电量的广播
             initPhoneStateListener();//初始化手机信号的监听
             registPhoneStateListener();//注册手机信号的监听
+            DeviceUtil.registListener();
             getSupportFragmentManager().addOnBackStackChangedListener(this);
         }catch (Exception e){
             e.printStackTrace();
@@ -397,7 +400,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyWarnLivingTimeoutMessageHandler);//终端上报即将超时提醒
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseSetLivingTimeMessageHandler);//响应设置终端上报时长
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiverUpdateInfraRedHandler);
-            MyTerminalFactory.getSDK().unregistReceiveHandler(receiverUsbConnetStateHandler);//USB连接
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiverNfcStatusHandler);//USB连接
             myHandler.removeCallbacksAndMessages(null);
             PromptManager.getInstance().stopRing();
             stopService(new Intent(MainActivity.this, LockScreenService.class));
@@ -407,7 +410,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             unRegistBatterBroadcastReceiver(batteryBroadcastReceiver);//注销电量的广播
             unRegistUsbConnetStateReceiver(usbConnetStateReceiver);//注销USB的广播
             unRegistPhoneStateListener();//注册手机信号的监听
-            stopInfraRed();
+            DeviceUtil.unRegistListener();
+            DeviceUtil.stopInfraRed();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -418,7 +422,9 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         switch (view.getId()) {
             case R.id.sv_live:
                 try {
-                    mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
+                    if(mMediaStream!=null){
+                        mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1119,23 +1125,25 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
      */
     private ReceiverFragmentShowHandler receiverFragmentShowHandler = (tag,bundle) -> {
         logger.info("ReceiverFragmentShowHandler---currentFragment:"+currentFragment);
-        Fragment mFragment = FragmentUtil.getFragmentByTag(tag,bundle);
-        if (mFragment != null) {
-            if (TextUtils.equals(Constants.FRAGMENT_TAG_MENU, tag)) {
-                currentFragment = null;
-                clearFragmentBackStack();
+        myHandler.post(() -> {
+            Fragment mFragment = FragmentUtil.getFragmentByTag(tag,bundle);
+            if (mFragment != null) {
+                if (TextUtils.equals(Constants.FRAGMENT_TAG_MENU, tag)) {
+                    currentFragment = null;
+                    clearFragmentBackStack();
+                }
+                hideTopInfoLayout();
+                if(currentFragment == null){
+                    getSupportFragmentManager().beginTransaction().add(R.id.fl_content, mFragment, tag).addToBackStack(tag).show(mFragment).commit();
+                }else{
+                    getSupportFragmentManager().beginTransaction().hide(currentFragment).add(R.id.fl_content, mFragment, tag).addToBackStack(tag).show(mFragment).commit();
+                }
+                if(flContent!=null){
+                    flContent.setVisibility(View.VISIBLE);
+                }
+                currentFragment = mFragment;
             }
-            hideTopInfoLayout();
-            if(currentFragment == null){
-                getSupportFragmentManager().beginTransaction().add(R.id.fl_content, mFragment, tag).addToBackStack(tag).show(mFragment).commit();
-            }else{
-                getSupportFragmentManager().beginTransaction().hide(currentFragment).add(R.id.fl_content, mFragment, tag).addToBackStack(tag).show(mFragment).commit();
-            }
-            if(flContent!=null){
-                flContent.setVisibility(View.VISIBLE);
-            }
-            currentFragment = mFragment;
-        }
+        });
     };
 
     /**
@@ -1176,16 +1184,23 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         @Override
         public void handler(boolean isConnected) {
             ToastUtil.showToast(MyApplication.instance,isConnected?"USB连接":"USB断开");
-            setFlyMode(isConnected);
-            if(isConnected){
-                setUsbFunction(MyTerminalFactory.getSDK().getFileTransferOperation().checkOnlyUseSdCardStorage()?"mass_storage":"mtp", true);
-//                setUsbFunction("mtp", true);
-                NfcUtil.disable(MainActivity.this);
-                disableReaderMode();
-            }else{
-                setUsbFunction("none", false);
+            //比特星I7
+            DeviceUtil.usbConnetStatus(isConnected);
+        }
+    };
+
+    /**
+     * 设置nfc
+     */
+    private ReceiverNfcStatusHandler receiverNfcStatusHandler = new ReceiverNfcStatusHandler() {
+        @Override
+        public void handler(boolean open) {
+            if(open){
                 NfcUtil.enable(MainActivity.this);
                 enableReaderMode();
+            }else{
+                NfcUtil.disable(MainActivity.this);
+                disableReaderMode();
             }
         }
     };
@@ -1207,27 +1222,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
      * 停止一切业务
      */
     private ReceiverStopBusniessHandler receiverStopBusniessHandler = this::stopBusniess;
-
-    /**音量改变*/
-    private ReceiveVolumeOffCallHandler receiveVolumeOffCallHandler = new ReceiveVolumeOffCallHandler() {
-
-        @Override
-        public void handler(boolean isVolumeOff,int status) {
-//            myHandler.removeMessages(HANDLE_CODE_RECEIVE_VOICE_CHANGED);
-//            if (status == 0){
-//                ll_sliding_chenge_volume.setVisibility(View.GONE);
-//            }else if (status ==1){
-//                ll_sliding_chenge_volume.setVisibility(View.VISIBLE);
-//
-//            }
-//            tv_volume_fw.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
-//            if (timerTask!= null){
-//                timerTask.cancel();
-//                timerTask = null;
-//            }
-//            myHandler.sendEmptyMessageDelayed(HANDLE_CODE_RECEIVE_VOICE_CHANGED,2000);
-        }
-    };
 
     /**
      * 绑定同一个警务通账号，切组到警情组时，上报图像
@@ -1505,10 +1499,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             ms = new BITMediaStream(getApplicationContext(), surface, true, width, height);
             mMediaStream = ms;
             startCamera();
-//                mService.setMediaStream(ms);
-            initInfraRedState();
+            DeviceUtil.initInfraRedState();
         }
-
     }
 
     /**
@@ -1681,7 +1673,10 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                     exit();
                 } else {
 //                    ToastUtil.showToast(this, getString(R.string.text_move_task_to_back));
-//                    moveTaskToBack(true);
+                    //判断是否可以点击返回按键返回到home页面
+                    if(DeviceUtil.canBackToHome()){
+                        moveTaskToBack(true);
+                    }
                 }
                 return true;
             default:
