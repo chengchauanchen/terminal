@@ -3,11 +3,10 @@ package cn.vsx.vc.activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Handler;
-import android.os.Message;
 import android.widget.RelativeLayout;
 
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.ActivityCollector;
 
 import static cn.vsx.vc.utils.BitmapUtil.computeSampleSize;
 
@@ -16,15 +15,6 @@ import static cn.vsx.vc.utils.BitmapUtil.computeSampleSize;
  */
 
 public class KilledActivity extends BaseActivity {
-
-    Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            finish();
-        }
-    };
-
 
     @Override
     public int getLayoutResId(){
@@ -41,7 +31,11 @@ public class KilledActivity extends BaseActivity {
 
     @Override
     public void initData(){
-        handler.sendEmptyMessageDelayed(0,5000);
+        try{
+            myHandler.postDelayed(() -> ActivityCollector.removeAllActivity(),5000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override

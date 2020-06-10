@@ -151,23 +151,33 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }
     }
 
-
     protected Handler myHandler = new Handler(Looper.getMainLooper());
-
 
     /**
      * 组成员遥毙消息
      */
     protected ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = forbid -> {
         logger.error("收到遥毙，此时forbid状态为：" + forbid);
-        if (forbid) {
-            TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-            TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-            startActivity(new Intent(BaseActivity.this, KilledActivity.class));
-            myHandler.postDelayed(() -> {
-                BaseActivity.this.finish();
-                MyApplication.instance.stopHandlerService();
-            }, 5000);
+        try{
+            if (forbid) {
+                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+                if(TerminalFactory.getSDK().isServerConnected()){
+                    TerminalFactory.getSDK().getAuthManagerTwo().logout();
+                }
+                LoginStateMachine loginStateMachine = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine();
+                if(loginStateMachine!=null){
+                    loginStateMachine.stop();
+                }
+                TerminalFactory.getSDK().getClientChannel().stop();
+                MyTerminalFactory.getSDK().stop();
+                MyApplication.instance.isClickVolumeToCall = false;
+                MyApplication.instance.isPttPress = false;
+                OperateReceiveHandlerUtil.getInstance().clear();
+                startActivity(new Intent(BaseActivity.this, KilledActivity.class));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     };
 
@@ -210,16 +220,11 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             //重走应用流程
             protectApp();
         } else {
-
-
             regBroadcastRecv(ACT_SHOW_FULL_SCREEN, ACT_DISMISS_FULL_SCREEN, STOP_INDIVDUALCALL_SERVEIC);
             ActivityCollector.addActivity(this, getClass());
             initView();
-
             initData();
-
             initListener();
-
             audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         }
         //适配Android9.0调用hide时，关闭警告弹窗

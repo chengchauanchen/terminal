@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -144,31 +143,30 @@ public class FileTransferOperation {
         @Override
         public void handler(PTTProtolbuf.NotifyMemberUploadFileMessage message) {
             logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:" + message);
-            if (message != null) {
-
-
-                List<String> list = message.getFileNameListList();
-
-                if (list != null && list.size() > 0) {
-                    logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:list:" + list);
-                    if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
-                        logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:isSave");
-                        //正在省电模式中，
-                        notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_POWER_SAVE_STATUS);
-                        return;
-                    }
-                    //从数据库中获取文件的信息,并上传
-                    CopyOnWriteArrayList<BitStarFileRecord> records = getRecordsByNames(list);
-                    if(!records.isEmpty()){
-                        uploadFileByPaths(records, message.getRequestMemberId(),message.getRequestUniqueNo(), false);
-                    }else{
-                        //本地没有这条数据时，通知PC没有
-                        notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
-                    }
-                    //推送视频文件到流媒体服务器
-//                    pushStreamOfVideoFile(list);
-                }
+            if (message == null) {
+                return;
             }
+            List<String> list = message.getFileNameListList();
+            if (list == null || list.isEmpty()) {
+                return;
+            }
+            logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:list:" + list);
+            if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:isSave");
+                //正在省电模式中，
+                notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_POWER_SAVE_STATUS);
+                return;
+            }
+            //从数据库中获取文件的信息,并上传
+            CopyOnWriteArrayList<BitStarFileRecord> records = getRecordsByNames(list);
+            if(!records.isEmpty()){
+                uploadFileByPaths(records, message.getRequestMemberId(),message.getRequestUniqueNo(), false);
+            }else{
+                //本地没有这条数据时，通知PC没有
+                notifyMemberUploadFileFail(list.get(0), message.getRequestUniqueNo(), FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
+            }
+            //推送视频文件到流媒体服务器
+//                    pushStreamOfVideoFile(list);
         }
     };
 
@@ -286,49 +284,46 @@ public class FileTransferOperation {
      * 上传文件目录树
      */
     public void uploadFileTreeBean(final String path) {
-        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-            @Override
-            public void run() {
-                List<FileBean> list = saveAndGetBITFileTreeBean(path);
-                if (!isConnected(context)) {
-                    logger.info(TAG + "uploadFileTreeBean:isConnected:" + isConnected(context));
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            List<FileBean> list = saveAndGetBITFileTreeBean(path);
+            if (!isConnected(context)) {
+                logger.info(TAG + "uploadFileTreeBean:isConnected:" + isConnected(context));
+                return;
+            }
+            if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                logger.info(TAG + "uploadFileTreeBean:isSave:");
+                return;
+            }
+            if (list == null || list.isEmpty()) {
+                return;
+            }
+            logger.info(TAG + "uploadFileTreeBean:url:" + getUploadFileServerUrl() + UPLOAD_FILE_INFO_SERVER_PATH + "-list-" + list);
+            Map<String, String> paramsMap = new HashMap<>();
+            paramsMap.put("fileTree", new Gson().toJson(list));
+            String result = TerminalFactory.getSDK().getHttpClient().post(getUploadFileServerUrl() + UPLOAD_FILE_INFO_SERVER_PATH, paramsMap);
+            logger.info(TAG + "uploadFileTreeBean:result:" + result);
+            //{"msg":"上传的文件信息已经存在记录","success":false} {"success":true}
+            if (TextUtils.isEmpty(result)) {
+                return;
+            }
+            try {
+                JSONObject object = JSONObject.parseObject(result);
+                if (object == null) {
                     return;
                 }
-                if(MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
-                    logger.info(TAG + "uploadFileTreeBean:isSave:");
+                String success = object.getString(RESULT_SUCCESS);
+                if (!TextUtils.equals(RESULT_SUCCESS_TRUE,success)) {
                     return;
                 }
-                if (list != null && list.size() > 0) {
-                    logger.info(TAG + "uploadFileTreeBean:url:" + getUploadFileServerUrl() + UPLOAD_FILE_INFO_SERVER_PATH + "-list-" + list);
-                    Map<String, String> paramsMap = new HashMap<>();
-                    paramsMap.put("fileTree", new Gson().toJson(list));
-                    String result = TerminalFactory.getSDK().getHttpClient().post(getUploadFileServerUrl() + UPLOAD_FILE_INFO_SERVER_PATH, paramsMap);
-                    logger.info(TAG + "uploadFileTreeBean:result:" + result);
-                    //{"msg":"上传的文件信息已经存在记录","success":false} {"success":true}
-                    if (!TextUtils.isEmpty(result)) {
-                        try {
-                            JSONObject object = JSONObject.parseObject(result);
-                            if (object != null) {
-                                String success = object.getString(RESULT_SUCCESS);
-                                if (RESULT_SUCCESS_TRUE.equals(success)) {
-                                    //判断是否是执法记录仪，是的话就自动上传文件
-                                    //判断是否是自动上传文件,随后要改成服务配置参数
-                                    if(isRecorderDevice()){
-                                        uploadFileByPath(path, 0, 0L,false);
-                                    }
-                                    deleteBITFileTreeBean(list);
-                                } else {
-                                    logger.error(TAG + "uploadFileTreeBean:result;" + object.getString(RESULT_MSG));
-                                }
-                            } else {
-                                logger.info(TAG + "uploadFileTreeBean:result;解析错误");
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            logger.info(TAG + "uploadFileTreeBean:result:Exception" + e);
-                        }
-                    }
+                //判断是否是执法记录仪，是的话就自动上传文件
+                //判断是否是自动上传文件,随后要改成服务配置参数
+                if(isRecorderDevice()){
+                    uploadFileByPath(path, 0, 0L,false);
                 }
+                deleteBITFileTreeBean(list);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.info(TAG + "uploadFileTreeBean:result:Exception" + e);
             }
         });
     }
@@ -349,63 +344,63 @@ public class FileTransferOperation {
             logger.info(TAG + "uploadFileByPath:isSave" );
             return;
         }
-        TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(new Runnable() {
-            @Override
-            public void run() {
-                File file = new File(path);
-                logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + (file.exists()));
-                String fileName = FileTransgerUtil.getFileName(path);
-                try {
-                    if (file.exists()) {
-                        String type = FileTransgerUtil.getBITFileType(path);
-                        String url = MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, "");
-                        if(TextUtils.equals(type,FileTransgerUtil.TYPE_IMAGE)){
-                            url = MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, "");
-                        }
-                        String fileUrl = uploadFileByOkHttp(url,file);
-                        if(!TextUtils.isEmpty(fileUrl)){
-                            //上传成功，调用接口更新文件信息到服务端
-                            String result = updateFileByOkHttp(fileName,fileUrl,requestMemberId,requestUniqueNo);
-                            if (!TextUtils.isEmpty(result)) {
-                                JSONObject object = JSONObject.parseObject(result);
-                                if (object != null) {
-                                    String success = object.getString(RESULT_SUCCESS);
-                                    if (TextUtils.equals(RESULT_SUCCESS_TRUE,success)) {
-                                        //是否删除
-                                        if (isDelete) {
-                                            deleteRecordByName(fileName);
-                                            file.delete();
-                                        } else {
-                                            //更新数据库中文件的上传状态
-                                            updateRecordState(fileName, UPLOAD_STATE_YES);
-                                        }
-                                        //更新48小时未上传的对比的文件信息
-                                        checkUpdateExpireFileInfo();
-                                    } else {
-                                        logger.error(TAG + "uploadFileInfo:result;" + object.getString(RESULT_MSG));
-                                        String resultDesc = TextUtils.isEmpty(object.getString(RESULT_MSG))?FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL:object.getString(RESULT_MSG);
-                                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, resultDesc);
-                                    }
-                                } else {
-                                    logger.info(TAG + "uploadFileInfo:result;解析错误");
-                                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
-                                }
-                            } else {
-                                notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
-                            }
-                        } else {
-                            //上传失败
-                            notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_FAEL);
-                        }
-                    } else {
-                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    //                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
-                    logger.info(TAG + "uploadFileByPath:result:Exception" + e);
-                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
+        TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(() -> {
+            File file = new File(path);
+            logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + (file.exists()));
+            String fileName = FileTransgerUtil.getFileName(path);
+            try {
+                if (!file.exists()) {
+                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
+                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
+                    return;
                 }
+                String type = FileTransgerUtil.getBITFileType(path);
+                String url = MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, "");
+                if(TextUtils.equals(type,FileTransgerUtil.TYPE_IMAGE)){
+                    url = MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, "");
+                }
+                String fileUrl = uploadFileByOkHttp(url,file);
+                if(TextUtils.isEmpty(fileUrl)){
+                    //上传失败
+                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
+                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_FAEL);
+                    return;
+                }
+                //上传成功，调用接口更新文件信息到服务端
+                String result = updateFileByOkHttp(fileName,fileUrl,requestMemberId,requestUniqueNo);
+                if (TextUtils.isEmpty(result)) {
+                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
+                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
+                    return;
+                }
+                JSONObject object = JSONObject.parseObject(result);
+                if (object == null) {
+                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
+                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
+                    return;
+                }
+                String success = object.getString(RESULT_SUCCESS);
+                if (!TextUtils.equals(RESULT_SUCCESS_TRUE,success)) {
+                    logger.error(TAG + "uploadFileInfo:result;" + object.getString(RESULT_MSG));
+                    String resultDesc = TextUtils.isEmpty(object.getString(RESULT_MSG))?FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL:object.getString(RESULT_MSG);
+                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, resultDesc);
+                    return;
+                }
+                //是否删除
+                if (isDelete) {
+                    deleteRecordByName(fileName);
+                    file.delete();
+                } else {
+                    //更新数据库中文件的上传状态
+                    updateRecordState(fileName, UPLOAD_STATE_YES);
+                }
+                //更新48小时未上传的对比的文件信息
+                checkUpdateExpireFileInfo();
+            } catch (Exception e) {
+                e.printStackTrace();
+                //                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
+                logger.info(TAG + "uploadFileByPath:result:Exception" + e);
+                notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
             }
         });
     }
@@ -501,28 +496,28 @@ public class FileTransferOperation {
             public void run() {
                 CopyOnWriteArrayList<BitStarFileRecord> list = getRecordByState(FileTransferOperation.UPLOAD_STATE_NO);
                 logger.info(TAG + "uploadFileByExpire:list:" + list);
-                if (list != null && list.size() > 0) {
-                    //有没有上传的文件
-                    CopyOnWriteArrayList<BitStarFileRecord> uploadList = new CopyOnWriteArrayList<>();
-                    for (BitStarFileRecord record : list) {
-                        if (record != null && FileTransgerUtil.isOutOf48Hours(record.getFileTime())) {
-                            //如果超过48小时就加入上传集合中
-                            uploadList.add(record);
-                        }
+                if (list == null || list.isEmpty()) {
+                    updateExpireFileInfo(null);
+                    return;
+                }
+                //有没有上传的文件
+                CopyOnWriteArrayList<BitStarFileRecord> uploadList = new CopyOnWriteArrayList<>();
+                for (BitStarFileRecord record : list) {
+                    if (record != null && FileTransgerUtil.isOutOf48Hours(record.getFileTime())) {
+                        //如果超过48小时就加入上传集合中
+                        uploadList.add(record);
                     }
-                    if (uploadList.size() > 0) {
-                        //有超过48小时未上传的文件
-                        uploadFileByPaths(uploadList, 0, 0L, false);
-                        if(showToast){
-                            showToast("有48小时未上传的文件，开始上传");
-                        }
-                    } else {
-                        //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
-//                        sendMessgeToUpdateExpireInfo(list.get(0));
-                        updateExpireFileInfo(list.get(0));
+                }
+                if (uploadList.size() > 0) {
+                    //有超过48小时未上传的文件
+                    uploadFileByPaths(uploadList, 0, 0L, false);
+                    if(showToast){
+                        showToast("有48小时未上传的文件，开始上传");
                     }
                 } else {
-                    updateExpireFileInfo(null);
+                    //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
+//                        sendMessgeToUpdateExpireInfo(list.get(0));
+                    updateExpireFileInfo(list.get(0));
                 }
             }
         });
@@ -705,17 +700,17 @@ public class FileTransferOperation {
     private void deleteBITFileTreeBean(List<FileBean> list) {
         FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST, new FileTreeBean(), FileTreeBean.class);
         List<FileBean> allList = fileTreeBean.getFileTree();
-        if (allList != null && allList.size() > 0) {
-            if (list != null && list.size() > 0) {
-                for (FileBean bean : list) {
-                    if (allList.contains(bean)) {
-                        allList.remove(bean);
-                    }
-                }
-                fileTreeBean.setFileTree(allList);
-                TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST, fileTreeBean);
-            }
+        if (allList == null || allList.isEmpty()) {
+            return;
         }
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        for (FileBean bean : list) {
+            allList.remove(bean);
+        }
+        fileTreeBean.setFileTree(allList);
+        TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST, fileTreeBean);
     }
 
     /**
@@ -729,7 +724,7 @@ public class FileTransferOperation {
             return null;
         }
         File file = new File(path);
-        if (file != null && file.exists()) {
+        if (file.exists()) {
             return FileTransgerUtil.getFileInfo(path, file);
         } else {
             return null;
@@ -893,14 +888,12 @@ public class FileTransferOperation {
             int size = yesList.size();
             for (int i = 0; i < size; i++) {
                 File file = new File(yesList.get(i).getFilePath());
-                if (file != null && file.exists()) {
+                if (file.exists()) {
                     file.delete();
                 }
                 array[i] = yesList.get(i).getFileName();
             }
-            if (array.length > 0) {
-                TerminalFactory.getSDK().getSQLiteDBManager().deleteBitStarFileRecords(array);
-            }
+            TerminalFactory.getSDK().getSQLiteDBManager().deleteBitStarFileRecords(array);
         }
     }
 
@@ -1088,17 +1081,15 @@ public class FileTransferOperation {
      */
     private boolean isConnected(Context context) {
         ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (null != connectivity) {
-            NetworkInfo info = connectivity.getActiveNetworkInfo();
-            if (info != null) {
-                return info.isAvailable();
-            }
+        if (null != connectivity && connectivity.getActiveNetworkInfo()!=null) {
+            return connectivity.getActiveNetworkInfo().isAvailable();
         }
         return false;
     }
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case HANDLER_WHAT_SAVE_EXPIRE_INFO_FOR_FRIST_TIMES:
@@ -1142,7 +1133,6 @@ public class FileTransferOperation {
     private void notifyMemberUploadFileFail(String fileName, long requestUniqueNo, int resultCode, String resultDesc) {
         //被动上传文件（PC拉取文件）
         if (requestUniqueNo != 0) {
-
             //文件不存在，通知PC上传失败
             TerminalFactory.getSDK().getFileTransferManager().notifyMemberUploadFileFail(fileName, requestUniqueNo,
                     resultCode, resultDesc);
@@ -1246,19 +1236,20 @@ public class FileTransferOperation {
             List<File> result = new ArrayList<>();
             try {
                 boolean enable = TerminalFactory.getSDK().checkeExternalStorageIsAvailable(code);
-                if (enable) {
-                    File file = null;
-                    if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_VIDEO)) {
-                        file = new File(TerminalFactory.getSDK().getBITVideoRecordesDirectoty(code));
-                    } else if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_IMAGE)) {
-                        file = new File(TerminalFactory.getSDK().getBITPhotoRecordedDirectoty(code));
-                    } else if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_AUDIO)) {
-                        file = new File(TerminalFactory.getSDK().getBITAudioRecordedDirectoty(code));
-                    }
-                    if (file != null && file.exists() && file.isDirectory()) {
-                        result.clear();
-                        result.addAll(Arrays.asList(file.listFiles()));
-                    }
+                if (!enable) {
+                    return result;
+                }
+                File file = null;
+                if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_VIDEO)) {
+                    file = new File(TerminalFactory.getSDK().getBITVideoRecordesDirectoty(code));
+                } else if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_IMAGE)) {
+                    file = new File(TerminalFactory.getSDK().getBITPhotoRecordedDirectoty(code));
+                } else if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_AUDIO)) {
+                    file = new File(TerminalFactory.getSDK().getBITAudioRecordedDirectoty(code));
+                }
+                if (file != null && file.exists() && file.isDirectory()) {
+                    result.clear();
+                    result.addAll(Arrays.asList(file.listFiles()));
                 }
             } catch (Exception e) {
                 e.printStackTrace();

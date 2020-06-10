@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
@@ -74,7 +73,6 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
-import cn.vsx.hamster.terminalsdk.model.IdentifyType;
 import cn.vsx.hamster.terminalsdk.model.UpdateType;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCanUpdateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
@@ -1172,7 +1170,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                             || TextUtils.equals(AuthManagerTwo.WUTIE,apkType)){
                         startVPNService();
                     }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
-//                TerminalFactory.getSDK().getTianJinStringToken();
                         requestDrawOverLays();
                     }else if(TextUtils.equals(AuthManagerTwo.LANGFANG,apkType)){
                         authorizeByLangFang();//认证并获取User信息
@@ -1189,42 +1186,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             });
         });
     }
-
-    /**
-     * 获取票据
-     */
-    private void getTianJinStringToken() {
-        MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, "");
-        MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,false);
-        Cursor cursor = getContentResolver().query(Uri.parse(Constants.AUTH_TIAN_JIN_TOKEN_URI),null,null,null,null);
-        logger.info("getTianJinStringToken--cursor:"+cursor+"--count:"+((cursor!=null)?cursor.getCount():0));
-        if (cursor != null && cursor.moveToFirst()) {
-            do{
-                int resultCode = cursor.getInt(cursor.getColumnIndex("resultCode"));
-                String message = cursor.getString(cursor.getColumnIndex("message"));
-                String billStr = cursor.getString(cursor.getColumnIndex("billStr"));
-                logger.info("getTianJinStringToken--resultCode"+resultCode+"--message:"+message+"--billStr:"+billStr);
-                if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                    if(!TextUtils.isEmpty(billStr)){
-                        //传给服务端获取警员信息
-                        MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,true);
-                        MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STRTOKEN,billStr);
-                        MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, IdentifyType.IDENTIFY_TYPE_TOKEN_OUTER.toString());
-                    }else{
-                        ToastUtil.showToast(this,getString(R.string.text_get_token_fail));
-                    }
-                } else {
-                    ToastUtil.showToast(this,TextUtils.isEmpty(message)?getString(R.string.text_get_token_fail):message);
-                }
-            }while(cursor.moveToNext());
-        }else{
-            ToastUtil.showToast(this,getString(R.string.text_get_token_fail));
-        }
-        if(cursor!=null){
-            cursor.close();
-        }
-    }
-
     private void permissionDenied(final String permissionName) {
         new DialogUtil() {
             @Override

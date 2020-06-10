@@ -1,5 +1,7 @@
 package ptt.terminalsdk.tools;
 
+import android.text.TextUtils;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -12,7 +14,7 @@ public class PhoneAdapter {
     // 是否是F25机型
     public static boolean isF25() {
         String machineType = android.os.Build.MODEL;
-        if (machineType.equals("F25")) {
+        if (TextUtils.equals("F25",machineType)) {
             return true;
         }
         return false;
@@ -22,9 +24,20 @@ public class PhoneAdapter {
     public static boolean isF32() {
         String machineType = android.os.Build.MODEL;
         logger.info("android.os.Build.MODEL ---> "+machineType);
-        if (machineType.equals("F32") || machineType.equals("LT132")) {
+        if (TextUtils.equals("F32",machineType) || TextUtils.equals("LT132",machineType)) {
             return true;
         }
         return false;
     }
+
+    // 是否是PDC760机型
+    public static boolean isPDC760() {
+        String machineType = android.os.Build.MODEL;
+        if (TextUtils.equals("PDC760",machineType)) {
+            return true;
+        }
+        return false;
+    }
+
+
 }
