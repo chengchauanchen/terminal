@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import org.apache.log4j.Logger;
 
@@ -81,28 +82,13 @@ public class RecorderGPSManager {
 					}
 					logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--Longitude:" + location.getLongitude()+"--Latitude:" +location.getLatitude()
 							+"--location:" +location);
-					StringBuffer stringBuffer = new StringBuffer();
+//					[gps 31******,114****** hAcc=48 et=+4d8h28m1s798ms alt=122.89964528815449 vel=0.0 vAcc=??? sAcc=??? bAcc=???]
 					if (location.getLongitude() != 0 && location.getLatitude() != 0) {
-						List<Address> addresses = new Geocoder(context).getFromLocation(
-								location.getLatitude(), location.getLongitude(),
-								1);
-						if (addresses.size() > 0) {
-							Address address = addresses.get(0);
-							stringBuffer.append(address.getCountryName());
-							if(address.getMaxAddressLineIndex() == 0){
-								stringBuffer.append(address.getAddressLine(0));
-							}else{
-								for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-									stringBuffer.append(address.getAddressLine(i));
-								}
-							}
-						}
-						//停止顺丰GPS定位的监听
-						MyTerminalFactory.getSDK().getRecorderSfGPSManager().removelocationListener();
+						String address = getAddressString(location);
 						//停止百度定位的监听
 						MyTerminalFactory.getSDK().getRecorderBDGPSManager().removelocationListener();
-						location.setExtras(MyTerminalFactory.getSDK().getLocationManager().getAddressBundle(stringBuffer.toString()));
-						logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--addresses:" + stringBuffer.toString());
+						location.setExtras(MyTerminalFactory.getSDK().getLocationManager().getAddressBundle(address));
+						logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--addresses:" + address);
 						MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(location);
 					}else{
 						MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();
@@ -110,6 +96,7 @@ public class RecorderGPSManager {
 					}
 				}catch (Exception e){
 					e.printStackTrace();
+					logger.error(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager-onLocationChanged-e:"+e.toString());
 					MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();
 					MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.GPS);
 				}
@@ -207,5 +194,34 @@ public class RecorderGPSManager {
 				locationManager.removeUpdates(locationListener);
 			}
 		}
+	}
+
+	/**
+	 * 获取地址信息
+	 * @param location
+	 * @return
+	 */
+	private String getAddressString(Location location){
+		StringBuffer stringBuffer = new StringBuffer();
+		try{
+			List<Address> addresses = new Geocoder(context).getFromLocation(
+					location.getLatitude(), location.getLongitude(),
+					1);
+			if (addresses.size() > 0) {
+				Address address = addresses.get(0);
+				stringBuffer.append(address.getCountryName());
+				if(address.getMaxAddressLineIndex() == 0){
+					stringBuffer.append(address.getAddressLine(0));
+				}else{
+					for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+						stringBuffer.append(address.getAddressLine(i));
+					}
+				}
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+			logger.error(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager-onLocationChanged-Address-e:"+e.toString());
+		}
+		return (TextUtils.isEmpty(stringBuffer.toString())? "" : stringBuffer.toString());
 	}
 }

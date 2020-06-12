@@ -87,7 +87,7 @@ public class LocationManager  {
 
     //通知GPS失败
     private final int HANDLER_WHAT_GPS_FAIL = 5;
-    private final int DELAYED_TIME_GPS_FAIL = 13*1000;
+    private final int DELAYED_TIME_GPS_FAIL = 20*1000;
     //延时时间
     private final int DELAYED_TIME = 300;
     //记录定位类型失败的集合
@@ -407,46 +407,52 @@ public class LocationManager  {
      */
     @SuppressLint("MissingPermission")
     private synchronized void requestLocationUpdate(final boolean isChat) {
-        //如果在定位中就不再请求定位
-        if(isLocationing){
-            return;
-        }
-        //设置正在定位
-        isLocationing = true;
-        logger.info(TAG + "是否是会话页面发送位置信息：" + isChat + "---之前的是否是会话页面的状态:" + isChatSendLocation);
-        //判断当前是否已经是会话页面上传位置信息
-        if(!isChatSendLocation){
-            isChatSendLocation = isChat;
-        }
+        try{
+            mHandler.post(() -> {
+                //如果在定位中就不再请求定位
+                if(isLocationing){
+                    return;
+                }
+                //设置正在定位
+                isLocationing = true;
+                logger.info(TAG + "是否是会话页面发送位置信息：" + isChat + "---之前的是否是会话页面的状态:" + isChatSendLocation);
+                //判断当前是否已经是会话页面上传位置信息
+                if(!isChatSendLocation){
+                    isChatSendLocation = isChat;
+                }
 //        if (!isChat) {
-        failList.clear();
+                failList.clear();
 //        }
-        boolean shijuSDP = TerminalFactory.getSDK().getLiveManager().isShijuSDP();
-        logger.info(LocationManager.TAG + "是否市局环境---"+shijuSDP);
-        if(shijuSDP){
-            //顺丰
-            RecorderSfGPSManager recorderSfGPSManager = MyTerminalFactory.getSDK().getRecorderSfGPSManager();
-            recorderSfGPSManager.requestLocationInfo(0);
-        }
-        //百度定位
-        final RecorderBDGPSManager bDGPSManager = MyTerminalFactory.getSDK().getRecorderBDGPSManager();
-        bDGPSManager.requestLocationInfo(0);
+                boolean shijuSDP = TerminalFactory.getSDK().getLiveManager().isShijuSDP();
+                logger.info(LocationManager.TAG + "是否市局环境---"+shijuSDP);
+                if(shijuSDP){
+                    //顺丰
+                    RecorderSfGPSManager recorderSfGPSManager = MyTerminalFactory.getSDK().getRecorderSfGPSManager();
+                    recorderSfGPSManager.requestLocationInfo(0);
+                }
+                //百度定位
+                final RecorderBDGPSManager bDGPSManager = MyTerminalFactory.getSDK().getRecorderBDGPSManager();
+                bDGPSManager.requestLocationInfo(0);
 
-        //GPS定位
-        final RecorderGPSManager gpsManager = MyTerminalFactory.getSDK().getRecorderGPSManager();
-        if (gpsManager.checkInitCompleteAndIsChat()) {
-            logger.info(LocationManager.TAG + "gpsManager-requestLocationUpdates");
+                //GPS定位
+                final RecorderGPSManager gpsManager = MyTerminalFactory.getSDK().getRecorderGPSManager();
+                if (gpsManager.checkInitCompleteAndIsChat()) {
+                    logger.info(LocationManager.TAG + "gpsManager-requestLocationUpdates");
 //                    MyTerminalFactory.getSDK().getRecorderGPSManager().getLocationManager().requestLocationUpdates(gpsManager.getlocationProvider(), uploadTime, 0, gpsManager.getLocationListener());
-            MyTerminalFactory.getSDK().getRecorderGPSManager().getLocationManager().requestSingleUpdate(gpsManager.getlocationProvider(),  gpsManager.getLocationListener(),null);
-        }
-        //处理5s之后都没有定位到----会话页面
-        if (isChat) {
-            getHandler().sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT,DELAYED_TIME_GPS_FAIL);
-        }else{
-            if(getHandler().hasMessages(HANDLER_WHAT_GPS_FAIL)){
-                getHandler().removeMessages(HANDLER_WHAT_GPS_FAIL);
-            }
-            getHandler().sendEmptyMessageDelayed(HANDLER_WHAT_GPS_FAIL,DELAYED_TIME_GPS_FAIL);
+                    MyTerminalFactory.getSDK().getRecorderGPSManager().getLocationManager().requestSingleUpdate(gpsManager.getlocationProvider(),  gpsManager.getLocationListener(),null);
+                }
+                //处理5s之后都没有定位到----会话页面
+                if (isChat) {
+                    getHandler().sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT,DELAYED_TIME_GPS_FAIL);
+                }else{
+                    if(getHandler().hasMessages(HANDLER_WHAT_GPS_FAIL)){
+                        getHandler().removeMessages(HANDLER_WHAT_GPS_FAIL);
+                    }
+                    getHandler().sendEmptyMessageDelayed(HANDLER_WHAT_GPS_FAIL,DELAYED_TIME_GPS_FAIL);
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

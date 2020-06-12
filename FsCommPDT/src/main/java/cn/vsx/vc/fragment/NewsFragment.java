@@ -153,13 +153,15 @@ public class NewsFragment extends BaseFragment {
 
     private void loadMessages(){
         synchronized(NewsFragment.this){
-            terminalMessageData.clear();
-            clearData();
-            List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
-            logger.info("从数据库取出消息列表："+messageList);
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                terminalMessageData.clear();
+                clearData();
+                List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
+                logger.info("从数据库取出消息列表："+messageList);
 
-            addData(messageList);
-            addToNewsList();
+                addData(messageList);
+                addToNewsList();
+            });
         }
     }
 
