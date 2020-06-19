@@ -1830,7 +1830,7 @@ public class NewsFragment extends BaseFragment {
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
                 if(!DataUtil.isExistGroup(next.messageToId) && !TerminalMessageUtil.isCombatGroup(next)){
                     //说明组列表中没有这个组了
-                    iterator.remove();//消息列表中移除
+                    TerminalFactory.getSDK().getDataManager().getGroupByNoAndSaveData(next.messageToId);
                 }else {
                     next.messageToName = DataUtil.getGroupName(next.messageToId);
                 }
