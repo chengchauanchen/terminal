@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+import com.github.moduth.blockcanary.BlockCanary;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.apache.log4j.Logger;
@@ -40,6 +41,7 @@ import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.util.StateMachine.IState;
+import cn.vsx.vc.BuildConfig;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.ReceiveHandlerService;
@@ -126,7 +128,19 @@ public class MyApplication extends BaseApplication{
 		CrashReport.initCrashReport(getApplicationContext(), "3ebac89656", true);
 		int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
 		CrashReport.setUserId(memberId+"");
-
+        if (BuildConfig.DEBUG) {
+            BlockCanary.install(this, new AppBlockCanaryContext()).start();
+        }
+	//		if (BuildConfig.DEBUG) {
+	//            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+	//                    .detectAll()
+	//                    .penaltyLog()
+	//                    .build());
+	//            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+	//                    .detectAll()
+	//                    .penaltyLog()
+	//                    .build());
+	//        }
 	}
 
 	protected void initSdk(){

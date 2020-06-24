@@ -19,19 +19,11 @@ public abstract class BaseFragment extends Fragment {
     public Logger logger = Logger.getLogger(getClass());
    
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		
-		mRootView =inflater.inflate(getContentViewId(),container,false);  
-		
-
-        
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		mRootView =inflater.inflate(getContentViewId(),container,false);
         initView();
-        
         initData();
-        
 		initListener();
-		
 		return mRootView;
 	}
 
@@ -69,12 +61,9 @@ public abstract class BaseFragment extends Fragment {
 	 * 初始化数据 给控件填充内容
 	 */
 	public abstract void initData();
-	
-
 
 	@Override  
     public void onDestroyView() {  
-
 		unRegistListener();
 //		RefWatcher refWatcher = MyApplication.getRefWatcher(getActivity());
 //		refWatcher.watch(this);

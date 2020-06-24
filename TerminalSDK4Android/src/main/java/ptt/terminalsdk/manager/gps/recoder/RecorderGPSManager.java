@@ -85,6 +85,8 @@ public class RecorderGPSManager {
 //					[gps 31******,114****** hAcc=48 et=+4d8h28m1s798ms alt=122.89964528815449 vel=0.0 vAcc=??? sAcc=??? bAcc=???]
 					if (location.getLongitude() != 0 && location.getLatitude() != 0) {
 						String address = getAddressString(location);
+						//停止顺丰GPS定位的监听
+						MyTerminalFactory.getSDK().getRecorderSfGPSManager().removelocationListener();
 						//停止百度定位的监听
 						MyTerminalFactory.getSDK().getRecorderBDGPSManager().removelocationListener();
 						location.setExtras(MyTerminalFactory.getSDK().getLocationManager().getAddressBundle(address));

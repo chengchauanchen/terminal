@@ -91,7 +91,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
-import cn.vsx.vc.dialog.ProgressDialogForResgistActivity;
+import cn.vsx.vc.dialog.ProgressForResgistActivityDialog;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
@@ -142,7 +142,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     View view_pop;
     private int reAuthCount;
-//    private ProgressDialogForResgistActivity myProgressDialog;
     private Handler myHandler = new Handler(Looper.getMainLooper());
     private String orgHint;
     private String nameHint;
@@ -151,7 +150,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private PopupWindow popupWindow;
     private boolean isCheckSuccess;//联通校验是否通过
     private boolean isCheckFinished;//联通校验是否完成
-    private boolean showDialog;//联通校验是否完成
+    private boolean showDialog;//是否可以
     private NetWorkConnectionChangeByNoRegistReceiver netWorkConnectionChangeByNoRegistReceiver;
     // 安全VPN服务名称
     private static final String SEC_VPN_SERVICE_ACTION_NAME = "sec.vpn.service";
@@ -403,7 +402,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
             if(hasCompleteData){
                 changeProgressMsg(getString(R.string.text_start_success));
-                myHandler.postDelayed(() -> goOn(true),1000);
+                myHandler.postDelayed(() -> {
+                    stopProgress();
+                    goOn(true);
+                },1000);
                 return;
             }
             //是否是认证
@@ -1005,13 +1007,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         orgHint = getResources().getString(R.string.regist_org_hint);
         nameHint = getResources().getString(R.string.regist_name_hint);
         showDialog = true;
-//        if (myProgressDialog == null) {
-//            myProgressDialog = new ProgressDialogForResgistActivity(RegistActivity.this);
-//            myProgressDialog.setCancelable(false);
-//
-//        }
-//        myProgressDialog =ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
-
         ll_regist.setVisibility(View.GONE);
         initUpdate();
         judgePermission();
@@ -1383,7 +1378,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         btnAddMember.setOnClickListener(new OnSwitchingModeClickListener());
         btn_confirm.setOnClickListener(new OnClickListenerImplementation());
         xcd_available_ip.setOnXCDropDownListViewClickListeren(new XCDClickListener());
-        ProgressDialogForResgistActivity.getInstance(RegistActivity.this).setUpLoadLogClickListeren(new MyProgressUpLoadLogListener());
+        getProgressDialog().setUpLoadLogClickListeren(new MyProgressUpLoadLogListener());
         btn_idcard_login.setOnClickListener(new IdcardLoginClickListener());
         llPushLive.setOnClickListener(new PushLiveClickListener());
         if (viewHolder == null) {
@@ -1463,7 +1458,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCanUpdateHandler);
             myHandler.removeCallbacksAndMessages(null);
-            ProgressDialogForResgistActivity.getInstance(this).onDismiss();
+            getProgressDialog().onDismiss();
             reAuthCount = 0;
 
             viewHolder = null;
@@ -1478,7 +1473,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private void hideProgressDialog() {
         try{
-            ProgressDialogForResgistActivity.getInstance(this).dismiss();
+            getProgressDialog().dismiss();
 //        if (myProgressDialog != null) {
 //            myProgressDialog.dismiss();
 //        }
@@ -1527,16 +1522,28 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         try{
             myHandler.post(() -> {
                 if(showDialog){
-                    ProgressDialogForResgistActivity dialog =  ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
-                    if(dialog!=null){
-                        dialog.setMsg(msg);
-                        dialog.show();
-                    }
+                    ProgressForResgistActivityDialog dialog =  getProgressDialog();
+                    dialog.setMsg(msg);
+                    dialog.show();
                 }
             });
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+    private void stopProgress() {
+        try{
+            ProgressForResgistActivityDialog dialog =  getProgressDialog();
+            if(dialog!=null){
+                dialog.onStopAnimation();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private ProgressForResgistActivityDialog getProgressDialog(){
+        return ProgressForResgistActivityDialog.getInstance(RegistActivity.this);
     }
 
     @Override
@@ -1929,10 +1936,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     /**
      *
      */
-    private class MyProgressUpLoadLogListener implements ProgressDialogForResgistActivity.UpLoadLogClickListeren {
+    private class MyProgressUpLoadLogListener implements ProgressForResgistActivityDialog.UpLoadLogClickListener {
         @Override
-        public void onUploadLogClickListeren() {
-//            logger.info("result ProgressDialogForResgistActivity 点击上传");
+        public void onUploadLogClickListener() {
             uploadLog();
         }
     }

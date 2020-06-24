@@ -211,7 +211,7 @@ public class SearchUtil {
             List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllAccountFirst();
             Log.e("SearchUtil", "getDbAllAccount-成员数据.size:" + search.size());
             return search;
-        }).subscribeOn(Schedulers.io());
+        }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io());
     }
 
 
@@ -297,7 +297,7 @@ public class SearchUtil {
             List<GroupSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllGroupFirst();
             Log.e("SearchUtil", "getAllGroupFirst-组数据.size:" + search.size());
             return search;
-        }).subscribeOn(Schedulers.io());
+        }).subscribeOn(Schedulers.io()).observeOn(Schedulers.io());
     }
 
 

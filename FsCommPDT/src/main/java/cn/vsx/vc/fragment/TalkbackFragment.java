@@ -1373,9 +1373,9 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
     public void initData() {
 
         // 如果是F25机型，则将PTT按键隐藏
-        if (PhoneAdapter.isF25()) {
+//        if (PhoneAdapter.isF25()) {
 //            view_pager.setVisibility(View.GONE);
-        }
+//        }
 
         MyApplication.instance.isPttViewPager = true;
         online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();

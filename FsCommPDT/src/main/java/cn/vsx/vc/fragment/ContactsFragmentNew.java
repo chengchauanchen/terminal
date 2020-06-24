@@ -1,15 +1,12 @@
 package cn.vsx.vc.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -53,7 +50,6 @@ import cn.vsx.vc.search.SearchTabGroupFragment;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.ToastUtil;
-import cn.vsx.vc.view.DialPopupwindow;
 import cn.vsx.vc.view.MyTabLayout.MyTabLayout;
 import cn.vsx.vc.view.ProgressView;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
@@ -62,6 +58,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -73,25 +70,14 @@ import static cn.vsx.vc.view.MyTabLayout.MyTabLayout.MODE_SCROLLABLE;
 
 @SuppressLint("ValidFragment")
 public class ContactsFragmentNew extends BaseFragment implements View.OnClickListener {
-
     TextView setting_group_name;
-
     ImageView add_icon;
-
-
     FrameLayout viewPager;
-
     ImageView icon_laba;
-
     ImageView voice_image;
-
-
-    ImageButton imgbtn_dial;
-
     private Fragment currentFragment;
     NewMainActivity activity;
     private Handler mHandler = new Handler();
-    private DialPopupwindow dialPopupwindow;
     private boolean soundOff;
     private MyTabLayout tabLayout;
     private List<String> titles = new ArrayList<>();
@@ -115,22 +101,15 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     @Override
     public void initView() {
-        imgbtn_dial = (ImageButton) mRootView.findViewById(R.id.imgbtn_dial);
         tabLayout = mRootView.findViewById(R.id.tabLayout);
         voice_image = (ImageView) mRootView.findViewById(R.id.voice_image);
         icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
         viewPager = (FrameLayout) mRootView.findViewById(R.id.contacts_viewPager);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
-
-
         activity = (NewMainActivity) getActivity();
-
         setVideoIcon();
-
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
-
-        dialPopupwindow = new DialPopupwindow(context);
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
         voice_image.setOnClickListener(view -> {
             if (!soundOff) {
@@ -164,12 +143,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupByNoHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
-        imgbtn_dial.setOnClickListener(v -> {
-            if (dialPopupwindow == null) {
-                dialPopupwindow = new DialPopupwindow(context);
-            }
-            dialPopupwindow.showAtLocation(((Activity) context).findViewById(R.id.rg), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
-        });
 
         activity.setOnBackListener(() -> {
             if (groupFragmentNew.isVisible()) {
@@ -210,7 +183,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     @Override
     public void initData() {
-        imgbtn_dial.setVisibility(View.GONE);
         FragmentManager childFragmentManager = getChildFragmentManager();
         FragmentTransaction transaction = childFragmentManager.beginTransaction();
         //添加tab
@@ -275,11 +247,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             public void onTabSelected(MyTabLayout.Tab tab) {
                 logger.info("onTabSelected");
                 int position = tab.getPosition();
-                if (position == 0) {
-                    imgbtn_dial.setVisibility(View.GONE);
-                } else {
-//                    imgbtn_dial.setVisibility(View.VISIBLE);
-                }
                 BaseFragment currentFrgment = fragments.get(position);
                 if (lastFragment != currentFrgment) {
                     tab.setSelected(true);
@@ -301,7 +268,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         });
 
         //同步通讯录数据
-        synchronousData();
+        TerminalFactory.getSDK().getThreadPool().execute(() -> synchronousData());
     }
     private void setVideoIcon() {
         MyTopRightMenu.offerObject().initview(add_icon, activity);
@@ -348,7 +315,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                     icon_laba.setVisibility(View.VISIBLE);
                 });
             }
-
         }
     };
     /**
@@ -561,13 +527,15 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 }
             }
         }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CommonObserver<Boolean>() {
+                .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
-                    public void doOnSubscribe(Disposable d) {
-                        super.doOnSubscribe(d);
+                    public void accept(Disposable disposable) throws Exception {
                         showProgressView();
                     }
+                })
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .subscribe(new CommonObserver<Boolean>() {
 
                     @Override
                     protected String setTag() {
@@ -581,7 +549,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
                     @Override
                     protected void onError(String errorMsg) {
-                        hideProgressView();
+                        mHandler.post(() -> hideProgressView());
                         logger.info("更新通讯录组数据 异常："+errorMsg);
                     }
 
@@ -589,7 +557,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                     protected void onSuccess(Boolean allRowSize) {
                         logger.info(allRowSize);
                         if (allRowSize) {
-                            hideProgressView();
+                            mHandler.post(() -> hideProgressView());
                         }
                     }
                 });

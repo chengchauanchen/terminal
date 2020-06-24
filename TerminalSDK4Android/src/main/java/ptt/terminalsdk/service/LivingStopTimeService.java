@@ -25,6 +25,7 @@ public class LivingStopTimeService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         logger.info(TAG + "LivingStopTimeService：收到上报图像到最大时间的广播");
+        KeepLiveManager.getInstance().setServiceForeground(this);
         long intervalTime = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME_TEMPT, 0L);
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyWarnLivingTimeoutMessageHandler.class, intervalTime, Params.LIVING_STOP_TIME_DELAY_TIME_SECONDS);
         return super.onStartCommand(intent, flags, startId);
