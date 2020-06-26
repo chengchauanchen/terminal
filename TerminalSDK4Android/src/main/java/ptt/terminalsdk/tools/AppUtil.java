@@ -15,6 +15,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Paint;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -529,6 +530,13 @@ public class AppUtil {
             dbm =  BaseApplication.getApplication().getDbmLevel();
         }
         return dbm;
+    }
+
+    //获取字符串得宽度
+    public static int getStrWidth(String str, int textSize){
+        Paint pFont = new Paint();
+        pFont.setTextSize(textSize);
+        return (int)pFont.measureText(str);
     }
 
 }

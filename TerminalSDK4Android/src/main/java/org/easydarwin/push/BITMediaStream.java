@@ -155,25 +155,21 @@ public class BITMediaStream {
 
                     }
 
-                    String status = AppUtil.getDbmStatusStr(context);
-                    int strWidth = BITMediaStream.this.width - getStrWidth(status) - 40;
-                    if (strWidth < 0){
-                        strWidth = 0;
-                    }
-                    overlay.overlay(data, status, strWidth,0);
+                    overLayBatteryDbm(data,mApplicationContext,textSize);
                     mVC.onVideo(data, NV21);
                     mCamera.addCallbackBuffer(data);
                 }
-
-
-
             };
     }
 
-    public int getStrWidth(String str){
-        Paint pFont = new Paint();
-        pFont.setTextSize(textSize);
-        return (int)pFont.measureText(str);
+    //添加电量信号状态水印
+    public void overLayBatteryDbm(byte[] data, Context context, int textSize){
+        String status = AppUtil.getDbmStatusStr(context);
+        int strWidth = this.width - AppUtil.getStrWidth(status, textSize) - 40;
+        if (strWidth < 0){
+            strWidth = 0;
+        }
+        overlay.overlay(data, status, strWidth,0);
     }
 
     public void startStream(String url, InitCallback callback) {
