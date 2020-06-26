@@ -55,7 +55,7 @@ import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiverStartAuthHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
-import cn.vsx.vc.utils.NetworkUtil;
+import ptt.terminalsdk.tools.NetworkUtil;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;

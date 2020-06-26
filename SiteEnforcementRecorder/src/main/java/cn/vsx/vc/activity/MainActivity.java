@@ -104,7 +104,7 @@ import cn.vsx.vc.receiveHandle.ReceiverUpdateInfraRedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverUpdatePlayVideoStateHandler;
 import cn.vsx.vc.receiveHandle.ReceiverUsbConnetStateHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
-import cn.vsx.vc.receiver.BatteryBroadcastReceiver;
+import ptt.terminalsdk.broadcastreceiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.NFCCardReader;
 import cn.vsx.vc.receiver.UsbConnetStateReceiver;
 import cn.vsx.vc.service.LockScreenService;
@@ -114,7 +114,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.DeviceUtil;
 import cn.vsx.vc.utils.FragmentUtil;
-import cn.vsx.vc.utils.NetworkUtil;
+import ptt.terminalsdk.tools.NetworkUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.PhotoUtils;
 import cn.vsx.vc.utils.SetToListUtil;
@@ -420,10 +420,14 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     @OnClick({R.id.sv_live, R.id.tv_login_info, R.id.bt_bind_state})
     public void onClick(View view) {
         switch (view.getId()) {
+
             case R.id.sv_live:
                 try {
                     if(mMediaStream!=null){
-                        mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
+                        Camera camera = mMediaStream.getCamera();
+                        if (camera != null){
+                            camera.autoFocus(null);//屏幕聚焦
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
