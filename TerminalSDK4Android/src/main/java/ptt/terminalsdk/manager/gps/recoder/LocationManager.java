@@ -40,8 +40,10 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.bean.LocationType;
 import ptt.terminalsdk.broadcastreceiver.LocationRequestReceiver;
+import ptt.terminalsdk.context.BaseApplication;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.receiveHandler.ReceiverLocationCountDownHandler;
+import ptt.terminalsdk.tools.AppUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 import static android.content.Context.ALARM_SERVICE;
@@ -495,7 +497,11 @@ public class LocationManager  {
         int count = getCheckLocationType();
         failList.add(type);
         if(failList.size() >= count){
-            //所有定位都失败，计数1次。
+            //所有定位都失败，判断最后一次记录的位置信息是否有效，如果有效，上传位置信息
+            if(lastLocation!=null && lastLocation.getLatitude()!=0 && lastLocation.getLongitude()!=0){
+                MyTerminalFactory.getSDK().getLocationManager().upLoadLocation(lastLocation);
+            }
+            //计数1次。
             locationFailCount++;
             if(!mHandler.hasMessages(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT)){
                 internalRequestLocation();
@@ -574,6 +580,10 @@ public class LocationManager  {
                     params.put("altitude",location.getAltitude());
                     params.put("addressStr",getAddressString(location.getExtras()));
                     params.put("mountType", MountType.MOUNT_SELF.toString());
+                    //电量
+                    params.put("batteryLevel", AppUtil.getBatteryLevel(context));
+                    //信号状态
+                    params.put("mobileDbm", AppUtil.getDbmStatusStr(context));
                     Gson gson = new Gson();
                     final String json = gson.toJson(params);
                     MyTerminalFactory.getSDK().getHttpClient().postJson(url,"gps="+json);
@@ -740,4 +750,8 @@ public class LocationManager  {
         return mHandler;
     }
 
+
+    public Location getlastLocation(){
+        return lastLocation;
+    }
 }

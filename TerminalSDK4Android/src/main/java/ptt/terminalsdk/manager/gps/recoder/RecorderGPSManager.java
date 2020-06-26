@@ -96,7 +96,7 @@ public class RecorderGPSManager {
 						MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();
 						MyTerminalFactory.getSDK().getLocationManager().locationFail(LocationType.GPS);
 					}
-				}catch (Exception e){
+				} catch (Exception e){
 					e.printStackTrace();
 					logger.error(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager-onLocationChanged-e:"+e.toString());
 					MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();

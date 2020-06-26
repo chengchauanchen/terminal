@@ -3,6 +3,7 @@ package org.easydarwin.push;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.ImageFormat;
+import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.MediaCodec;
@@ -39,6 +40,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import cn.com.cybertech.pdk.utils.DisplayUtil;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSupportResolutionHandler;
 import dagger.Module;
@@ -46,6 +48,7 @@ import dagger.Provides;
 import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.tools.AppUtil;
 import ptt.terminalsdk.tools.FileTransgerUtil;
 
 import static android.graphics.ImageFormat.NV21;
@@ -61,7 +64,7 @@ public class BITMediaStream {
     private final boolean enanleVideo;
     Pusher mEasyPusher;
     static final String TAG = "MediaStream";
-    int width = 640, height = 480;
+    public int width = 640, height = 480;
     //录制每个视频片段的时间
     private static final int VIDEO_RECODE_PER_TIME = 5*60*1000;
 //    private static final int VIDEO_RECODE_PER_TIME = 10*1000;
@@ -84,12 +87,17 @@ public class BITMediaStream {
     //    private int previewFormat;
     public static CodecInfo info = new CodecInfo();
     public Logger logger = Logger.getLogger(getClass());
+
+    //字体大小
+    private int textSize = 12;
+
     public BITMediaStream(Context context, SurfaceTexture texture,int width,int height) {
         this(context, texture, true,width,height);
     }
 
     public BITMediaStream(Context context, SurfaceTexture texture, boolean enableVideo, final int width, final int height) {
         mApplicationContext = context;
+        textSize =  DisplayUtil.dip2px(mApplicationContext,12);
         mSurfaceHolderRef = new WeakReference(texture);
         mEasyPusher = new EasyPusher();
         this.width = width;
@@ -146,11 +154,26 @@ public class BITMediaStream {
                         //overlay.overlay(data, txt);
 
                     }
+
+                    String status = AppUtil.getDbmStatusStr(context);
+                    int strWidth = BITMediaStream.this.width - getStrWidth(status) - 40;
+                    if (strWidth < 0){
+                        strWidth = 0;
+                    }
+                    overlay.overlay(data, status, strWidth,0);
                     mVC.onVideo(data, NV21);
                     mCamera.addCallbackBuffer(data);
                 }
 
+
+
             };
+    }
+
+    public int getStrWidth(String str){
+        Paint pFont = new Paint();
+        pFont.setTextSize(textSize);
+        return (int)pFont.measureText(str);
     }
 
     public void startStream(String url, InitCallback callback) {

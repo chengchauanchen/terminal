@@ -10,7 +10,10 @@ import android.app.Application;
  * 修订历史：
  */
 public class BaseApplication extends Application{
-
+    //电量
+    private int batteryLevel  = 0;
+    //信号强度
+    private int dbmLevel = 0;
     private static BaseApplication baseApp;
     @Override
     public void onCreate(){
@@ -45,5 +48,21 @@ public class BaseApplication extends Application{
 
     public void initVsxSendMessage(){
 
+    }
+
+    public int getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    public void setBatteryLevel(int batteryLevel) {
+        this.batteryLevel = batteryLevel;
+    }
+
+    public int getDbmLevel() {
+        return dbmLevel;
+    }
+
+    public void setDbmLevel(int dbmLevel) {
+        this.dbmLevel = dbmLevel;
     }
 }

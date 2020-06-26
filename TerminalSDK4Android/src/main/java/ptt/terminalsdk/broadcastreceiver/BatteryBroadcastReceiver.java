@@ -1,4 +1,4 @@
-package cn.vsx.vc.receiver;
+package ptt.terminalsdk.broadcastreceiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,7 +7,9 @@ import android.os.BatteryManager;
 
 import org.apache.log4j.Logger;
 
-import cn.vsx.vc.prompt.PromptManager;
+import ptt.terminalsdk.context.BaseApplication;
+import ptt.terminalsdk.manager.Prompt.PromptManager;
+
 
 public class BatteryBroadcastReceiver extends BroadcastReceiver {
     public Logger logger = Logger.getLogger(getClass());
@@ -36,6 +38,8 @@ public class BatteryBroadcastReceiver extends BroadcastReceiver {
                         checkBatteryTempt(10,level);
                     }
                 }
+                //保存电池电量
+                BaseApplication.getApplication().setBatteryLevel(level);
             }
         }
     }

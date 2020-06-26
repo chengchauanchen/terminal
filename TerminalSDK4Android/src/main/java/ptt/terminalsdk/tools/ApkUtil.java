@@ -98,4 +98,10 @@ public class ApkUtil{
     public static String getLogUpdateAddress(String path) {
         return path+"/file/upload/log";
     }
+
+    //是否为执法记录仪
+    public static boolean isSiteEnforcement(){
+        String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        return TextUtils.isEmpty(deviceType)&&TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+    }
 }

@@ -1,4 +1,4 @@
-package cn.vsx.vc.utils;
+package ptt.terminalsdk.tools;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -40,9 +40,15 @@ public class NetworkUtil{
      */
     public static boolean isWifi(Context context){
         ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivity == null) return false;
-        return connectivity.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI;
-
+        if (connectivity == null){
+            return false;
+        }
+        NetworkInfo networkInfo =  connectivity.getActiveNetworkInfo();
+        if (networkInfo !=null){
+            return networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
+        }else{
+            return false;
+        }
     }
 
     public static String getOperatorName(Context context) {

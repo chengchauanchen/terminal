@@ -1,4 +1,4 @@
-package cn.vsx.vc.receiver;
+package ptt.terminalsdk.broadcastreceiver;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -15,8 +15,9 @@ import org.apache.log4j.Logger;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
-import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.utils.NetworkUtil;
+import ptt.terminalsdk.context.BaseApplication;
+import ptt.terminalsdk.manager.Prompt.PromptManager;
+import ptt.terminalsdk.tools.NetworkUtil;
 
 /**
  * 信号强度监听
@@ -37,11 +38,9 @@ public class MyPhoneStateListener extends PhoneStateListener {
     private static final int NETWORN_MOBILE = 5;
     private static final int NETWORN_ETHERNET=6;
 
-
     private static final int HANDLE_SHOW_TEMPT=10;
     private static final int HANDLE_CLEAR_TEMPT=11;
      TelephonyManager tm;
-
     private Handler myHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg) {
@@ -285,10 +284,13 @@ public class MyPhoneStateListener extends PhoneStateListener {
      * 6.大于-44时候，等级为-1
      * @param dbm
      */
+
     private void checkTempt(int dbm) {
 //        logger.info("MyPhoneStateListener--checkSingleTempt--dbm:"+dbm+"--connect:"+connect);
 //        ToastUtil.showToast(context,"dbm:"+dbm);
         if(connect){
+            //保存信号强度变化
+            BaseApplication.getApplication().setDbmLevel(dbm);
             if (dbm < -130) {
                 if(showTempt){
                     showTempt = false;
@@ -298,6 +300,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
             }
         }
     }
+
 
     /**
      * 真实网络
