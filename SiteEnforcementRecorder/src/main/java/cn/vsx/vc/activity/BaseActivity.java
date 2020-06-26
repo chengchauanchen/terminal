@@ -96,7 +96,7 @@ import cn.vsx.vc.utils.BITDialogUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DeviceUtil;
 import ptt.terminalsdk.tools.NetworkUtil;
-import cn.vsx.vc.utils.SystemUtil;
+import ptt.terminalsdk.tools.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.broadcastreceiver.LivingStopTimeReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;

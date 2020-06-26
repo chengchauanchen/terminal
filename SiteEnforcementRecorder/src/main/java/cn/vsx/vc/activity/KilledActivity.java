@@ -13,7 +13,7 @@ import android.view.WindowManager;
 
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.utils.SystemUtil;
+import ptt.terminalsdk.tools.SystemUtil;
 
 /**
  * Created by zckj on 2017/4/1.

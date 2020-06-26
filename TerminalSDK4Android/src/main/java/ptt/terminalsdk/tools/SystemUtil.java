@@ -1,4 +1,4 @@
-package cn.vsx.vc.utils;
+package ptt.terminalsdk.tools;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
