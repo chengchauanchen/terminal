@@ -583,7 +583,7 @@ public class LocationManager  {
                     //电量
                     params.put("batteryLevel", AppUtil.getBatteryLevel(context));
                     //信号状态
-                    params.put("mobileDbm", AppUtil.getDbmStatusStr(context));
+                    params.put("mobileDbm", AppUtil.getWifiOrPhoneDbmStatus(context));
                     Gson gson = new Gson();
                     final String json = gson.toJson(params);
                     MyTerminalFactory.getSDK().getHttpClient().postJson(url,"gps="+json);

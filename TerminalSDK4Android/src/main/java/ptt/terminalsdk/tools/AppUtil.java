@@ -528,6 +528,9 @@ public class AppUtil {
             dbm = getWifiDbm(context);
         }else{
             dbm =  BaseApplication.getApplication().getDbmLevel();
+            if (dbm ==0){
+                dbm = getMobileDbm(context);
+            }
         }
         return dbm;
     }
