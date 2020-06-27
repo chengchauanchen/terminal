@@ -63,7 +63,9 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.NetworkUtil;
+import ptt.terminalsdk.broadcastreceiver.BatteryBroadcastReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.listener.BaseListener;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -111,9 +113,8 @@ public class PhonePushService extends BaseService{
     private int height = 480;
     protected TextView tvNoNetwork;
     protected LinearLayout llNoNetwork;
-
+    private BatteryBroadcastReceiver batteryBroadcastReceiver;
     public PhonePushService(){}
-
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
@@ -192,6 +193,13 @@ public class PhonePushService extends BaseService{
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mIvLiveChageCamera.setOnClickListener(changeCameraOnClickListener);
         mLvLiveMemberInfo.setOnTouchListener(listViewOnTouchListener);
+        //初始化手机信号的监听
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).initPhoneStateListener();
+        //注册手机信号的监听
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).registPhoneStateListener();
+        //注册电量广播
+        batteryBroadcastReceiver = new BatteryBroadcastReceiver();
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).registBatterBroadcastReceiver(batteryBroadcastReceiver);
     }
 
     @Override
@@ -308,6 +316,10 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSupportResolutionHandler);
+        //注销电量的广播
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).unRegistBatterBroadcastReceiver(batteryBroadcastReceiver);
+        //注册手机信号的监听
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).unRegistPhoneStateListener();
     }
 
     private void hideAllView(){
