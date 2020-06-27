@@ -45,6 +45,7 @@ import dagger.Module;
 import dagger.Provides;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.tools.AppUtil;
 import ptt.terminalsdk.tools.FileTransgerUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -89,13 +90,16 @@ public class MediaStream {
     public static CodecInfo info = new CodecInfo();
     private boolean preView;
     public Logger logger = Logger.getLogger(getClass());
-
+    //字体大小
+    private final int textSize = 12;
+    public boolean isScreenLandscape = false;
     public MediaStream(Context context, SurfaceTexture texture) {
         this(context, texture, true);
     }
 
     public MediaStream(Context context, SurfaceTexture texture, boolean enableVideo) {
         mApplicationContext = context;
+        this.isScreenLandscape = isScreenLandscape;
         mSurfaceHolderRef = new WeakReference(texture);
         mEasyPusher = new EasyPusher();
         mCameraThread = new HandlerThread("CAMERA") {
@@ -180,13 +184,27 @@ public class MediaStream {
                         txt = "4GPTT " + new SimpleDateFormat("yy-MM-dd HH:mm:ss SSS").format(new Date());
                         //叠加水印
                         //overlay.overlay(data, txt);
+
                     }
+
+                    overLayBatteryDbm(data,mApplicationContext,textSize);
 //                    logger.info(TAG+"----PreviewCallback");
                     mVC.onVideo(data, NV21);
                     mCamera.addCallbackBuffer(data);
                 }
 
             };
+    }
+
+    //添加电量信号状态水印
+    public void overLayBatteryDbm(byte[] data, Context context, int textSize){
+        String status = AppUtil.getDbmStatusStr(context);
+        int width = this.width;
+        int strWidth = width - AppUtil.getStrWidth(status, textSize) - 40;
+        if (strWidth < 0){
+            strWidth = 0;
+        }
+        overlay.overlay(data, status, strWidth,0);
     }
 
     public void startStream(String url, InitCallback callback) {
