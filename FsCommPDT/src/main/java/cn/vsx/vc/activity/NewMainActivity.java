@@ -112,7 +112,6 @@ import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
-import cn.vsx.vc.service.CardService;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
@@ -127,6 +126,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.permission.FloatWindowManager;
+import ptt.terminalsdk.service.CardService;
 import ptt.terminalsdk.tools.PhoneAdapter;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -269,8 +269,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //					MyTerminalFactory.getSDK().getGroupCallManager().requestCall();
                 }
                 MyApplication.instance.notifyAll();
-                NfcUtil.writeData();
             }
+            NfcUtil.writeData();
             //切到对讲页面，前提是在该页面做的切组操作
             if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
 //                if(contactsFragmentNew!=null&&currentCheckedId == R.id.bv_group_contacts && !contactsFragmentNew.getHiddenState()){
@@ -1139,7 +1139,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(!FloatWindowManager.getInstance().checkPermission(this)){
             FloatWindowManager.getInstance().applyPermission(this);
         }
-        NfcUtil.writeData();
     }
 //    private void initNFC() {
 //        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -1434,8 +1433,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 }
             }
         } else if (requestCode == CODE_FNC_REQUEST) {
-            int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-            checkNFC(userId,false);
+            int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+            checkNFC(groupId,false);
         }else if(requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK){
             if (data != null) {
                 String result = data.getStringExtra(Constant.CODED_CONTENT);

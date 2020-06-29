@@ -12,4 +12,8 @@
     <string name="open_overlay_permisson">请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！</string>
 
     <string name="text_get_token_fail">获取票据失败</string>
+    <string name="aid">f22eca0ca7eb9ed0022a64e4fff5c34b</string>
+    <string name="header">00A40400</string>
+    <string name="service_name">service_name</string>
+    <string name="card_title">card_title</string>
 </resources>

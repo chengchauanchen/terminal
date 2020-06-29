@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
@@ -113,8 +114,6 @@ public class MyApplication extends BaseApplication{
 				//				.setSkinStatusBarColorEnable(false)                     // 关闭状态栏换肤，默认打开[可选]
 				//				.setSkinWindowBackgroundEnable(false)                   // 关闭windowBackground换肤，默认打开[可选]
 				.loadSkin();
-        //清空刷NFC需要传的数据
-        MyApplication.instance.setBindTranslateBean(null);
         // TODO 初始化 向地三方应用同步消息的service
 		//判断是否是绿之云的，如果是就初始化同步消息的service
 		if(ApkUtil.isWuHanPoliceStore()){
@@ -130,17 +129,17 @@ public class MyApplication extends BaseApplication{
 		CrashReport.setUserId(memberId+"");
         if (BuildConfig.DEBUG) {
             BlockCanary.install(this, new AppBlockCanaryContext()).start();
-        }
-	//		if (BuildConfig.DEBUG) {
-	//            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-	//                    .detectAll()
-	//                    .penaltyLog()
-	//                    .build());
-	//            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-	//                    .detectAll()
-	//                    .penaltyLog()
-	//                    .build());
-	//        }
+		}
+		if (BuildConfig.DEBUG) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+		}
 	}
 
 	protected void initSdk(){

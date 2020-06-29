@@ -117,6 +117,8 @@ import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
 import ptt.terminalsdk.manager.live.LiveManager;
 import ptt.terminalsdk.manager.message.SQLiteDBManager;
+import ptt.terminalsdk.manager.nfc.INfcManager;
+import ptt.terminalsdk.manager.nfc.NfcManager;
 import ptt.terminalsdk.manager.powersave.PowerSaveManager;
 import ptt.terminalsdk.manager.recordingAudio.RecordingAudioManager;
 import ptt.terminalsdk.manager.search.SearchDataManager;
@@ -188,6 +190,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getFileTransferOperation().start();
 		searchDataStart();
         powerSaveManagerStart();
+		nfcManagerStart();
 		// 广播接收器，用来监听SSL服务发出的广播
 		vpnConnectionChangeReceiver = new VPNConnectionChangeReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -245,6 +248,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	protected void onStop() {
 		logger.error("TerminalSDK4Android----stop！！");
+		nfcManagerStop();
         powerSaveManagerStop();
 		searchDataStop();
 		getFileTransferOperation().stop();
@@ -1306,7 +1310,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
         }
         return powerSaveManager;
     }
-    @Override
+
+	private INfcManager nfcManager;
+	public INfcManager getNfcManager() {
+		if (nfcManager == null){
+			nfcManager =new NfcManager(application);
+		}
+		return nfcManager;
+	}
+
+	@Override
 	public void setDataUpdateAddress(String path) {
 		StringBuffer address = new StringBuffer();
 		address.append(path);
@@ -1569,6 +1582,24 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
             getPowerSaveManager().stop();
         }
     }
+
+	/**
+	 * 开启NFC数据交换管理
+	 */
+	private void nfcManagerStart() {
+		if(DataUtil.checkNfcManagerDevice()){
+			getNfcManager().start();
+		}
+	}
+
+	/**
+	 * 关闭NFC数据交换管理
+	 */
+	private void nfcManagerStop() {
+		if(DataUtil.checkNfcManagerDevice()){
+			getNfcManager().stop();
+		}
+	}
 
     @Override
 	public Group getGroupByGroupNo(int no){

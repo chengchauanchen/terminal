@@ -1,4 +1,4 @@
-package cn.vsx.vc.receiveHandle;
+package ptt.terminalsdk.receiveHandler;
 
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 

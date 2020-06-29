@@ -166,8 +166,8 @@ public class MyTopRightMenu {
                                     } else if (items.get(position) == scanItem) {
                                         context.goToScanActivity();
                                     } else if (items.get(position) == nfcItem) {
-                                        int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-                                        context.checkNFC(userId, true);
+                                        int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+                                        context.checkNFC(groupId, true);
                                     } else if (items.get(position) == bandItem) {//绑定设备
                                         context.bandDeviceDialog();
                                     } else if (items.get(position) == videoMeetingItem) {//视频会商

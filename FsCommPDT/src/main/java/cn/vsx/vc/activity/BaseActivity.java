@@ -319,6 +319,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTianjinAuthLoginAndLogoutHandler);
         registerHeadsetPlugReceiver();
         setPttVolumeChangedListener();
+        NfcUtil.writeData();
     }
 
     @Override
@@ -814,7 +815,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 检查NFC功能，并提示
      */
-    public void checkNFC(int userId,boolean openSetting) {
+    public void checkNFC(int groupId,boolean openSetting) {
         int result = NfcUtil.nfcCheck(this);
         switch (result) {
             case NfcUtil.NFC_ENABLE_FALSE_NONE:
@@ -827,12 +828,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 }
                 break;
             case NfcUtil.NFC_ENABLE_FALSE_SHOW:
-                showNFCDialog(userId);
+                showNFCDialog(groupId);
                 break;
             case NfcUtil.NFC_ENABLE_NONE:
                 break;
         }
     }
+
 
     /**
      * 绑定设备
@@ -845,19 +847,20 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 显示刷NFC的弹窗
      */
-    private void showNFCDialog(int userId) {
-        if(userId!=0){
+    private void showNFCDialog(int groupId) {
+        if(groupId>0){
             NFCBindingDialog nfcBindingDialog = new NFCBindingDialog(BaseActivity.this, NFCBindingDialog.TYPE_WAIT);
             HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-            if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-                nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""),"");
+            if (hashMap.containsKey(groupId + "") && !android.text.TextUtils.isEmpty(hashMap.get(groupId + ""))) {
+                nfcBindingDialog.showDialog(groupId, hashMap.get(groupId + ""),"");
             }else{
-                nfcBindingDialog.showDialog(userId, "","");
+                nfcBindingDialog.showDialog(groupId, "","");
             }
         }else{
             ToastUtil.showToast(BaseActivity.this,getString(R.string.text_group_id_abnormal));
         }
     }
+
 
     /**
      * 跳转到扫码页面

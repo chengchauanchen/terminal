@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
+import android.text.TextUtils;
 
 import org.apache.log4j.Logger;
 
@@ -12,10 +13,9 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
-import cn.vsx.vc.application.MyApplication;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class NfcUtil {
     private static Logger logger = Logger.getLogger(NfcUtil.class.getName());
@@ -148,7 +148,13 @@ public class NfcUtil {
         //设置刷NFC需要传的数据
         int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         long uniqueNo = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
-        MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId,voiceDes));
+        String action = "";
+        if(TextUtils.isEmpty(warningId)){
+            action = MyTerminalFactory.getSDK().getNfcManager().getBindString(memberId,uniqueNo+"",groupId);
+        }else{
+            action = MyTerminalFactory.getSDK().getNfcManager().getBindWarningString(memberId,uniqueNo+"",groupId,warningId);
+        }
+        MyTerminalFactory.getSDK().getNfcManager().setTransmitData(action);
     }
 
 }

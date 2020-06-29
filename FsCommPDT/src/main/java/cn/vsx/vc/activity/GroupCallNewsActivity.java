@@ -79,7 +79,6 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
-import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
@@ -356,7 +355,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         //获取组内正在上报的人数
         handler.sendEmptyMessage(VIDEO_LIVE_COUNT);
         refreshPtt();
-        NfcUtil.writeData();
     }
 
     private void switchToGroup(){
@@ -1128,13 +1126,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         }
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        NfcUtil.writeData();
-    }
-
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

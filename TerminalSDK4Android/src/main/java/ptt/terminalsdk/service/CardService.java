@@ -1,21 +1,18 @@
-package cn.vsx.vc.service;
+package ptt.terminalsdk.service;
 
 import android.annotation.TargetApi;
 import android.nfc.cardemulation.HostApduService;
 import android.os.Build;
 import android.os.Bundle;
-
-import com.google.gson.Gson;
+import android.text.TextUtils;
 
 import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 
-import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
-import cn.vsx.vc.R;
-import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
+import ptt.terminalsdk.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiveNFCWriteResultHandler;
 
 @TargetApi(Build.VERSION_CODES.KITKAT)
 public class CardService extends HostApduService {
@@ -44,9 +41,9 @@ public class CardService extends HostApduService {
     public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
         //做判断，是否在警情临时组（警情编号和警情临时组id）
         //如果没有，就不发送  return null
-        RecorderBindTranslateBean bean = MyApplication.instance.getBindTranslateBean();
-        logger.debug("processCommandApdu---bean:"+bean);
-        if(bean == null){
+        String transmitData = MyTerminalFactory.getSDK().getNfcManager().getTransmitData();
+        logger.debug("processCommandApdu---transmitData:"+transmitData);
+        if(TextUtils.isEmpty(transmitData)){
             return null;
         }
         // 将指令转换成 byte[]
@@ -54,13 +51,8 @@ public class CardService extends HostApduService {
 
         // 判断是否和读卡器发来的数据相同
         if (Arrays.equals(selectAPDU, commandApdu)) {
-//            String account = new Gson().toJson(new RecorderBindBean("1234123",123456789));
-            String account = new Gson().toJson(bean);
-            // 直接模拟返回16位卡号
-//            String account = "6222222200000001";
-
             // 获取卡号 byte[]
-            byte[] accountBytes = account.getBytes();
+            byte[] accountBytes = transmitData.getBytes();
 
             // 处理欲返回的响应数据
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNFCWriteResultHandler.class,0,"");
