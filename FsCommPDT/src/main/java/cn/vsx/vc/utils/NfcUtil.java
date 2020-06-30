@@ -150,9 +150,9 @@ public class NfcUtil {
         long uniqueNo = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
         String action = "";
         if(TextUtils.isEmpty(warningId)){
-            action = MyTerminalFactory.getSDK().getNfcManager().getBindString(memberId,uniqueNo+"",groupId);
+            action = MyTerminalFactory.getSDK().getNfcManager().getBindString(memberId,uniqueNo+"",groupId,voiceDes);
         }else{
-            action = MyTerminalFactory.getSDK().getNfcManager().getBindWarningString(memberId,uniqueNo+"",groupId,warningId);
+            action = MyTerminalFactory.getSDK().getNfcManager().getBindWarningAndVideoPushString(memberId,uniqueNo+"",groupId,warningId,1,voiceDes);
         }
         MyTerminalFactory.getSDK().getNfcManager().setTransmitData(action);
     }

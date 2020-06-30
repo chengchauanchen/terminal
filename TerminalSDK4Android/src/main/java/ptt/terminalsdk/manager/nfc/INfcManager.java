@@ -30,6 +30,9 @@ public interface INfcManager {
     //获取实时上报业务的传输数据
     public String getVideoPushString(int state, JSONObject tag, String voiceString);
 
+    //获取绑定警情和上报图像业务的传输数据
+    public String getBindWarningAndVideoPushString(int bindNo, String bindUniqueNo, int groupNo, String warningId, int state,String voiceString);
+
     //解析业务的传输数据
     public void parseData(String data);
 

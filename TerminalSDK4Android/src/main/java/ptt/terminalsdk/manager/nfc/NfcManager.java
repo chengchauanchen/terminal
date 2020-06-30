@@ -195,6 +195,28 @@ public class NfcManager implements INfcManager {
         return JSON.toJSONString(baseBean);
     }
 
+    @Override
+    public String getBindWarningAndVideoPushString(int bindNo, String bindUniqueNo, int groupNo, String warningId, int state, String voiceString) {
+        NfcBaseBean baseBean = new NfcBaseBean();
+        List<Integer> code = new ArrayList<>();
+        code.add(NfcBusinessType.BIND_WARNING.getCode());
+        code.add(NfcBusinessType.VIDEO_PUSH.getCode());
+        baseBean.setCode(code);
+        NfcDataBean dataBean = new NfcDataBean();
+        dataBean.setNo(bindNo);
+        dataBean.setuNo(bindUniqueNo);
+        dataBean.setgNo(groupNo);
+        dataBean.setState(state);
+        JSONObject tagJsonObject = new JSONObject();
+        tagJsonObject.put(WID, warningId);
+        dataBean.setTag(tagJsonObject);
+        List<String> voices = new ArrayList<>();
+        voices.add(voiceString);
+        dataBean.setvStr(voices);
+        baseBean.setData(dataBean);
+        return JSON.toJSONString(baseBean);
+    }
+
     /**
      * 解析数据
      *

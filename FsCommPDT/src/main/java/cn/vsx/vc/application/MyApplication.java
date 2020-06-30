@@ -145,6 +145,8 @@ public class MyApplication extends BaseApplication{
 	protected void initSdk(){
 		Log.e("MyApplication", "initSdk");
 		SpecificSDK.init(this,TerminalMemberType.TERMINAL_PHONE.toString());
+		//是否是4.0之前
+		TerminalFactory.getSDK().putParam(Params.IS_PREFOUR_VERSION, false);
 	}
 
 	@Override

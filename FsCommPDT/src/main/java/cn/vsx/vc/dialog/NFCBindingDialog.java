@@ -110,9 +110,9 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
             long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
             String action = "";
             if(TextUtils.isEmpty(warningId)){
-                action = MyTerminalFactory.getSDK().getNfcManager().getBindString(memberId,uniqueNo+"",groupId);
+                action = MyTerminalFactory.getSDK().getNfcManager().getBindString(memberId,uniqueNo+"",groupId,voiceDes);
             }else{
-                action = MyTerminalFactory.getSDK().getNfcManager().getBindWarningString(memberId,uniqueNo+"",groupId,warningId);
+                action = MyTerminalFactory.getSDK().getNfcManager().getBindWarningAndVideoPushString(memberId,uniqueNo+"",groupId,warningId,1,voiceDes);
             }
             MyTerminalFactory.getSDK().getNfcManager().setTransmitData(action);
             MyTerminalFactory.getSDK().registReceiveHandler(receiveNFCWriteResultHandler);
