@@ -32,6 +32,11 @@ public class KeyUtil {
                     key = new CL310AKey();
                 }
                 break;
+            case DeviceUtil.TYPE_H40:
+                if(key == null){
+                    key = new H40Key();
+                }
+                break;
             default:
                 if(key == null){
                     key = new DefaultKey();

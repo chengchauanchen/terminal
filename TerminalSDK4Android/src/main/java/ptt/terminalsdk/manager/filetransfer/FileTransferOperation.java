@@ -24,6 +24,7 @@ import org.easydarwin.push.InitCallback;
 import org.easydarwin.push.LocalVideoPushStream;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -344,65 +345,120 @@ public class FileTransferOperation {
             logger.info(TAG + "uploadFileByPath:isSave" );
             return;
         }
-        TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(() -> {
-            File file = new File(path);
-            logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + (file.exists()));
-            String fileName = FileTransgerUtil.getFileName(path);
-            try {
-                if (!file.exists()) {
-                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
-                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
-                    return;
+        TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                File file = new File(path);
+                logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + (file.exists()));
+                String fileName = FileTransgerUtil.getFileName(path);
+                try {
+                    if (!file.exists()) {
+                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
+                                , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
+                        return;
+                    }
+                    String result = "";
+                    boolean isPreFourVersion = TerminalFactory.getSDK().getParam(Params.IS_PREFOUR_VERSION,true);
+                    if(isPreFourVersion){
+                        result = oldUploadFile(file,fileName,requestMemberId,requestUniqueNo);
+                    }else{
+                        String fileUrl =newUploadFile(path,file);
+                        if(!TextUtils.isEmpty(fileUrl)){
+                            //上传成功，调用接口更新文件信息到服务端
+                            result = updateFileByOkHttp(fileName,fileUrl,requestMemberId,requestUniqueNo);
+                        }else{
+                            //上传失败
+                            notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_FAEL);
+                            return;
+                        }
+                    }
+                    if (TextUtils.isEmpty(result)) {
+                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
+                                , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
+                        return;
+                    }
+                    JSONObject object = JSONObject.parseObject(result);
+                    if (object == null) {
+                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
+                                , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
+                        return;
+                    }
+                    String success = object.getString(RESULT_SUCCESS);
+                    if (!TextUtils.equals(RESULT_SUCCESS_TRUE,success)) {
+                        logger.error(TAG + "uploadFileInfo:result;" + object.getString(RESULT_MSG));
+                        String resultDesc = TextUtils.isEmpty(object.getString(RESULT_MSG))?FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL:object.getString(RESULT_MSG);
+                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, resultDesc);
+                        return;
+                    }
+                    //是否删除
+                    if (isDelete) {
+                        deleteRecordByName(fileName);
+                        file.delete();
+                    } else {
+                        //更新数据库中文件的上传状态
+                        updateRecordState(fileName, UPLOAD_STATE_YES);
+                    }
+                    //更新48小时未上传的对比的文件信息
+                    checkUpdateExpireFileInfo();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    //                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
+                    logger.info(TAG + "uploadFileByPath:result:Exception" + e);
+                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
                 }
-                String type = FileTransgerUtil.getBITFileType(path);
-                String url = MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, "");
-                if(TextUtils.equals(type,FileTransgerUtil.TYPE_IMAGE)){
-                    url = MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, "");
-                }
-                String fileUrl = uploadFileByOkHttp(url,file);
-                if(TextUtils.isEmpty(fileUrl)){
-                    //上传失败
-                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
-                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_FAEL);
-                    return;
-                }
-                //上传成功，调用接口更新文件信息到服务端
-                String result = updateFileByOkHttp(fileName,fileUrl,requestMemberId,requestUniqueNo);
-                if (TextUtils.isEmpty(result)) {
-                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
-                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
-                    return;
-                }
-                JSONObject object = JSONObject.parseObject(result);
-                if (object == null) {
-                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE
-                            , FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
-                    return;
-                }
-                String success = object.getString(RESULT_SUCCESS);
-                if (!TextUtils.equals(RESULT_SUCCESS_TRUE,success)) {
-                    logger.error(TAG + "uploadFileInfo:result;" + object.getString(RESULT_MSG));
-                    String resultDesc = TextUtils.isEmpty(object.getString(RESULT_MSG))?FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL:object.getString(RESULT_MSG);
-                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, resultDesc);
-                    return;
-                }
-                //是否删除
-                if (isDelete) {
-                    deleteRecordByName(fileName);
-                    file.delete();
-                } else {
-                    //更新数据库中文件的上传状态
-                    updateRecordState(fileName, UPLOAD_STATE_YES);
-                }
-                //更新48小时未上传的对比的文件信息
-                checkUpdateExpireFileInfo();
-            } catch (Exception e) {
-                e.printStackTrace();
-                //                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
-                logger.info(TAG + "uploadFileByPath:result:Exception" + e);
-                notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
             }
         });
+    }
+
+    /**
+     * 之前上传文件的方法
+     * @param file
+     * @param fileName
+     * @param requestMemberId
+     * @param requestUniqueNo
+     * @throws IOException
+     */
+    private String oldUploadFile(File file,String fileName,final int requestMemberId,final long requestUniqueNo) throws IOException {
+        boolean needRateLimit = getUpLoadFileNeedRateLimit();
+        logger.info(TAG + "oldUploadFile-needRateLimit:"+needRateLimit);
+        long startTime = System.currentTimeMillis();
+        //使用okhttp
+        rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, needRateLimit?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+        MultipartBody.Part fileBody = MultipartBody.Part.createFormData("fileStream", fileName, rateLimitingRequestBody);
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addPart(fileBody)
+                .addFormDataPart("name", fileName)
+                .addFormDataPart("memberId", FileTransgerUtil.getPoliceIdInt() + "")
+                .addFormDataPart("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
+        if (requestMemberId != 0 && requestUniqueNo != 0) {
+            builder.addFormDataPart("requestMemberId", requestMemberId + "");
+            builder.addFormDataPart("requestUniqueNo", requestUniqueNo + "");
+        }
+        Request request = new Request.Builder()
+                .url(getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH)
+                .post(builder.build())
+                .build();
+        String result = mOkHttpClient.newCall(request).execute().body().string();
+
+        long endTime = System.currentTimeMillis() - startTime;
+        logger.info(TAG + "uploadFileByPath:url:" + getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH + "-fileName-" + fileName + "-result-" + result + "-time-" + endTime);
+        return result;
+    }
+
+    /**
+     * 现在上传文件的方法
+     * @param path
+     * @param file
+     * @return
+     */
+    private String newUploadFile(String path,File file) {
+        String type = FileTransgerUtil.getBITFileType(path);
+        String url = MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, "");
+        if(TextUtils.equals(type,FileTransgerUtil.TYPE_IMAGE)){
+            url = MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, "");
+        }
+        return uploadFileByOkHttp(url,file);
     }
 
     /**

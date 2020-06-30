@@ -4,6 +4,8 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.text.TextUtils;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.text.DecimalFormat;
@@ -13,11 +15,10 @@ import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.FileBean;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.nfc.NfcManager;
 
 public class FileTransgerUtil {
 
@@ -86,11 +87,28 @@ public class FileTransgerUtil {
      * @return
      */
     public static String getWarningId() {
-        RecorderBindBean bean = DataUtil.getRecorderBindBean();
-        if(bean!=null){
-             return bean.getWarningId();
+        String result = "";
+        String tag = getTag();
+        if(!TextUtils.isEmpty(tag)){
+            try{
+                JSONObject jsonObject = JSONObject.parseObject(tag);
+                if(jsonObject.containsKey(NfcManager.WID)){
+                    result = jsonObject.getString(NfcManager.WID);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
-        return "";
+        return result;
+    }
+
+    /**
+     * 获取tag
+     *
+     * @return
+     */
+    public static String getTag() {
+        return MyTerminalFactory.getSDK().getNfcManager().getFileTag();
     }
 
     /**
@@ -234,6 +252,7 @@ public class FileTransgerUtil {
         bean.setTerminalMemberNo(getPoliceIdInt());
         bean.setTerminalUniqueNo(getPoliceUniqueNo());
         bean.setWarningId(getWarningId());
+        bean.setTag(getTag());
         bean.setName(getFileName(path));
         String type =  getBITFileType(path);
         bean.setType(type);

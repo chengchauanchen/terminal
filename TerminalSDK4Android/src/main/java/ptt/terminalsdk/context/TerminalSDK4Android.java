@@ -1772,7 +1772,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
 		if(!TextUtils.isEmpty(deviceType)){
 			if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())
-					&& TextUtils.equals("CL310A",Build.MODEL)){
+					&& (TextUtils.equals("CL310A",Build.MODEL)||TextUtils.equals("H40",Build.MODEL))){
 				return true;
 			}
 		}

@@ -31,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.service.PTTButtonEventService;
 import cn.vsx.vc.utils.Constants;
@@ -94,6 +95,8 @@ public class MyApplication extends BaseApplication {
 
 	public void init(){
 		SpecificSDK.init(this,TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+		//是否是4.0之前
+		TerminalFactory.getSDK().putParam(Params.IS_PREFOUR_VERSION, false);
 	}
 
 	public void setIsContactsPersonal(boolean isContactsIndividual){

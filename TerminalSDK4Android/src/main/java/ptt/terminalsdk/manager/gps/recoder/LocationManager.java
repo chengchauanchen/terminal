@@ -40,7 +40,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.bean.LocationType;
 import ptt.terminalsdk.broadcastreceiver.LocationRequestReceiver;
-import ptt.terminalsdk.context.BaseApplication;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.receiveHandler.ReceiverLocationCountDownHandler;
 import ptt.terminalsdk.tools.AppUtil;
@@ -563,12 +562,13 @@ public class LocationManager  {
                     logger.info(TAG + "开始上传位置信息---Longitude:" + location.getLongitude() + "---Latitude：" + location.getLatitude());
                     lastUpLocationTime = System.currentTimeMillis();
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveChangePersonLocationHandler.class,location.getLatitude(),location.getLongitude());
-                    String ip = MyTerminalFactory.getSDK().getParam(Params.HTTP_IP);
-                    int port = MyTerminalFactory.getSDK().getParam(Params.HTTP_PORT,0);
+                    boolean isPreFourVersion = TerminalFactory.getSDK().getParam(Params.IS_PREFOUR_VERSION,true);
+                    String ip = MyTerminalFactory.getSDK().getParam(isPreFourVersion?Params.GPS_IP:Params.HTTP_IP);
+                    int port = MyTerminalFactory.getSDK().getParam(isPreFourVersion?Params.GPS_PORT:Params.HTTP_PORT,0);
                     if(TextUtils.isEmpty(ip)||port<=0){
                         return;
                     }
-                    final String url = "http://"+ip+":"+port+"/gatherService/save";
+                    final String url = "http://"+ip+":"+port+(isPreFourVersion?"/save":"/gatherService/save");
                     Map<String,Object> params = new HashMap<>();
                     params.put("terminalno", MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
                     params.put("memberuniqueno", MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L));

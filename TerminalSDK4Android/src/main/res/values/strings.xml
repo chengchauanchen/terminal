@@ -16,4 +16,7 @@
     <string name="header">00A40400</string>
     <string name="service_name">service_name</string>
     <string name="card_title">card_title</string>
+    <string name="nfc_transmit_data_error_null">传输数据为空</string>
+    <string name="nfc_transmit_data_error_invalid_format">传输数据格式错误</string>
+    <string name="nfc_transmit_data_error">传输数据错误</string>
 </resources>

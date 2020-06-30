@@ -1,14 +1,12 @@
 package ptt.terminalsdk.bean;
 
-import com.google.gson.JsonObject;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class NfcBaseBean implements Serializable {
     private static final long serialVersionUID = 5362503103452034617L;
     private List<Integer> code;
-    private JsonObject data;
+    private NfcDataBean data;
 
     public List<Integer> getCode() {
         return code;
@@ -18,11 +16,11 @@ public class NfcBaseBean implements Serializable {
         this.code = code;
     }
 
-    public JsonObject getData() {
+    public NfcDataBean getData() {
         return data;
     }
 
-    public void setData(JsonObject data) {
+    public void setData(NfcDataBean data) {
         this.data = data;
     }
 }

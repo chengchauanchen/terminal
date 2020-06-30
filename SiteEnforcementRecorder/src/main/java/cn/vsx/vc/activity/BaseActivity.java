@@ -56,7 +56,6 @@ import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.model.RecorderServerBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
@@ -86,24 +85,26 @@ import cn.vsx.vc.receiveHandle.ReceiverFragmentClearHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverUploadLogEventHandler;
-import ptt.terminalsdk.broadcastreceiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
-import ptt.terminalsdk.broadcastreceiver.MyPhoneStateListener;
 import cn.vsx.vc.receiver.NFCCardReader;
 import cn.vsx.vc.receiver.UsbConnetStateReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BITDialogUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DeviceUtil;
-import ptt.terminalsdk.tools.NetworkUtil;
-import ptt.terminalsdk.tools.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
+import ptt.terminalsdk.bean.NfcBusinessType;
+import ptt.terminalsdk.bean.NfcBusinessVideoType;
+import ptt.terminalsdk.broadcastreceiver.BatteryBroadcastReceiver;
 import ptt.terminalsdk.broadcastreceiver.LivingStopTimeReceiver;
+import ptt.terminalsdk.broadcastreceiver.MyPhoneStateListener;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.DialogUtil;
+import ptt.terminalsdk.tools.NetworkUtil;
+import ptt.terminalsdk.tools.SystemUtil;
 
 public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions {
 
@@ -296,12 +297,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 //普通组，只需要转组
                 TerminalFactory.getSDK().getGroupManager().changeGroup(groupNo);
             }
-
             //Todo 市局对接绿之云
         } else if (currentGroupId == groupNo && TextUtils.equals(bean.getWarningId(), alarmNo)) {
             logger.info(TAG + "第二次贴，组相同，警情也相同，则解绑");
             TerminalFactory.getSDK().getRecorderBindManager().requestUnBind();
         }
+        //检查是否有执行的业务，如果有就执行
+        MyTerminalFactory.getSDK().getNfcManager().performBusinessByTime();
     };
     /**
      * 接收到绑定/解绑的结果
@@ -310,31 +312,26 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         RecorderBindBean recorderBindBean = DataUtil.getRecorderBindBean();
         if (!isBound) {
             if (recorderBindBean != null) {
-                RecorderBindTranslateBean bean = DataUtil.getRecorderBindTranslateBean();
-                if(bean!=null && !TextUtils.isEmpty(bean.getVoiceDes())){
-                    MscV5Api.getInstance(this).startSpeaking(bean.getVoiceDes());
-                }else{
-                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().unbinding();
-                }
+                ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().unbinding();
                 ToastUtil.showToast(BaseActivity.this, getString(R.string.text_unbind_success));
                 //清空绑定信息
                 DataUtil.clearRecorderBindBean();
+                //清空执行业务信息
+                MyTerminalFactory.getSDK().getNfcManager().savePerformBean(null);
                 //切换到绑定账号
                 TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
                     @Override
-                    public void run() {
-                        changeAccount();
+                    public void run() { changeAccount();
                     }
                 }, 1000);
-
             }
         } else {
             if (recorderBindBean != null) {
                 ToastUtil.showToast(BaseActivity.this, getString(R.string.text_bind_success));
-
-                RecorderBindTranslateBean bean = DataUtil.getRecorderBindTranslateBean();
-                if(bean!=null && !TextUtils.isEmpty(bean.getVoiceDes())){
-                    MscV5Api.getInstance(this).startSpeaking(bean.getVoiceDes());
+                boolean isWarning = MyTerminalFactory.getSDK().getNfcManager().checkIsWarningBusiness();
+                String voice = MyTerminalFactory.getSDK().getNfcManager().getVoiceStringByCode(isWarning? NfcBusinessType.BIND_WARNING:NfcBusinessType.BIND);
+                if(!TextUtils.isEmpty(voice)){
+                    MscV5Api.getInstance(this).startSpeaking(voice);
                 }else{
                     if (TextUtils.isEmpty(recorderBindBean.getWarningId())) {
                         ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceSuccess();
@@ -344,7 +341,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 }
             }
         }
-        DataUtil.clearRecorderBindTranslateBean();
     };
     /**
      * 切换环境
@@ -788,17 +784,36 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     private void login() {
         //进入注册界面了，先判断有没有认证地址
-        String authUrl = TerminalFactory.getSDK().getParam(Params.AUTH_URL, "");
-        if (TextUtils.isEmpty(authUrl)) {
-            //平台包或者没获取到类型，直接用AuthManager中的地址,
-            //设置切换的环境
-            TerminalFactory.getSDK().getAuthManagerTwo().setChangeServer();
-            String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
-            if (defaultAddress.length >= 2) {
+        MyTerminalFactory.getSDK().initUuid(() -> {
+            String authUrl = TerminalFactory.getSDK().getParam(Params.AUTH_URL, "");
+            if (TextUtils.isEmpty(authUrl)) {
+                //平台包或者没获取到类型，直接用AuthManager中的地址,
+                //设置切换的环境
+                TerminalFactory.getSDK().getAuthManagerTwo().setChangeServer();
+                String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
+                if (defaultAddress.length >= 2) {
+                    if (NetworkUtil.isConnected(this)) {
+                        //自动更新
+                        updataVersion();
+                        int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
+                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                            ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
+                        } else {
+                            //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                        }
+                    } else {
+                        ToastUtil.showToast(BaseActivity.this, getString(R.string.text_network_disconnect));
+                    }
+                } else {
+                    //没有注册服务地址，去探测地址
+                    TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                }
+            } else {
+                //有注册服务地址，去认证
                 if (NetworkUtil.isConnected(this)) {
                     //自动更新
                     updataVersion();
-                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
+                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                         ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
                     } else {
@@ -807,32 +822,15 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 } else {
                     ToastUtil.showToast(BaseActivity.this, getString(R.string.text_network_disconnect));
                 }
-            } else {
-                //没有注册服务地址，去探测地址
-                TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
             }
-        } else {
-            //有注册服务地址，去认证
-            if (NetworkUtil.isConnected(this)) {
-                //自动更新
-                updataVersion();
-                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
-                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                    ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
-                } else {
-                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
-                }
-            } else {
-                ToastUtil.showToast(BaseActivity.this, getString(R.string.text_network_disconnect));
+            try {
+                MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
+            } catch (Exception e) {
+                logger.error(e);
+            } finally {
+                MyTerminalFactory.getSDK().registNetworkChangeHandler();
             }
-        }
-        try {
-            MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
-        } catch (Exception e) {
-            logger.error(e);
-        } finally {
-            MyTerminalFactory.getSDK().registNetworkChangeHandler();
-        }
+        });
     }
 
     /**
@@ -889,23 +887,18 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * @param resultCode
      * @param readType
      * @param resultDescribe
-     * @param bean
+     * @param data
      */
-    public void onReadResult(int resultCode, String readType, String resultDescribe, final RecorderBindTranslateBean bean) {
+    public void onReadResult(int resultCode, String readType, String resultDescribe, String data) {
         ToastUtil.showToast(this, resultDescribe);
         switch (resultCode) {
             case NFCCardReader.RESULT_CODE_SUCCESS:
+                //通过NFCManager解析数据
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    MyTerminalFactory.getSDK().getNfcManager().parseData(data);
+                    MyTerminalFactory.getSDK().getNfcManager().performBusiness();
+                });
                 //切组，上报，录像
-                if (bean != null) {
-                    logger.debug("onReadResult---bean:" + bean);
-                    DataUtil.saveRecorderBindTranslateBean(bean);
-                    int accountNo = bean.getAccountNo();
-                    String voiceDes = bean.getVoiceDes();
-                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
-                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(bean.getAccountNo(), uniqueNo, bean.getGroupId(), bean.getWarningId());
-                    });
-                }
                 break;
             default:
                 break;
@@ -1066,7 +1059,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             default:
                 break;
         }
-        return degrees;
+        return degrees+(DeviceUtil.isH40()?90:0);
     }
 
     protected class PushCallback implements InitCallback {
@@ -1325,6 +1318,36 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 final UpdateManager manager = new UpdateManager(BaseActivity.this);
                 manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL, ""), false);
             });
+        }
+    }
+
+    /**
+     * 提示开始录像的提示语
+     */
+    protected void promptStartVideoRecoder(){
+        //判断提示不同提示音
+        int type = MyTerminalFactory.getSDK().getNfcManager().getVideoType();
+        if(type == NfcBusinessVideoType.CARRIAGE_INSPECTION.getCode()){
+            PromptManager.getInstance().startVideoTapByCarriageInspection();
+        }else if(type == NfcBusinessVideoType.TRAIN_ARRIVAL_INSPECTION.getCode()){
+            PromptManager.getInstance().startVideoTapByTrainArrivalInspection();
+        }else{
+            PromptManager.getInstance().startVideoTap();
+        }
+    }
+
+    /**
+     * 提示停止录像的提示语
+     */
+    protected void promptStopVideoRecoder(){
+        //判断提示不同提示音
+        int type = MyTerminalFactory.getSDK().getNfcManager().getVideoType();
+        if(type == NfcBusinessVideoType.CARRIAGE_INSPECTION.getCode()){
+            PromptManager.getInstance().stopVideoTapByCarriageInspection();
+        }else if(type == NfcBusinessVideoType.TRAIN_ARRIVAL_INSPECTION.getCode()){
+            PromptManager.getInstance().stopVideoTapByTrainArrivalInspection();
+        }else{
+            PromptManager.getInstance().stopVideoTap();
         }
     }
 }

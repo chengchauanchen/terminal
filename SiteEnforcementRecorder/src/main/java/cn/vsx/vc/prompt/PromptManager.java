@@ -370,6 +370,42 @@ public class PromptManager {
     }
 
     /**
+     * 开始车厢巡视
+     */
+    public void startVideoTapByCarriageInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.start_carriageInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
+     * 停止车厢巡视
+     */
+    public void stopVideoTapByCarriageInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.stop_carriageInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
+     * 开始列车终到检查
+     */
+    public void startVideoTapByTrainArrivalInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.start_trainArrivalInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
+     * 停止列车终到检查
+     */
+    public void stopVideoTapByTrainArrivalInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.stop_trainArrivalInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
      * 开始录音
      */
     public void startRecordAudio() {
@@ -467,6 +503,11 @@ public class PromptManager {
         soundMap.put(R.raw.stop_report, soundPool.load(MyApplication.instance, R.raw.stop_report, 1));
         soundMap.put(R.raw.start_videotape, soundPool.load(MyApplication.instance, R.raw.start_videotape, 1));
         soundMap.put(R.raw.stop_videotape, soundPool.load(MyApplication.instance, R.raw.stop_videotape, 1));
+        soundMap.put(R.raw.start_carriageInspection, soundPool.load(MyApplication.instance, R.raw.start_carriageInspection, 1));
+        soundMap.put(R.raw.stop_carriageInspection, soundPool.load(MyApplication.instance, R.raw.stop_carriageInspection, 1));
+        soundMap.put(R.raw.start_trainArrivalInspection, soundPool.load(MyApplication.instance, R.raw.start_trainArrivalInspection, 1));
+        soundMap.put(R.raw.stop_trainArrivalInspection, soundPool.load(MyApplication.instance, R.raw.stop_trainArrivalInspection, 1));
+
         soundMap.put(R.raw.start_record_audio, soundPool.load(MyApplication.instance, R.raw.start_record_audio, 1));
         soundMap.put(R.raw.stop_record_audio, soundPool.load(MyApplication.instance, R.raw.stop_record_audio, 1));
 
