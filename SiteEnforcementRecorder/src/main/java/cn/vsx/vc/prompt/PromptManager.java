@@ -374,7 +374,7 @@ public class PromptManager {
      */
     public void startVideoTapByCarriageInspection() {
         if (soundPool != null) {
-            soundPool.play(soundMap.get(R.raw.start_carriageInspection), 0.5f, 0.5f, 0, 0, 1);
+            soundPool.play(soundMap.get(R.raw.start_carriage_inspection), 0.5f, 0.5f, 0, 0, 1);
         }
     }
 
@@ -383,7 +383,7 @@ public class PromptManager {
      */
     public void stopVideoTapByCarriageInspection() {
         if (soundPool != null) {
-            soundPool.play(soundMap.get(R.raw.stop_carriageInspection), 0.5f, 0.5f, 0, 0, 1);
+            soundPool.play(soundMap.get(R.raw.stop_carriage_inspection), 0.5f, 0.5f, 0, 0, 1);
         }
     }
 
@@ -392,7 +392,7 @@ public class PromptManager {
      */
     public void startVideoTapByTrainArrivalInspection() {
         if (soundPool != null) {
-            soundPool.play(soundMap.get(R.raw.start_trainArrivalInspection), 0.5f, 0.5f, 0, 0, 1);
+            soundPool.play(soundMap.get(R.raw.start_train_arrival_inspection), 0.5f, 0.5f, 0, 0, 1);
         }
     }
 
@@ -401,7 +401,7 @@ public class PromptManager {
      */
     public void stopVideoTapByTrainArrivalInspection() {
         if (soundPool != null) {
-            soundPool.play(soundMap.get(R.raw.stop_trainArrivalInspection), 0.5f, 0.5f, 0, 0, 1);
+            soundPool.play(soundMap.get(R.raw.stop_train_arrival_inspection), 0.5f, 0.5f, 0, 0, 1);
         }
     }
 
@@ -503,10 +503,10 @@ public class PromptManager {
         soundMap.put(R.raw.stop_report, soundPool.load(MyApplication.instance, R.raw.stop_report, 1));
         soundMap.put(R.raw.start_videotape, soundPool.load(MyApplication.instance, R.raw.start_videotape, 1));
         soundMap.put(R.raw.stop_videotape, soundPool.load(MyApplication.instance, R.raw.stop_videotape, 1));
-        soundMap.put(R.raw.start_carriageInspection, soundPool.load(MyApplication.instance, R.raw.start_carriageInspection, 1));
-        soundMap.put(R.raw.stop_carriageInspection, soundPool.load(MyApplication.instance, R.raw.stop_carriageInspection, 1));
-        soundMap.put(R.raw.start_trainArrivalInspection, soundPool.load(MyApplication.instance, R.raw.start_trainArrivalInspection, 1));
-        soundMap.put(R.raw.stop_trainArrivalInspection, soundPool.load(MyApplication.instance, R.raw.stop_trainArrivalInspection, 1));
+        soundMap.put(R.raw.start_carriage_inspection, soundPool.load(MyApplication.instance, R.raw.start_carriage_inspection, 1));
+        soundMap.put(R.raw.stop_carriage_inspection, soundPool.load(MyApplication.instance, R.raw.stop_carriage_inspection, 1));
+        soundMap.put(R.raw.start_train_arrival_inspection, soundPool.load(MyApplication.instance, R.raw.start_train_arrival_inspection, 1));
+        soundMap.put(R.raw.stop_train_arrival_inspection, soundPool.load(MyApplication.instance, R.raw.stop_train_arrival_inspection, 1));
 
         soundMap.put(R.raw.start_record_audio, soundPool.load(MyApplication.instance, R.raw.start_record_audio, 1));
         soundMap.put(R.raw.stop_record_audio, soundPool.load(MyApplication.instance, R.raw.stop_record_audio, 1));
