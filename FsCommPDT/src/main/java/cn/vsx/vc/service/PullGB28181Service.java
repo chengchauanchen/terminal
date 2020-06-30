@@ -34,11 +34,14 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.NetworkUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -59,10 +62,15 @@ public class PullGB28181Service extends BaseService{
     private String gb28181Url;
     private Logger logger = Logger.getLogger(this.getClass());
     private static final int CURRENTTIME = 1;
+    private static final int HIDELIVINGVIEW = 2;
+    private static final int SHOW_LOADING_VIEW = 3;
+    private static final int HIDE_LOADING_VIEW = 4;
+    private static final int HIDE_LOADING_VIEW_TIME = 2*1000;
 
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
+    protected LinearLayout llNoNetwork;
 
     public PullGB28181Service(){}
 
@@ -92,10 +100,11 @@ public class PullGB28181Service extends BaseService{
         mIvClose =  rootView.findViewById(R.id.iv_close);
         mLlInviteMember =  rootView.findViewById(R.id.ll_invite_member);
         mIvLiveLookAddmember =  rootView.findViewById(R.id.iv_live_look_addmember);
-        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+        llNoNetwork = rootView.findViewById(R.id.ll_no_network);
         mLlRefreshing = rootView.findViewById(R.id.ll_refreshing);
         mRefreshingIcon = rootView.findViewById(R.id.refreshing_icon);
         dismissLoadingView(mLlRefreshing,mRefreshingIcon);
+        llNoNetwork.setVisibility(NetworkUtil.isConnected(MyApplication.getApplication())?View.GONE:View.VISIBLE);
     }
 
     @Override
@@ -113,8 +122,10 @@ public class PullGB28181Service extends BaseService{
     protected void initListener(){
         mIvLiveLookAddmember.setOnClickListener(inviteMemberOnClickListener);
         mSvGb28181.setSurfaceTextureListener(GB28181SurfaceTextureListener);
+        mSvGb28181.setOnClickListener(svOnClickListener);
         mIvClose.setOnClickListener(closeOnClickListener);
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
     }
@@ -123,6 +134,8 @@ public class PullGB28181Service extends BaseService{
     protected void initView(Intent intent){
         terminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
         logger.info("terminalMessage:"+terminalMessage);
+        mHandler.removeMessages(HIDELIVINGVIEW);
+        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
         if(terminalMessage.messageBody.containsKey(JsonParam.GB28181_RTSP_URL)){
             setPushAuthority();
             //gb28181Url = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
@@ -149,34 +162,54 @@ public class PullGB28181Service extends BaseService{
             case CURRENTTIME:
                 setCurrentTime();
                 break;
-            case OFF_LINE:
-                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
-                stopBusiness();
+//            case OFF_LINE:
+//                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
+//                stopBusiness();
+//                break;
+            case HIDELIVINGVIEW:
+                mHandler.removeMessages(HIDELIVINGVIEW);
+                hideLivingView();
                 break;
+            case SHOW_LOADING_VIEW:
+                mHandler.removeMessages(SHOW_LOADING_VIEW);
+                showLoadingView(mLlRefreshing,mRefreshingIcon);
+                break;
+            case HIDE_LOADING_VIEW:
+                mHandler.removeMessages(HIDE_LOADING_VIEW);
+                dismissLoadingView(mLlRefreshing,mRefreshingIcon);
+                break;
+                default:break;
         }
     }
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-            }
-        }else {
-            mHandler.removeMessages(OFF_LINE);
-//            if(null != mSvGb28181.getSurfaceTexture()){
-//                startPullGB28121(mSvGb28181.getSurfaceTexture());
-//            }
-        }
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
+
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            mHandler.post(() -> {
+                if(llNoNetwork!=null) {
+                    llNoNetwork.setVisibility((!connected) ? View.VISIBLE : View.GONE);
+                }
+            });
+            if(connected){
+                if(null != mSvGb28181.getSurfaceTexture()){
+                startPullGB28121(mSvGb28181.getSurfaceTexture());
+                }
+            }
+        }
+    };
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
 
@@ -227,6 +260,12 @@ public class PullGB28181Service extends BaseService{
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }
+    };
+
+    private View.OnClickListener svOnClickListener = v->{
+        showLivingView();
+        mHandler.removeMessages(HIDELIVINGVIEW);
+        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
     };
 
     private View.OnClickListener closeOnClickListener = v -> {
@@ -295,15 +334,14 @@ public class PullGB28181Service extends BaseService{
         protected void onReceiveResult(int resultCode, Bundle resultData){
             super.onReceiveResult(resultCode, resultData);
             if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
-                pullcount = 0;
-                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
+                mHandler.sendEmptyMessage(HIDE_LOADING_VIEW);
             } else if (resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE) {
 //                if(isPulling){
 //                    return;
 //                }
                 mLiveWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
-                onVideoSizeChange();
+//                onVideoSizeChange();
             } else if (resultCode == EasyRTSPClient.RESULT_TIMEOUT) {
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.time_up));
                 finishVideoLive();
@@ -314,41 +352,16 @@ public class PullGB28181Service extends BaseService{
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.video_not_support));
                 finishVideoLive();
             } else if (resultCode == EasyRTSPClient.RESULT_EVENT) {
-                mHandler.post(() -> showLoadingView(mLlRefreshing,mRefreshingIcon));
-                int errorcode = resultData.getInt("errorcode");
-                String resultDataString = resultData.getString("event-msg");
-                logger.error("视频流播放状态：" + errorcode + "=========" + resultDataString+"-----count:"+ pullcount);
-
-                if (errorcode != 0) {
-                    stopPull();
-                }
-                if (errorcode == 500 || errorcode == 404 ||errorcode ==-32 || errorcode == -101) {
-                    if (pullcount < 10) {
-                        try {
-                            Thread.sleep(300);
-                            logger.error("请求第" + pullcount + "次");
-                            if (mSvGb28181 != null && mSvGb28181.getVisibility() == View.VISIBLE && mSvGb28181.getSurfaceTexture() != null) {
-                                startPullGB28121(mSvGb28181.getSurfaceTexture());
-                                pullcount++;
-
-                            }else{
-                                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
-                                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
-                                finishVideoLive();
-                            }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
-                        mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
-                        finishVideoLive();
-                    }
-                } else if(errorcode !=0){
-                    ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
-                    mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
-                    finishVideoLive();
+//                int errorcode = resultData.getInt("errorcode");
+//                String resultDataString = resultData.getString("event-msg");
+                int state = resultData.getInt("state");
+                if(state == 1){
+                    //延时发送取消显示加载布局
+                    mHandler.sendEmptyMessage(SHOW_LOADING_VIEW);
+                    mHandler.sendEmptyMessageDelayed(HIDE_LOADING_VIEW,HIDE_LOADING_VIEW_TIME);
+                }else{
+                    //如果在state == 1状态下延时发送取消显示加载布局之前，收到state!=1的状态时，就把取消显示加载布局的message去掉
+                    mHandler.removeMessages(HIDE_LOADING_VIEW);
                 }
             }
         }
@@ -402,7 +415,27 @@ public class PullGB28181Service extends BaseService{
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             mLlInviteMember.setVisibility(View.GONE);
         }else {
-            mLlInviteMember.setVisibility(View.VISIBLE);
+//            mLlInviteMember.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void showLivingView() {
+        try{
+            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
+                mLlInviteMember.setVisibility(View.VISIBLE);
+            }else{
+                mLlInviteMember.setVisibility(View.GONE);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void hideLivingView() {
+        try{
+            mLlInviteMember.setVisibility(View.GONE);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

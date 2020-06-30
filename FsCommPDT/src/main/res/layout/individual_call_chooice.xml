@@ -55,7 +55,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/y2"
-                android:text="张星星"
+                android:maxLines="2"
+                android:ellipsize="end"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_20" />
 
@@ -64,7 +65,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/y2"
-                android:text="123456789"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_15" />
         </LinearLayout>
@@ -74,7 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
+            android:layout_alignBottom="@+id/iv_member_portrait_chooice"
             android:layout_marginRight="@dimen/x20"
             android:text="@string/text_call_is_comming"
             android:textColor="@color/white"

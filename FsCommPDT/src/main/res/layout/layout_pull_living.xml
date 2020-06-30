@@ -80,6 +80,9 @@
                         android:id="@+id/live_vedioName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:maxWidth="@dimen/dp_100"
+                        android:ellipsize="end"
+                        android:maxLines="1"
                         android:layout_marginLeft="5dp"
                         android:textColor="@color/white"
                         android:textSize="15sp" />
@@ -249,7 +252,7 @@
             android:text="PTT"
             android:textColor="@color/white"
             android:textSize="30sp"
-            android:visibility="visible" />
+            android:visibility="gone" />
     </RelativeLayout>
 
     <include layout="@layout/layout_refreshing"
@@ -257,4 +260,8 @@
 
     <include layout="@layout/layout_no_network"
         android:visibility="gone"/>
+
+    <include layout="@layout/layout_toast"
+        android:visibility="gone"/>
+
 </RelativeLayout>

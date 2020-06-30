@@ -18,7 +18,7 @@ public class IndividualCallTimerView extends LinearLayout {
 	private String defaultText = "00:00";
 	private TextView timerTextView;
 	private Timer timer = new Timer();
-	private int second = 0;
+	private long second = 0;
 	private static final int UPDATE_TIME = 1;
 	private static final int UPDATE_PERIOD = 1000;
 	private Handler myHandler = new Handler(Looper.getMainLooper()){
@@ -44,8 +44,22 @@ public class IndividualCallTimerView extends LinearLayout {
 	}
 
 	public void onStart(){
-		second = 0;
-		myHandler.sendEmptyMessageDelayed(UPDATE_TIME,UPDATE_PERIOD);
+		second = 0L;
+		onStartBySecond(second);
+	}
+
+	public void onStartBySecond(long second){
+		try{
+			myHandler.post(() -> {
+				if(timerTextView!=null){
+					timerTextView.setText(getTwoNumber(second/60)+":"+getTwoNumber(second%60));
+					invalidate();
+				}
+			});
+			myHandler.sendEmptyMessageDelayed(UPDATE_TIME,UPDATE_PERIOD);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	public void onStart(int color) {
@@ -53,8 +67,18 @@ public class IndividualCallTimerView extends LinearLayout {
 		timerTextView.setTextColor(color);
 	}
 
+	public void setTextSize(float size){
+		try{
+			if(timerTextView!=null){
+				timerTextView.setTextSize(size);
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
 	public void onStop(){
-		second = 0;
+		second = 0L;
 		myHandler.removeMessages(UPDATE_TIME);
 	}
 	public void onPause(){
@@ -65,7 +89,7 @@ public class IndividualCallTimerView extends LinearLayout {
 		myHandler.sendEmptyMessageDelayed(UPDATE_TIME,UPDATE_PERIOD);
 	}
 
-	private String getTwoNumber(int number){
+	private String getTwoNumber(long number){
 		if(number <= 0){
 			return "00";
 		}
@@ -78,5 +102,8 @@ public class IndividualCallTimerView extends LinearLayout {
 		else{
 			return "" + number%100;
 		}
+	}
+	public long getTime(){
+		return second;
 	}
 }

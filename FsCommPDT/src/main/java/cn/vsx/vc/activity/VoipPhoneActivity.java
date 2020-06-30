@@ -12,6 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
+import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallActiveEndHandler;
 import com.alibaba.fastjson.JSONObject;
 import com.blankj.utilcode.util.ToastUtils;
 
@@ -65,6 +68,10 @@ public class VoipPhoneActivity extends BaseActivity{
     private Handler mHandler=new Handler();
     private IndividualCallView ictVspeakingTimeSpeaking;
 
+    //网络状态的布局
+    private LinearLayout  ll_network_state_request;
+    private LinearLayout  ll_network_state_speaking;
+
     @Override
     public int getLayoutResId() {
         return R.layout.activity_voip_phone;
@@ -112,21 +119,36 @@ public class VoipPhoneActivity extends BaseActivity{
         //打开默认听筒说话，
         setSpeakPhoneOn(ivHandFree,false);
         setMicrophoneMute(ivMicroMute,false);
+
+        ll_network_state_request = findViewById(R.id.ll_network_state_request);
+        ll_network_state_speaking = findViewById(R.id.ll_network_state_speaking);
+        ll_network_state_request.setVisibility(View.GONE);
+        ll_network_state_speaking.setVisibility(View.GONE);
     }
 
     @Override
     public void initListener(){
         llHangupRequest.setOnClickListener(v -> {
-            ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
-            status = HANG_UP_SELF + "";
-            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-            mHandler.postDelayed(() -> finish(),500);
+            try{
+                ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
+                status = HANG_UP_SELF + "";
+                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                mHandler.postDelayed(() -> finish(),500);
+            }
         });
         ivHangupSpeaking.setOnClickListener(v -> {
-            ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
-            status = CALL_END + "";
-            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-            mHandler.postDelayed(() -> finish(),500);
+            try{
+                ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
+                status = CALL_END + "";
+                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                mHandler.postDelayed(() -> finish(),500);
+            }
         });
         ivMicroMute.setOnClickListener(v -> {
             boolean isMicrophoneMute = MyTerminalFactory.getSDK().getAudioProxy().isMicrophoneMute();
@@ -145,8 +167,10 @@ public class VoipPhoneActivity extends BaseActivity{
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallActiveEndHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipErrorHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHeadSetPlugHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
     }
 
     private ReceiveVoipConnectedHandler receiveVoipConnectedHandler = (linphoneCall)->{
@@ -222,27 +246,44 @@ public class VoipPhoneActivity extends BaseActivity{
         });
     };
 
+    private ReceiveVoipCallActiveEndHandler receiveVoipCallActiveEndHandler = ()->{
+        //电话接通之后挂断，还有主叫拨号时挂断
+        Log.e("VoipPhoneActivity", "电话挂断");
+        TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+        mHandler.post(() -> {
+            try{
+                ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_is_over));
+                status = CALL_END + "";
+                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                mHandler.postDelayed(() -> VoipPhoneActivity.this.finish(),500);
+            }
+        });
+    };
+
     private ReceiveVoipErrorHandler receiveVoipErrorHandler = (linphoneCall)->{
         Log.e("VoipPhoneActivity", "error");
         TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                status=CALL_ERROR+"";
-                CallRecord callRecord = new CallRecord();
-                callRecord.setCallId(linphoneCall.getCallLog().getCallId());
-                callRecord.setMemberName(userName);
-                callRecord.setPhone(phone);
-                callRecord.setTime(DateUtils.getNowTime());
-                callRecord.setCallRecords(status);
-
-                CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
-                callRecords.add(callRecord);
-                MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
-                ictVspeakingTimeSpeaking.onStop();
-                ToastUtil.showToast(VoipPhoneActivity.this,getString(R.string.other_stop_call));
-                SystemClock.sleep(2000);
                 try{
+                    status=CALL_ERROR+"";
+                    CallRecord callRecord = new CallRecord();
+                    callRecord.setCallId(linphoneCall.getCallLog().getCallId());
+                    callRecord.setMemberName(userName);
+                    callRecord.setPhone(phone);
+                    callRecord.setTime(DateUtils.getNowTime());
+                    callRecord.setCallRecords(status);
+
+                    CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
+                    callRecords.add(callRecord);
+                    MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
+                    ictVspeakingTimeSpeaking.onStop();
+                    ToastUtil.showToast(VoipPhoneActivity.this,getString(R.string.other_stop_call));
+                    SystemClock.sleep(2000);
                     finish();
                 }catch (Exception e){
                     logger.error(e.toString());
@@ -264,6 +305,20 @@ public class VoipPhoneActivity extends BaseActivity{
                 }
             });
         }
+    };
+
+    /**
+     * 在线状态
+     */
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
+        mHandler.post(()-> {
+            if(ll_network_state_request!=null){
+                ll_network_state_request.setVisibility((!connected)?View.VISIBLE:View.GONE);
+            }
+            if(ll_network_state_speaking!=null){
+                ll_network_state_speaking.setVisibility((!connected)?View.VISIBLE:View.GONE);
+            }
+        });
     };
 
     @Override
@@ -297,7 +352,7 @@ public class VoipPhoneActivity extends BaseActivity{
             MyTerminalFactory.getSDK().getVoipCallManager().audioCall(phone);
         }
 
-//        PromptManager.getInstance().IndividualCallRequestRing();//提示音
+        //PromptManager.getInstance().IndividualCallRequestRing();//提示音
         MyTerminalFactory.getSDK().getVoipCallManager().toggleSpeaker(false);//是否开启免提
 
     }
@@ -319,8 +374,10 @@ public class VoipPhoneActivity extends BaseActivity{
         setSpeakPhoneOn(ivHandFree,false);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallActiveEndHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipErrorHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHeadSetPlugHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
 
         if (getSharedPreferences("CallRecord", MODE_PRIVATE).getBoolean("isFirstCall", true)) {//第一次打VOIP电话结束通知消息列表添加电话助手
             SharedPreferences.Editor editor = getSharedPreferences("CallRecord",
@@ -329,7 +386,11 @@ public class VoipPhoneActivity extends BaseActivity{
             editor.commit();
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateFoldersAndGroupsHandler.class);
         }
-        MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+        try{
+            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         mHandler.removeCallbacksAndMessages(null);
     }
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cn.vsx.vc.view.ServiceFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <include
+        android:id="@+id/rl_phone_push_live"
+        layout="@layout/layout_video_meeting_live"/>
+
+    <!-- 缩小化-->
+    <include
+        android:id="@+id/pop_minimize"
+        layout="@layout/layout_video_meeting_minimize"
+        android:visibility="gone" />
+</cn.vsx.vc.view.ServiceFrameLayout>

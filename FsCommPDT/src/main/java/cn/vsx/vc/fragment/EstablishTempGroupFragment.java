@@ -1,6 +1,8 @@
 package cn.vsx.vc.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import cn.vsx.vc.receiveHandle.ReceiveSelectedMemberChangedHandler;
 import com.blankj.utilcode.util.ToastUtils;
 
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -41,6 +44,8 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
     private Button mOkBtn;
     private FrameLayout mContainer;
     private TempGroupMemberFragment tempGroupMemberFragment;
+
+    private static Handler handler = new Handler(Looper.getMainLooper());
 
     public EstablishTempGroupFragment(){
         // Required empty public constructor
@@ -93,6 +98,7 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
             mBarTitle.setText(R.string.text_add_group_member);
             mOkBtn.setText(R.string.text_sure);
         }
+        mOkBtn.setEnabled(false);
         mRightBtn.setVisibility(View.GONE);
     }
 
@@ -100,6 +106,7 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
         mNewsBarBack.setOnClickListener(this);
         mOkBtn.setOnClickListener(this);
         TerminalFactory.getSDK().registReceiveHandler(receiveResponseAddMemberToTempGroupMessageHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveSelectedMemberChangedHandler);
     }
 
     private void initData(){
@@ -111,6 +118,8 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
     public void onDestroyView(){
         super.onDestroyView();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveResponseAddMemberToTempGroupMessageHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveSelectedMemberChangedHandler);
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -142,6 +151,18 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
             }else {
                 ToastUtils.showShort(resultDesc);
             }
+        }
+    };
+    private ReceiveSelectedMemberChangedHandler receiveSelectedMemberChangedHandler = new ReceiveSelectedMemberChangedHandler(){
+        @Override public void handle(int count) {
+            handler.post(() -> {
+                mOkBtn.setEnabled((count>0));
+                if(type == Constants.CREATE_TEMP_GROUP){
+                    mOkBtn.setText((count>0)?String.format(getString(R.string.text_next_count),count+""):getString(R.string.text_next));
+                }else if(type == Constants.INCREASE_MEMBER){
+                    mOkBtn.setText((count>0)?String.format(getString(R.string.text_sure_count),count+""):getString(R.string.text_sure));
+                }
+            });
         }
     };
 }

@@ -10,8 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager.WakeLock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,7 +39,7 @@ public class OnlineService extends Service {
     private WakeLock wakeLock;
 
     private Logger logger = Logger.getLogger(getClass());
-
+    private static final String TAG = "OnlineService---";
     protected PendingIntent tickPendIntent;
 
     //	private PhoneBroadcastReceiver receiver;
@@ -51,9 +53,7 @@ public class OnlineService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        logger.info("--vsxSDK--启动惟实信Service开始onCreate");
-        logger.info("OnlineService开始onCreate");
-
+        logger.info(TAG+"onCreate");
 //		this.setTickAlarm();
 
         wakeLock = MyTerminalFactory.getSDK().getWakeLock();
@@ -101,11 +101,11 @@ public class OnlineService extends Service {
 
     @Override
     public void onDestroy() {
-        logger.info("OnlineService执行onDestroy");
+        logger.info(TAG+"onDestroy");
 //		unregisterReceiver(receiver);
         unregisterReceiver(pttDownAndUpReceiver);
         unregisterReceiver(receiverLock);
-        logger.info("OnlineService被杀了，要重新启动");
+        logger.info(TAG+"被杀了，要重新启动");
         Intent intent = new Intent();
         intent.setAction("RESTART_ONLINESERVICE");
         sendBroadcast(intent);
@@ -114,8 +114,10 @@ public class OnlineService extends Service {
 
     @Override
     public int onStartCommand(Intent param, int flags, int startId) {
-        logger.info("--vsxSDK--启动惟实信Service开始onStartCommand" + param);
-        KeepLiveManager.getInstance().setServiceForeground(this);
+        logger.info(TAG+"onStartCommand" + param);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            KeepLiveManager.getInstance().setServiceForeground(this);
+        }
         try {
             //如果全部更新完成，没有退出，就发送OnlineService开启的广播
 //			if(!MyTerminalFactory.getSDK().isExit()){
@@ -132,14 +134,14 @@ public class OnlineService extends Service {
 //			}
 
             if (param == null) {
-                logger.info("--vsxSDK--Intent 为null");
+                logger.info(TAG+"Intent 为null");
                 return START_STICKY;
             }
             String cmd = param.getStringExtra("CMD");
             if (cmd == null) {
                 cmd = "";
             }
-            logger.info("--vsxSDK-" + "-OnlineService开始onStartCommand，CMD = " + cmd);
+            logger.info(TAG+"onStartCommand，CMD = " + cmd);
             if (cmd.equals("TICK")) {
                 if (wakeLock != null && wakeLock.isHeld() == false) {
                     wakeLock.acquire();
@@ -159,8 +161,8 @@ public class OnlineService extends Service {
             }
 
             //关联启动 自动认证
-            if ("AUTH".equals(cmd)) {
-                logger.info("--vsxSDK--关联启动 自动认证");
+            if (TextUtils.equals("AUTH",cmd)) {
+                logger.info(TAG+"关联启动 自动认证");
                 //开了自启权限,才可进到这个方法
                 //TerminalFactory.getSDK().putParam(Params.SDK_PROCESS_STATE,SDKProcessStateEnum.SELF_STARTUP_PERMISSION.name());
 
@@ -174,23 +176,23 @@ public class OnlineService extends Service {
                 }
                 //如果有悬浮窗权限，把事件service启动起来
                 if (!FloatWindowManager.getInstance().checkPermission(this)) {
-                    logger.info("--vsxSDK--没有获取到悬浮窗权限");
+                    logger.info(TAG+"没有获取到悬浮窗权限");
                     TerminalFactory.getSDK().putParam(Params.SDK_PROCESS_STATE, SDKProcessStateEnum.NO_WINDOW_PERMISSION.name());
                     return START_STICKY;
                 } else {
                     TerminalFactory.getSDK().putParam(Params.SDK_PROCESS_STATE, SDKProcessStateEnum.HAVE_WINDOW_PERMISSION.name());
-                    logger.info("--vsxSDK--startHandlerService");
+                    logger.info(TAG+"startHandlerService");
                     BaseApplication.getApplication().startHandlerService();
                 }
                 BaseApplication.getApplication().setAppLogined();
                 BaseApplication.getApplication().startPromptManager();
                 LoginState loginState = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState();
                 Log.e("--vsxSDK--", "loginState:" + loginState);
-                logger.info("--vsxSDK-loginState:" + loginState);
+                logger.info(TAG+"loginState:" + loginState);
                 if (TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState() == null ||
                         TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState() == LoginState.IDLE) {
                     if (checkCanStartAuth()) {
-                        logger.info("--vsxSDK-startAuth");
+                        logger.info(TAG+"startAuth");
                         startAuth();
                     } else {
                         TerminalFactory.getSDK().putParam(Params.SDK_PROCESS_STATE, SDKProcessStateEnum.NO_PHONE_TYPE.name());
@@ -201,7 +203,7 @@ public class OnlineService extends Service {
             }
             return START_STICKY;
         } catch (Exception e) {
-            logger.info("--vsxSDK--在线服务启动过程中出现异常", e);
+            logger.info(TAG+"在线服务启动过程中出现异常", e);
             return START_STICKY;
         }
     }
@@ -212,7 +214,7 @@ public class OnlineService extends Service {
      * @return
      */
     private boolean checkCanStartAuth() {
-        logger.info("-vsxSDK--判断是否可以在这里开始认证");
+        logger.info(TAG+"判断是否可以在这里开始认证");
         String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         return (TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PHONE.getCode());
     }
@@ -237,7 +239,9 @@ public class OnlineService extends Service {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 Log.d("OnlineService", "屏幕锁屏了，将OnlineService放到前台进程");
-                KeepLiveManager.getInstance().setServiceForeground(OnlineService.this);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    KeepLiveManager.getInstance().setServiceForeground(OnlineService.this);
+                }
             }
         }
     };
@@ -249,8 +253,7 @@ public class OnlineService extends Service {
     }
 
     private void startAuth() {
-        Log.e("-vsxSDK--", "startAuth");
-        logger.info("-vsxSDK--startAuth");
+        logger.info(TAG+"TAG+startAuth");
         AuthUtil.setOauthInfo(getApplicationContext());
 
         String authUrl = TerminalFactory.getSDK().getParam(Params.AUTH_URL, "");
@@ -265,20 +268,20 @@ public class OnlineService extends Service {
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 } else {
                     //状态机没有转到正在认证，说明已经在状态机中了，不用处理
-                    Log.e("--vsx--AuthService--", "状态机没有转到正在认证，说明已经在状态机中了，不用处理");
-                    logger.info("--vsx--AuthService--状态机没有转到正在认证，说明已经在状态机中了，不用处理");
+//                    Log.e("--vsx--AuthService--", "状态机没有转到正在认证，说明已经在状态机中了，不用处理");
+                    logger.info(TAG+"AuthService--状态机没有转到正在认证，说明已经在状态机中了，不用处理");
                 }
                 TerminalFactory.getSDK().putParam(Params.SDK_PROCESS_STATE, SDKProcessStateEnum.SUCCESS_STATE.name());
             } else {
-                logger.info("--vsx--AuthService--没有注册服务地址，去探测地址");
+                logger.info(TAG+"AuthService--没有注册服务地址，去探测地址");
                 //没有注册服务地址，去探测地址
                 TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                 TerminalFactory.getSDK().putParam(Params.SDK_PROCESS_STATE, SDKProcessStateEnum.NO_AUTH_URL.name());
             }
         } else {
             //有注册服务地址，去认证
-            Log.e("OnlineService", "startAuth");
-            logger.info("--vsx--OnlineService--startAuth");
+//            Log.e("OnlineService", "startAuth");
+            logger.info(TAG+"OnlineService--startAuth");
             TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
             TerminalFactory.getSDK().putParam(Params.SDK_PROCESS_STATE, SDKProcessStateEnum.SUCCESS_STATE.name());
         }

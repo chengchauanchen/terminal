@@ -127,6 +127,7 @@ public class CheckMyPermission {
                 return REQUEST_CAMERA;
             case permission.ACCESS_FINE_LOCATION:
                 return REQUEST_LOCATION;
+            case permission.READ_EXTERNAL_STORAGE:
             case permission.WRITE_EXTERNAL_STORAGE:
                 return REQUEST_EXTERNAL_STORAGE;
             case permission.READ_PHONE_STATE:

@@ -6,6 +6,7 @@ import com.xuchongyang.easyphone.EasyLinphone;
 import com.xuchongyang.easyphone.callback.PhoneCallback;
 import com.xuchongyang.easyphone.callback.RegistrationCallback;
 
+import com.xuchongyang.easyphone.linphone.LinphoneManager;
 import org.apache.log4j.Logger;
 import org.linphone.core.LinphoneCall;
 
@@ -119,47 +120,88 @@ public class VoipManager{
      * @param serverIP voip服务地址
      */
     public void login(String account,String password,String serverIP){
-        EasyLinphone.setAccount(account, password, serverIP);
-        EasyLinphone.login();
+        try{
+            EasyLinphone.setAccount(account, password, serverIP);
+            EasyLinphone.login();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 登陆
+     */
+    public void refreshLogin(){
+        try{
+            if(LinphoneManager.getLcIfManagerNotDestroyOrNull()!=null){
+                LinphoneManager.getLc().refreshRegisters();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
     /**
      * 拨打电话
      * @param dialNum 电话号码
      */
     public void audioCall(String dialNum){
-        EasyLinphone.callTo(dialNum, false);
+        try{
+            EasyLinphone.callTo(dialNum, false);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
      * 接听来电
      */
     public void acceptCall(){
-        EasyLinphone.acceptCall();
+        try{
+            EasyLinphone.acceptCall();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
      * 挂断电话
      */
     public void hangUp() {
-        EasyLinphone.hangUp();
+        try{
+            EasyLinphone.hangUp();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void refuseCall(LinphoneCall linphoneCall){
-        EasyLinphone.refusedCall(linphoneCall);
+        try{
+            EasyLinphone.refusedCall(linphoneCall);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
      * 切换静音
      */
     public void toggleMute() {
-        EasyLinphone.toggleMicro(!EasyLinphone.getLC().isMicMuted());
+        try{
+            EasyLinphone.toggleMicro(!EasyLinphone.getLC().isMicMuted());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
      * 是否免提
      */
     public void toggleSpeaker(boolean isSpeakerEnabled ) {
-        EasyLinphone.toggleSpeaker(isSpeakerEnabled);
+        try{
+            EasyLinphone.toggleSpeaker(isSpeakerEnabled);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -172,10 +214,27 @@ public class VoipManager{
     }
 
     public void destroy(Context context){
-        EasyLinphone.stopService(context);
+        try{
+            EasyLinphone.removeAuthInfo();
+            EasyLinphone.stopService(context);
+            EasyLinphone.clearUtil();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
+    public void removeAuthInfo(){
+        try{
+            EasyLinphone.removeAuthInfo();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
+    }
     public void clearCache(){
-        EasyLinphone.getLC().clearAuthInfos();
+        try{
+            EasyLinphone.getLC().clearAuthInfos();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

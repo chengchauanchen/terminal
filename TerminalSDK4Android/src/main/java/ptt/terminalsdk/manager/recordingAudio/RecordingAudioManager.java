@@ -13,6 +13,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -45,21 +46,27 @@ public class RecordingAudioManager {
                 case MESSAGE_WHAT_RECORD_NEXT_FILE:
                     logger.info(TAG+"准备录制下一个音频文件");
                     //检测内存卡的size
-                    MyTerminalFactory.getSDK().getFileTransferOperation().checkExternalUsableSize();
-                    checkIndexOutOfBounds();
-                    String fileName = FileTransgerUtil.getAudioFileName(date,FileTransgerUtil.getRecodeFileIndex(++index))+ FileTransgerUtil._TYPE_AUDIO_SUFFIX;
-                    File file = new File(dir,fileName);
-                    mediaRecorder.stop();
-                    //文件生成完成
-                    if(lastFile!=null){
-                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-                        operation.generateFileComplete(
-                                MyTerminalFactory.getSDK().getBITAudioRecordedDirectoty(operation.getExternalUsableStorageDirectory())
-                                ,lastFile.getPath());
+                    FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+                    boolean onlyUserSdCard = operation.checkOnlyUseSdCardStorage();
+                    if(!onlyUserSdCard){
+                        operation.checkExternalUsableSize();
                     }
-                    //开始录制下个音频
-                    recordFile(file);
+                    if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(operation.getExternalUsableStorageDirectory())) {
+                        checkIndexOutOfBounds();
+                        String fileName = FileTransgerUtil.getAudioFileName(date,FileTransgerUtil.getRecodeFileIndex(++index))+ FileTransgerUtil._TYPE_AUDIO_SUFFIX;
+                        File file = new File(dir,fileName);
+                        mediaRecorder.stop();
+                        //文件生成完成
+                        if(lastFile!=null){
+                            operation.generateFileComplete(
+                                    MyTerminalFactory.getSDK().getBITAudioRecordedDirectoty(operation.getExternalUsableStorageDirectory())
+                                    ,lastFile.getPath());
+                        }
+                        //开始录制下个音频
+                        recordFile(file);
+                    }
                     break;
+                    default:break;
             }
         }
     };
@@ -74,18 +81,23 @@ public class RecordingAudioManager {
         index = 1;
         //检测内存卡的size
         FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-        operation.checkExternalUsableSize();
-        date = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(System.currentTimeMillis()));
-        dir = new File(MyTerminalFactory.getSDK().getBITAudioRecordedDirectoty(operation.getExternalUsableStorageDirectory()));
-        if (!dir.exists()){
-            dir.mkdirs();
+        boolean onlyUserSdCard = operation.checkOnlyUseSdCardStorage();
+        if(!onlyUserSdCard){
+            operation.checkExternalUsableSize();
         }
-        String fileName = FileTransgerUtil.getAudioFileName(date,FileTransgerUtil.getRecodeFileIndex(index))+ FileTransgerUtil._TYPE_AUDIO_SUFFIX;
+        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(operation.getExternalUsableStorageDirectory())) {
+            date = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(System.currentTimeMillis()));
+            dir = new File(MyTerminalFactory.getSDK().getBITAudioRecordedDirectoty(operation.getExternalUsableStorageDirectory()));
+            if (!dir.exists()){
+                dir.mkdirs();
+            }
+            String fileName = FileTransgerUtil.getAudioFileName(date,FileTransgerUtil.getRecodeFileIndex(index))+ FileTransgerUtil._TYPE_AUDIO_SUFFIX;
 
-        File audioFile = new File(dir,fileName);
-        status = AudioRecordStatus.STATUS_READY;
-        mediaRecorder = new MediaRecorder();
-        recordFile(audioFile);
+            File audioFile = new File(dir,fileName);
+            status = AudioRecordStatus.STATUS_READY;
+            mediaRecorder = new MediaRecorder();
+            recordFile(audioFile);
+        }
     }
 
     private void recordFile(File file){

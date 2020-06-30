@@ -9,13 +9,19 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+import com.github.moduth.blockcanary.BlockCanary;
+import com.tencent.bugly.crashreport.CrashReport;
+
+import org.apache.log4j.Logger;
 import org.linphone.core.LinphoneCall;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.TerminalMemberType;
@@ -26,25 +32,36 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallStateMachine;
+import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.util.StateMachine.IState;
+import cn.vsx.vc.BuildConfig;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.ReceiveHandlerService;
+import cn.vsx.vc.service.VideoMeetingInvitationService;
+import cn.vsx.vc.service.VideoMeetingService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.SystemUtil;
 import ptt.terminalsdk.context.BaseApplication;
+import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ApkUtil;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
 public class MyApplication extends BaseApplication{
 
 
-
+	private Logger logger = Logger.getLogger(getClass());
+	public static final String TAG = "MyApplication---";
 	public int mAppStatus = Constants.FORCE_KILL;//App运行状态，是否被强杀
 	public boolean isBinded=false;
 	public boolean isPttFlowPress = false;
@@ -97,16 +114,39 @@ public class MyApplication extends BaseApplication{
 				//				.setSkinStatusBarColorEnable(false)                     // 关闭状态栏换肤，默认打开[可选]
 				//				.setSkinWindowBackgroundEnable(false)                   // 关闭windowBackground换肤，默认打开[可选]
 				.loadSkin();
-        //清空刷NFC需要传的数据
-        MyApplication.instance.setBindTranslateBean(null);
         // TODO 初始化 向地三方应用同步消息的service
-		//初始化 ThirdSendMessage
-		BaseApplication.getApplication().initVsxSendMessage();
+		//判断是否是绿之云的，如果是就初始化同步消息的service
+		if(ApkUtil.isWuHanPoliceStore()){
+			//初始化 ThirdSendMessage
+			initVsxSendMessage();
+		}
+		//上报图像可以不走信令
+		TerminalFactory.getSDK().putParam(Params.PUSH_LIVE_NO_SINGLE,true);
+
+		//建议在测试阶段建议设置成true，发布时设置为false
+		CrashReport.initCrashReport(getApplicationContext(), "3ebac89656", true);
+		int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+		CrashReport.setUserId(memberId+"");
+        if (BuildConfig.DEBUG) {
+            BlockCanary.install(this, new AppBlockCanaryContext()).start();
+		}
+		if (BuildConfig.DEBUG) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+					.detectAll()
+					.penaltyLog()
+					.build());
+		}
 	}
 
 	protected void initSdk(){
 		Log.e("MyApplication", "initSdk");
 		SpecificSDK.init(this,TerminalMemberType.TERMINAL_PHONE.toString());
+		//是否是4.0之前
+		TerminalFactory.getSDK().putParam(Params.IS_PREFOUR_VERSION, false);
 	}
 
 	@Override
@@ -279,6 +319,51 @@ public class MyApplication extends BaseApplication{
 		//注册 连接jumpService的广播
 		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
 		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
+	}
+
+	/**
+	 * 停止一切业务(除了视频会议)
+	 */
+	public void stopAllBusiness(){
+		Map<TerminalState, IState<?>>
+				currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+		if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PUSHING)
+				||currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)
+				|| currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
+			TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
+		}
+		if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING) || currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+			TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+		}
+	}
+
+	/**
+	 * 检查是否在视频会议中
+	 * @return
+	 */
+	public boolean checkVideoMeeting(){
+		boolean videoMeetingServiceRunning = SystemUtil.isServiceRunning(this, VideoMeetingService.class.getName());
+		boolean videoMeetingInvitationServiceRunning = SystemUtil.isServiceRunning(this, VideoMeetingInvitationService.class.getName());
+		boolean isMeetingStatus = TerminalFactory.getSDK().getVideoMeetingManager().isMeetingStatus();
+		logger.info(TAG+"videoMeetingServiceRunning:"+videoMeetingServiceRunning+"-isMeetingStatus:"+isMeetingStatus+"-videoMeetingInvitationServiceRunning:"+videoMeetingInvitationServiceRunning);
+		if((videoMeetingServiceRunning &&isMeetingStatus)|| (videoMeetingInvitationServiceRunning)){
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 检查是否有业务在service中
+	 * @return
+	 */
+	public boolean checkBusinessInServiceIsWorking(){
+		if(getIndividualState() !=  IndividualCallState.IDLE
+				|| getVideoLivePlayingState()!= VideoLivePlayingState.IDLE
+				|| getVideoLivePushingState()!= VideoLivePushingState.IDLE
+		        || checkVideoMeeting()){
+			return true;
+		}
+		return false;
 	}
 
 }

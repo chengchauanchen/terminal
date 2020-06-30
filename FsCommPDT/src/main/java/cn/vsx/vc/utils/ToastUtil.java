@@ -37,6 +37,26 @@ public class ToastUtil {
 			toast.show();
 		});
     }
+
+	/*
+	 * 静态吐司显示的速度更快
+	 * 静态toast  toast 消失 变为null 不消失就不用重新创建
+	 */
+	public static void showToast(final String text) {
+		showToast(text,false);
+	}
+
+	/*
+	 * 静态吐司显示的速度更快
+	 * 静态toast  toast 消失 变为null 不消失就不用重新创建
+	 */
+	public static void showToast(final String text,boolean longTime) {
+		handler.post(() -> {
+			toast = Toast.makeText(MyApplication.instance.getApplicationContext(), text, longTime?Toast.LENGTH_LONG:Toast.LENGTH_SHORT);
+			toast.setText(text);
+			toast.show();
+		});
+	}
     
     /*
      * 让主线程和子线程通用

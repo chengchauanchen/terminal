@@ -1,7 +1,6 @@
 package com.xuchongyang.easyphone.linphone;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.linphone.core.LinphoneAddress;
 import org.linphone.core.LinphoneAuthInfo;
@@ -27,6 +26,7 @@ public class LinphoneUtils {
     private static final String TAG = "LinphoneUtils";
     private static volatile LinphoneUtils sLinphoneUtils;
     private LinphoneCore mLinphoneCore = null;
+    private final int SIP_PORT  = -1;
 
     public static LinphoneUtils getInstance() {
         if (sLinphoneUtils == null) {
@@ -53,9 +53,9 @@ public class LinphoneUtils {
      * @throws LinphoneCoreException
      */
     public void registerUserAuth(String name, String password, String host) throws LinphoneCoreException {
-        Log.e(TAG, "registerUserAuth name = " + name);
-        Log.e(TAG, "registerUserAuth pw = " + password);
-        Log.e(TAG, "registerUserAuth host = " + host);
+        System.out.println(TAG+"registerUserAuth name = " + name);
+        System.out.println(TAG+"registerUserAuth pw = " + password);
+        System.out.println(TAG+"registerUserAuth host = " + host);
         String identify = "sip:" + name + "@" + host;
         String proxy = "sip:" + host;
         LinphoneAddress proxyAddr = LinphoneCoreFactory.instance().createLinphoneAddress(proxy);
@@ -71,6 +71,11 @@ public class LinphoneUtils {
         prxCfg.setQualityReportingCollector(null);
         prxCfg.setQualityReportingInterval(0);
         prxCfg.enableRegister(true);
+        LinphoneCore.Transports transportPorts = mLinphoneCore.getSignalingTransportPorts();//端口
+        transportPorts.udp = SIP_PORT;
+        transportPorts.tcp = SIP_PORT;
+        transportPorts.tls = SIP_PORT;
+        mLinphoneCore.setSignalingTransportPorts(transportPorts);
         mLinphoneCore.addProxyConfig(prxCfg);
         mLinphoneCore.addAuthInfo(authInfo);
         mLinphoneCore.setDefaultProxyConfig(prxCfg);
@@ -106,13 +111,17 @@ public class LinphoneUtils {
      * 挂断电话
      */
     public void hangUp() {
-        LinphoneCall currentCall = mLinphoneCore.getCurrentCall();
-        if (currentCall != null) {
-            mLinphoneCore.terminateCall(currentCall);
-        } else if (mLinphoneCore.isInConference()) {
-            mLinphoneCore.terminateConference();
-        } else {
-            mLinphoneCore.terminateAllCalls();
+        try{
+            LinphoneCall currentCall = mLinphoneCore.getCurrentCall();
+            if (currentCall != null) {
+                mLinphoneCore.terminateCall(currentCall);
+            } else if (mLinphoneCore.isInConference()) {
+                mLinphoneCore.terminateConference();
+            } else {
+                mLinphoneCore.terminateAllCalls();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -159,7 +168,7 @@ public class LinphoneUtils {
         }
 
         if (LinphoneManager.isInstanceiated()) {
-            org.linphone.mediastream.Log.w("LinphoneManager not instanciated yet...");
+            System.out.println(TAG+"LinphoneManager not instanciated yet...");
             return LinphoneCoreFactory.instance().createLpConfig(context.getFilesDir().getAbsolutePath() + "/.linphonerc");
         }
 
@@ -183,5 +192,14 @@ public class LinphoneUtils {
 
     public static void destroy(){
          LinphoneManager.destroy();
+    }
+    public static void clear(){
+        try{
+            if(sLinphoneUtils!=null){
+                sLinphoneUtils = null;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

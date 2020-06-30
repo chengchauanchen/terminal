@@ -10,6 +10,9 @@ import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.TimerTask;
+
 import cn.vsx.hamster.common.MessageFunEnum;
 import cn.vsx.hamster.protolbuf.codec.PTTMsgCodec;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -29,6 +32,7 @@ public class ClientChannel extends AbsClientChannel {
 
 	private Logger logger = LoggerFactory.getLogger(ClientChannel.class);
 	private IMessageService messageService;
+	private TimerTask timerTask;
 	public ClientChannel(IMessageService messageService){
 		this.messageService = messageService;
 	}
@@ -37,7 +41,7 @@ public class ClientChannel extends AbsClientChannel {
 	private ServerMessageReceivedHandlerAidl handler = new Stub() {
 		@Override
 		public void handle(byte[] data, int offset, int length) throws RemoteException {
-//			logger.info("收到消息 "+ Arrays.toString(data)+"of = "+offset+"  le = "+length);
+			logger.info("收到消息 "+ Arrays.toString(data)+"of = "+offset+"  le = "+length);
 			getDispatcher().notifyMessageReceived(PTTMsgCodec.INSTANCE.getDecode().decodeMessage(data, offset, length));
 		}
 	};
@@ -148,10 +152,39 @@ public class ClientChannel extends AbsClientChannel {
 				logger.error("ClientChannel  start失败");
 				isStarted = false;
 			}
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			logger.error("ClientChannel  Exception:"+e);
 			//start失败，重新start，直到成功
-			start();
+			reTryStart();
+
+		}
+	}
+
+	/**
+	 * 重新尝试
+	 */
+	private void reTryStart(){
+		try{
+			if(timerTask != null){
+				timerTask.cancel();
+				timerTask = null;
+			}
+		}catch (Exception ef){
+			logger.error("ClientChannel  Exception f:"+ef);
+			timerTask = null;
+		}finally {
+			try{
+				timerTask = new TimerTask() {
+					@Override
+					public void run() {
+						start();
+					}
+				};
+				TerminalFactory.getSDK().getTimer().schedule(timerTask,5*1000);
+			}catch (Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -107,11 +107,16 @@
     <string name="text_tempt_associated_account">关联账号</string>
     <string name="text_tempt_bind_unbind">NFC绑定、扫码绑定、输警号绑定</string>
     <string name="text_tempt_set">实时视频上报时长、网络参数、服务器地址</string>
+    <string name="text_tempt_video_picture">录像查看、照片查看</string>
 
     <string name="text_change_group">转组</string>
     <string name="text_set">设置</string>
     <string name="text_menu">菜单</string>
+    <string name="text_video_picture">录像、照片</string>
     <string name="text_sure">确定</string>
+    <string name="text_video_and_picture">录像和照片</string>
+    <string name="text_video">录像</string>
+    <string name="text_picture">照片</string>
 
     <string name="text_imei_null">获取IMEI信息失败</string>
     <string name="text_member_id">设备号%1$d</string>
@@ -157,4 +162,12 @@
     <string name="tv_set_close">关</string>
     <string name="tv_set_open">开</string>
     <string name="tv_set_automatic">自动</string>
+
+    <string name="text_file_video_empty">无录像</string>
+    <string name="text_file_picture_empty">无照片</string>
+    <string name="quiet_play">静音播放</string>
+    <string name="text_play">播放</string>
+    <string name="uav_push_quiet_play">正在上报图像，只能静音预览</string>
+
+    <string name="text_show_picture_index">(%1$d/%2$d)</string>
 </resources>

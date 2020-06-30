@@ -26,6 +26,7 @@ import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
+import cn.vsx.vc.receiveHandle.ReceiverRequestVideoMeetingHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.HongHuUtils;
@@ -73,18 +74,21 @@ public class MyTopRightMenu {
             final MenuItem nfcItem = new MenuItem(R.drawable.nfc_white, activity.getString(R.string.text_nfc));
             final MenuItem scanItem = new MenuItem(R.drawable.scan, activity.getString(R.string.scan));
             final MenuItem bandItem = new MenuItem(R.drawable.ic_bind_devce, activity.getString(R.string.band_device));
+            final MenuItem videoMeetingItem = new MenuItem(R.drawable.icon_video_meeting_3, activity.getString(R.string.text_video_meeting));
             final List<MenuItem> items = new ArrayList<>();
             mTopRightMenu.addMenuItem(pullItem);
             mTopRightMenu.addMenuItem(pushItem);
             mTopRightMenu.addMenuItem(createItem);
             mTopRightMenu.addMenuItem(nfcItem);
             mTopRightMenu.addMenuItem(scanItem);
+            mTopRightMenu.addMenuItem(videoMeetingItem);
 
             items.add(pullItem);
             items.add(pushItem);
             items.add(createItem);
             items.add(nfcItem);
             items.add(scanItem);
+            items.add(videoMeetingItem);
 
 
 //            if(items.size() == 1) {
@@ -100,7 +104,7 @@ public class MyTopRightMenu {
 //            }else if (items.size() == 5){
 //                mTopRightMenu.setHeight(1200);
 //            }
-            mTopRightMenu.setHeight(120)
+            mTopRightMenu.setHeight(140)
                     .setWidth(DensityUtil.dip2px(context, 200))      //默认宽度wrap_content
                     .showIcon(true)     //显示菜单图标，默认为true
                     .dimBackground(true)           //背景变暗，默认为true
@@ -162,10 +166,13 @@ public class MyTopRightMenu {
                                     } else if (items.get(position) == scanItem) {
                                         context.goToScanActivity();
                                     } else if (items.get(position) == nfcItem) {
-                                        int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-                                        context.checkNFC(userId, true);
+                                        int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+                                        context.checkNFC(groupId, true);
                                     } else if (items.get(position) == bandItem) {//绑定设备
                                         context.bandDeviceDialog();
+                                    } else if (items.get(position) == videoMeetingItem) {//视频会商
+                                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(
+                                                ReceiverRequestVideoMeetingHandler.class, 1);
                                     }
                                     break;
                                 case SPEAKING:

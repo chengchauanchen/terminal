@@ -100,17 +100,23 @@ public class SplashActivity extends BaseActivity implements RecvCallBack, Action
      * 必须要有SD卡和读取电话状态的权限，APP才能使用
      */
     private void myJudgePermission() {
-        if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
-            if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.READ_PHONE_STATE)) {//手机权限，获取uuid
-                SpecificSDK.getInstance().configLogger();
-                startSDK();
-            } else {
-                CheckMyPermission.permissionPrompt(this, Manifest.permission.READ_PHONE_STATE);
-            }
-
-        } else {
-            CheckMyPermission.permissionPrompt(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if(!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
+            CheckMyPermission.permissionPrompt(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            return;
         }
+
+        if(!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+            CheckMyPermission.permissionPrompt(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            return;
+        }
+
+        if(!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.READ_PHONE_STATE)){
+            CheckMyPermission.permissionPrompt(this, Manifest.permission.READ_PHONE_STATE);
+            return;
+        }
+
+        SpecificSDK.getInstance().configLogger();
+        startSDK();
     }
 
     /**

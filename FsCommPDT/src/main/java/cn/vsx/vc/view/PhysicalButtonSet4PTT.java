@@ -124,7 +124,7 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
             //没有设置上一个当前组,下音量键关闭
             pptButtonCut.initToggleState(false);
         }else {
-            tv_last_group_name.setText(TerminalFactory.getSDK().getGroupByGroupNo(lastGroupId).getName());
+            tv_last_group_name.setText(pptButtonCut.isChecked()?TerminalFactory.getSDK().getGroupByGroupNo(lastGroupId).getName():"");
         }
     }
 

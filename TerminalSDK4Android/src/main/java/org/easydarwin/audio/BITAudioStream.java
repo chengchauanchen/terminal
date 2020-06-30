@@ -152,7 +152,8 @@ public class BITAudioStream {
                             inputBuffers[bufferIndex].clear();
                             len = mAudioRecord.read(inputBuffers[bufferIndex], BUFFER_SIZE);
                             long timeUs = System.nanoTime() / 1000;
-                            Log.i(TAG, String.format("audio: %d [%d] ", timeUs, timeUs - presentationTimeUs));
+//                            Log.i(TAG, String.format("audio: %d [%d] ", timeUs, timeUs - presentationTimeUs));
+//                            Log.i(TAG,"-------------------------------测试--------------------------------------");
                             presentationTimeUs = timeUs;
                             if (len == AudioRecord.ERROR_INVALID_OPERATION || len == AudioRecord.ERROR_BAD_VALUE) {
                                 mMediaCodec.queueInputBuffer(bufferIndex, 0, 0, presentationTimeUs, 0);

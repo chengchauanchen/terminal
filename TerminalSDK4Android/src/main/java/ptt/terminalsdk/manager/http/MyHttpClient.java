@@ -52,7 +52,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			HttpResponse response = client.execute(request);
 			if (null != response) {
 				String responseString = new String(EntityUtils.toByteArray(response.getEntity()), DEFAULT_ENCODING);
-				logger.info("发送了一个get请求：url="+url+",收到的信息为："+responseString);
+				logger.info("发送了一个post请求：url="+url+",收到的信息为："+responseString);
 				return responseString;
 			}
 		} catch (Exception e) {
@@ -77,7 +77,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			HttpResponse response = client.execute(request);
 			if (null != response) {
 				String responseString = new String(EntityUtils.toByteArray(response.getEntity()), DEFAULT_ENCODING);
-				logger.info("发送了一个get请求：url="+url+",收到的信息为："+responseString);
+				logger.info("发送了一个post请求：url="+url+",收到的信息为："+responseString);
 				return responseString;
 			}
 		} catch (Exception e) {
@@ -195,6 +195,35 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		}
 		return null;
 	}
+
+	@Override
+	public String postFiles(String url, List<File> files, Map<String, String> paramsMap) {
+		try{
+			HttpPost httppost = new HttpPost(url);
+			logger.info("文件服务器地址为" + url);
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			for(String str : paramsMap.keySet()){
+				builder.addPart(str, new StringBody(paramsMap.get(str), ContentType.TEXT_PLAIN));
+			}
+			int count = 0;
+			for (File file: files) {
+				builder.addBinaryBody("file"+count, file);
+				count++;
+			}
+
+			DefaultHttpClient client = getHttpClient(timeOut);
+			httppost.setEntity(builder.build());
+			HttpResponse response = client.execute(httppost);
+			if (null != response) {
+				byte[] responseArray = EntityUtils.toByteArray(response
+						.getEntity());
+				return new String(responseArray, DEFAULT_ENCODING);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	private DefaultHttpClient getHttpClient(int timeOut) {
 		BasicHttpParams httpParams = new BasicHttpParams();
 		HttpConnectionParams.setSoTimeout(httpParams, timeOut);
@@ -208,7 +237,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		BufferedReader in = null;
 		try {
 			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
-			logger.info("发送get请求" + url);
+//			logger.info("发送get请求" + url);
 			String urlNameString = url;
 			URL realUrl = new URL(urlNameString);
 			// 打开和URL之间的连接

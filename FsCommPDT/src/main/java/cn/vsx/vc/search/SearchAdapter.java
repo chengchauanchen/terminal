@@ -40,6 +40,7 @@ import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import ptt.terminalsdk.bean.SearchTitleBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -61,10 +62,13 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     //成员
     private static final int MEMBER = 1003;
 
+    private boolean showHightLight;
 
-    public SearchAdapter(Context context, List<Object> datas) {
+
+    public SearchAdapter(Context context, List<Object> datas,boolean showHightLight) {
         this.mContext = context;
         this.mDatas = datas;
+        this.showHightLight = showHightLight;
     }
 
     @Override
@@ -108,31 +112,36 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
-        int itemViewType = getItemViewType(position);
-        switch (itemViewType) {
-            case TITLE:
-                SearchTitleBean data = (SearchTitleBean) mDatas.get(position);
-                TitleViewHolder holder = (TitleViewHolder) viewHolder;
-                bindTitle(data, holder);
-                break;
-            case MONITOR_GROUP:
-                GroupSearchBean data2 = (GroupSearchBean) mDatas.get(position);
-                GroupViewHolder holder2 = (GroupViewHolder) viewHolder;
-                bindGroup(data2, holder2);
-                break;
-            case GROUP:
-                GroupSearchBean data3 = (GroupSearchBean) mDatas.get(position);
-                GroupViewHolder holder3 = (GroupViewHolder) viewHolder;
-                bindGroup(data3, holder3);
-                break;
-            case MEMBER:
-                MemberSearchBean data4 = (MemberSearchBean) mDatas.get(position);
-                UserViewHolder holder4 = (UserViewHolder) viewHolder;
-                bindMember(data4, holder4);
-                break;
-            default:
-                break;
+        try{
+            int itemViewType = getItemViewType(position);
+            switch (itemViewType) {
+                case TITLE:
+                    SearchTitleBean data = (SearchTitleBean) mDatas.get(position);
+                    TitleViewHolder holder = (TitleViewHolder) viewHolder;
+                    bindTitle(data, holder);
+                    break;
+                case MONITOR_GROUP:
+                    GroupSearchBean data2 = (GroupSearchBean) mDatas.get(position);
+                    GroupViewHolder holder2 = (GroupViewHolder) viewHolder;
+                    bindGroup(data2, holder2);
+                    break;
+                case GROUP:
+                    GroupSearchBean data3 = (GroupSearchBean) mDatas.get(position);
+                    GroupViewHolder holder3 = (GroupViewHolder) viewHolder;
+                    bindGroup(data3, holder3);
+                    break;
+                case MEMBER:
+                    MemberSearchBean data4 = (MemberSearchBean) mDatas.get(position);
+                    UserViewHolder holder4 = (UserViewHolder) viewHolder;
+                    bindMember(data4, holder4);
+                    break;
+                default:
+                    break;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
     }
 
 
@@ -157,25 +166,35 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
      */
     private void bindGroup(GroupSearchBean data, GroupViewHolder holder) {
 
-        switch (data.getSearchByType()) {
-            case SearchByLabel:
-                ViewUtil.showTextHighlight(holder.tvName, data.getName(), data.getMatchKeywords().toString());
-                ViewUtil.showTextHighlight(holder.tv_group_no, data.getNo()+"", data.getMatchKeywords().toString());
-                break;
-            case SearchByNull:
-                ViewUtil.showTextNormal(holder.tvName, data.getName());
-                ViewUtil.showTextNormal(holder.tv_group_no, data.getNo()+"");
-                break;
-            default:
-                break;
+        if(showHightLight){
+            switch (data.getSearchByType()) {
+                case SearchByLabel:
+                    ViewUtil.showTextHighlight(holder.tvName, data.getName(), data.getMatchKeywords().toString());
+                    ViewUtil.showTextHighlight(holder.tv_group_no, data.getNo()+"", data.getMatchKeywords().toString());
+                    break;
+                case SearchByNull:
+                    ViewUtil.showTextNormal(holder.tvName, data.getName());
+                    ViewUtil.showTextNormal(holder.tv_group_no, data.getNo()+"");
+                    break;
+                default:
+                    break;
+            }
+        }else{
+            holder.tvName.setText(data.getName());
+            holder.tv_group_no.setText(String.valueOf(data.getNo()));
         }
+
         holder.tv_department_name.setText(data.getDepartmentName());
 //        holder.tv_group_no.setText(data.getNo()+"");
-        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
-            holder.iv_response_group_icon.setVisibility(View.VISIBLE);
-        }else {
-            holder.iv_response_group_icon.setVisibility(View.GONE);
-        }
+//        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
+//            holder.iv_response_group_icon.setVisibility(View.VISIBLE);
+//        }else {
+//            holder.iv_response_group_icon.setVisibility(View.GONE);
+//        }
+        //是否是响应组通过组图标来区分
+        holder.iv_group_logo.setImageResource(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())
+                ?R.drawable.response_group_photo:R.drawable.group_photo);
+
 
         if(checkIsMonitorGroup(data)){
             holder.ivMonitor.setImageResource(R.drawable.monitor_open);
@@ -233,11 +252,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
 
         holder.ivMonitor.setOnClickListener(v -> {
-            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == data.getNo()){
-                ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
-            }else {
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,data.getNo());
-            }
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,data.getNo());
         });
     }
 
@@ -251,10 +266,17 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if(account==null){
             return;
         }
-        if(!TextUtils.isEmpty(account.getName())){
-            ViewUtil.showTextHighlight(userViewHolder.tvName, account.getName(), account.getMatchKeywords().toString());
-            //userViewHolder.tvName.setText(account.getName() + "");
+        if(showHightLight){
+            if(!TextUtils.isEmpty(account.getName())){
+                ViewUtil.showTextHighlight(userViewHolder.tvName, account.getName(), account.getMatchKeywords().toString());
+                //userViewHolder.tvName.setText(account.getName() + "");
+            }else{
+                userViewHolder.tvName.setText("");
+            }
+        }else {
+            userViewHolder.tvName.setText(TextUtils.isEmpty(account.getName())?"":account.getName());
         }
+
         //userViewHolder.tvId.setText(account.getNo() + "");
 
         String no = HandleIdUtil.handleId(account.getNo());//去掉88 86
@@ -481,7 +503,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     /**
-     * 判断时候监听
+     * 判断是否监听
      *
      * @param group
      * @return

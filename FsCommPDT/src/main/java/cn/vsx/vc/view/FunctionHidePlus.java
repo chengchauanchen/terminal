@@ -3,7 +3,6 @@ package cn.vsx.vc.view;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
@@ -41,6 +40,7 @@ import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.ToastUtil;
+import skin.support.widget.SkinCompatDrawableManager;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -55,6 +55,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     GridView gv_function_bottom;
 
     RelativeLayout top;
+    LinearLayout rlFunctionHidePlusTopContent;
 
     EditText groupCallNewsEt;
 
@@ -127,6 +128,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
 
         gv_function_bottom = view.findViewById(R.id.gv_function_bottom);
         top = view.findViewById(R.id.rl_function_hide_plus_top);
+        rlFunctionHidePlusTopContent = view.findViewById(R.id.rl_function_hide_plus_top_content);
         groupCallNewsEt = view.findViewById(R.id.group_call_news_et);
         hideFunction = view.findViewById(R.id.hide_function);
         groupCallNewsKeyboard = view.findViewById(R.id.group_call_news_keyboard);
@@ -172,7 +174,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                 }else if (title.equals("发送位置")
                         &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
-                }else if (title.equals("上报图像")||(title.equals("组内上图"))){
+                }else if (title.equals("上报图像")||(title.equals("视频上报"))){
                     if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                         CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
                         return;
@@ -200,6 +202,8 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.NFC, true, userId);
                 }else if(title.equals("扫码")){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.QR_CODE, true, userId);
+                }else if(title.equals("视频会商")){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.VIDEO_MEETING, true, userId);
                 }else {
                     ToastUtil.showToast(context,context.getString(R.string.text_has_no_send_message_authority));
                 }
@@ -268,7 +272,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         v_edit_line.setVisibility(GONE);
         send.setVisibility(GONE);
         hideFunction.setVisibility(VISIBLE);
-        groupCallNewsKeyboard.setBackground(MyApplication.instance.getResources().getDrawable(R.drawable.soft_keyboard));
+        groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.soft_keyboard));
         if(isGroup){
             btn_ptt.setVisibility(View.VISIBLE);
             btn_record.setVisibility(View.GONE);
@@ -341,7 +345,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         v_edit_line.setVisibility(VISIBLE);
         btn_record.setVisibility(View.GONE);
         btn_ptt.setVisibility(GONE);
-        groupCallNewsKeyboard.setBackground(MyApplication.instance.getResources().getDrawable(R.drawable.recording));
+        groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.recording));
     }
 
     public void showBottom (boolean show) {
@@ -384,14 +388,14 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
 //            }else{
 //                setNoVideo();
 //            }
-            groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
+            groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.soft_keyboard));
             groupCallNewsEt.setVisibility(GONE);
             v_edit_line.setVisibility(GONE);
             btn_ptt.setVisibility(VISIBLE);
             btn_record.setVisibility(View.GONE);
             //如果有未读消息，显示未读消息，显示edittext
             if(!Util.isEmpty(unsendMessage)){
-                groupCallNewsKeyboard.setBackgroundResource(R.drawable.recording);
+                groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.recording));
                 groupCallNewsEt.setVisibility(VISIBLE);
                 v_edit_line.setVisibility(VISIBLE);
                 btn_ptt.setVisibility(GONE);
@@ -400,7 +404,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
             }
         }else{//个人消息界面
 
-            groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
+            groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.soft_keyboard));
             boolean canPush = false;
             boolean canPull = false;
 
@@ -425,7 +429,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                 groupCallNewsEt.setText(unsendMessage);
                 groupCallNewsEt.setSelection(unsendMessage.length());
                 groupCallNewsEt.setVisibility(VISIBLE);
-                groupCallNewsKeyboard.setBackgroundResource(R.drawable.recording);
+                groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.recording));
                 groupCallNewsKeyboard.setVisibility(VISIBLE);
                 btn_ptt.setVisibility(GONE);
                 btn_record.setVisibility(GONE);
@@ -435,7 +439,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
 //                if(TextUtils.equals("S962A",machineType)){
                     //这个型号的设备很奇怪，非要把edittext显示出来才正常
                     groupCallNewsEt.setVisibility(VISIBLE);
-                    groupCallNewsKeyboard.setBackgroundResource(R.drawable.recording);
+                groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.recording));
                     groupCallNewsKeyboard.setVisibility(VISIBLE);
                     btn_ptt.setVisibility(GONE);
                     btn_record.setVisibility(GONE);
@@ -476,7 +480,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     private void setNoVideo() {
         titles = null;
         titles=new String[]{
-                "相册","拍照","文件","发送位置","组内上图"
+                "相册","拍照","文件","发送位置","视频上报"
         };
         images = null;
         images=new Integer[]{
@@ -492,13 +496,13 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     private void setHasNFC() {
         titles = null;
         titles=new String[]{
-                "相册","拍照","文件","发送位置","组内上图","NFC","扫码"
+                "相册","拍照","文件","发送位置","视频上报","NFC","扫码","视频会商"
         };
         images = null;
         images=new Integer[]{
                 R.drawable.album,R.drawable.take_phones,
                 R.drawable.file_selector,R.drawable.position,
-                R.drawable.push_video, R.drawable.nfc, R.drawable.qr_scan
+                R.drawable.push_video, R.drawable.nfc, R.drawable.qr_scan,R.drawable.videoconference
         };
     }
 
@@ -602,7 +606,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         v_edit_line.setVisibility(VISIBLE);
         btn_ptt.setVisibility(View.GONE);
         btn_record.setVisibility(GONE);
-        groupCallNewsKeyboard.setBackground(MyApplication.instance.getResources().getDrawable(R.drawable.recording));
+        groupCallNewsKeyboard.setBackground(SkinCompatDrawableManager.get().getDrawable(getContext(),R.drawable.recording));
         hideKeyboard(true);
     }
 
@@ -702,6 +706,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
      */
     public void setMergeTransmitVisibility(int visibility){
         bt_merge_transmit.setVisibility(visibility);
+        rlFunctionHidePlusTopContent.setVisibility((visibility == View.VISIBLE)?View.GONE:View.VISIBLE);
     }
 
     /**

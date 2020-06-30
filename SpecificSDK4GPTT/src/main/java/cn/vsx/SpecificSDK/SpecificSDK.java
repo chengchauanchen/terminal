@@ -371,12 +371,14 @@ public class SpecificSDK extends TerminalSDK4Android {
         String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
         String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
         String server = voipServerIp+":"+voipServerPort;
-//        account = "1003";
-        logger.info("voip账号：" + account + ",密码：" + account + "，服务器地址：" + server);
+        String password = account;
+        //account = "1020";
+        //password = "YSDKFSDS324234sff";
+        logger.info("voip账号：" + account + ",密码：" + password + "，服务器地址：" + server);
         if(!TextUtils.isEmpty(account)){
             //开启voip电话服务
             MyTerminalFactory.getSDK().getVoipCallManager().startService(MyTerminalFactory.getSDK().application.getApplicationContext());
-            MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
+            MyTerminalFactory.getSDK().getVoipCallManager().login(account,password,server);
         }
     }
 }

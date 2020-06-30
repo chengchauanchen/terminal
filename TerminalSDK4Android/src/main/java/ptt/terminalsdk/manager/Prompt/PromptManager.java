@@ -6,6 +6,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Vibrator;
 
+
 import com.alibaba.fastjson.JSONObject;
 
 import org.apache.log4j.Logger;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Remark;
+
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
@@ -28,6 +30,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTalkWillTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.StringUtil;
 
 /**
@@ -91,7 +94,7 @@ public class PromptManager {
 			if(methodResult == BaseCommonCode.SUCCESS_CODE){
 				//组呼成功，发出提示音
 				if (vibrator != null){
-					vibrator.vibrate(requestCall,-1);
+					vibrator.vibrate(requestGroupCallOk,-1);
 				}
 				if(soundPool != null){
 					soundPool.play(soundMap.get(R.raw.request_call_ok_new), 0.5f, 0.5f, 0, 0, 1);
@@ -183,6 +186,10 @@ public class PromptManager {
 		soundMap.put(R.raw.success_binding_police_alert, soundPool.load(context, R.raw.success_binding_police_alert, 1));
 		soundMap.put(R.raw.success_changegroup, soundPool.load(context, R.raw.success_changegroup, 1));
 		soundMap.put(R.raw.unbinding, soundPool.load(context, R.raw.unbinding, 1));
+		soundMap.put(R.raw.lowpower_10, soundPool.load(context, R.raw.lowpower_10, 1));
+		soundMap.put(R.raw.lowpower_30, soundPool.load(context, R.raw.lowpower_30, 1));
+		soundMap.put(R.raw.lowpower_50, soundPool.load(context, R.raw.lowpower_50, 1));
+		soundMap.put(R.raw.weaksignal, soundPool.load(context, R.raw.weaksignal, 1));
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveStartCeaseGroupCallHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveTalkWillTimeoutHandler);
@@ -273,6 +280,44 @@ public class PromptManager {
 	public void unbinding(){
 		if(soundPool != null){
 			soundPool.play(soundMap.get(R.raw.unbinding), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 电量不足时提示
+	 *
+	 * @param values
+	 */
+	public void lowPower(int values) {
+		if(ApkUtil.isSiteEnforcement()){
+			switch (values) {
+				case 50:
+					if (soundPool != null) {
+						soundPool.play(soundMap.get(R.raw.lowpower_50), 0.5f, 0.5f, 0, 0, 1);
+					}
+					break;
+				case 30:
+					if (soundPool != null) {
+						soundPool.play(soundMap.get(R.raw.lowpower_30), 0.5f, 0.5f, 0, 0, 1);
+					}
+					break;
+				case 10:
+					if (soundPool != null) {
+						soundPool.play(soundMap.get(R.raw.lowpower_10), 0.5f, 0.5f, 0, 0, 1);
+					}
+					break;
+			}
+		}
+	}
+
+	/**
+	 * 信号弱时提示
+	 */
+	public void weakSignal() {
+		if(ApkUtil.isSiteEnforcement()){
+			if (soundPool != null) {
+				soundPool.play(soundMap.get(R.raw.weaksignal), 0.5f, 0.5f, 0, 0, 1);
+			}
 		}
 	}
 

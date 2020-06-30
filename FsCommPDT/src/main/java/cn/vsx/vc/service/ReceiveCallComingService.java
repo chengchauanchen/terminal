@@ -20,6 +20,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerIndividualCallTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallStoppedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
@@ -33,6 +34,7 @@ import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -134,6 +136,7 @@ public class ReceiveCallComingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         mLlIndividualCallRefuse.setOnClickListener(refuseCallListener);
         mLlIndividualCallAccept.setOnClickListener(acceptCallListener);
         mIndividualCallRetractEmergency.setOnClickListener(retractOnClickListener);
@@ -167,6 +170,10 @@ public class ReceiveCallComingService extends BaseService{
         mTvMemberNameChooice.setText(HandleIdUtil.handleName(memberName));
         PromptManager.getInstance().IndividualCallNotifyRing();
         mTimerView.onStart();
+
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+memberId);
+        SearchUtil.setUpdateUseTimeTag(memberId);
     }
 
     @Override
@@ -175,6 +182,7 @@ public class ReceiveCallComingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     /**
@@ -208,6 +216,12 @@ public class ReceiveCallComingService extends BaseService{
     private ReceiveStopStartReceiveCallServiceHandler receiveStopStartReceiveCallServiceHandler = () -> mHandler.post(() -> {
         mHandler.postDelayed(this::removeView,500);
     });
+
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+        if(!connected){
+            stopBusiness();
+        }
+    };
 
     private View.OnClickListener refuseCallListener = v -> refuseCall();
 

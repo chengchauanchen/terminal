@@ -23,7 +23,8 @@ public class FileExpireService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         logger.info(TAG + "FileExpireService：处理48小时未上传的文件");
-        MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileByExpire();
+        KeepLiveManager.getInstance().setServiceForeground(this);
+        MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileByExpire(false);
         return super.onStartCommand(intent, flags, startId);
     }
 }

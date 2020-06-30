@@ -14,8 +14,6 @@ import org.easydarwin.sw.JNIUtil;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import ptt.terminalsdk.BuildConfig;
-
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar;
@@ -166,13 +164,13 @@ public class HWConsumer extends Thread implements VideoConsumer{
                     System.arraycopy(mPpsSps, 0, h264, 0, mPpsSps.length);
                     outputBuffer.get(h264, mPpsSps.length, bufferInfo.size);
                     mPusher.push(h264, 0, mPpsSps.length + bufferInfo.size, bufferInfo.presentationTimeUs / 1000, 1);
-                    if (BuildConfig.DEBUG)
-                        Log.i(TAG, String.format("push i video stamp:%d", bufferInfo.presentationTimeUs / 1000));
+//                    if (BuildConfig.DEBUG)
+//                        Log.i(TAG, String.format("push i video stamp:%d", bufferInfo.presentationTimeUs / 1000));
                 } else {
                     outputBuffer.get(h264, 0, bufferInfo.size);
                     mPusher.push(h264, 0, bufferInfo.size, bufferInfo.presentationTimeUs / 1000, 1);
-                    if (BuildConfig.DEBUG)
-                        Log.i(TAG, String.format("push video stamp:%d", bufferInfo.presentationTimeUs / 1000));
+//                    if (BuildConfig.DEBUG)
+//                        Log.i(TAG, String.format("push video stamp:%d", bufferInfo.presentationTimeUs / 1000));
                 }
                 mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
                 EasyMuxer muxer = mMuxer;

@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallActiveEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
@@ -55,6 +56,9 @@ public class ReceiveVoipService extends BaseService{
         mLlIndividualCallRefuse =  rootView.findViewById(R.id.ll_individual_call_refuse);
         mLlIndividualCallAccept =  rootView.findViewById(R.id.ll_individual_call_accept);
 
+        //网络状态布局
+        mLlNoNetwork = rootView.findViewById(R.id.ll_network_state);
+
     }
 
     @Override
@@ -70,6 +74,7 @@ public class ReceiveVoipService extends BaseService{
         mLlIndividualCallRefuse.setOnClickListener(refuseOnclickListener);
         mLlIndividualCallAccept.setOnClickListener(acceptOnclickListener);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallActiveEndHandler);
     }
 
     @Override
@@ -97,6 +102,7 @@ public class ReceiveVoipService extends BaseService{
     public void onDestroy(){
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallActiveEndHandler);
     }
 
     private View.OnClickListener refuseOnclickListener = v-> {
@@ -116,4 +122,6 @@ public class ReceiveVoipService extends BaseService{
     };
 
     private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)-> mHandler.post(this::stopBusiness);
+
+    private ReceiveVoipCallActiveEndHandler receiveVoipCallActiveEndHandler = ()-> mHandler.post(this::stopBusiness);
 }

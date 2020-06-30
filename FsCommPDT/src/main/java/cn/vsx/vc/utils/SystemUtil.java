@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.KeyCharacterMap;
@@ -22,6 +23,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -222,4 +224,50 @@ public class SystemUtil {
         }
         return flag;
     }
+
+    /**
+     * 判断某个界面是否在前台
+     *
+     * @param context   Context
+     * @param className 界面的类名
+     * @return 是否在前台显示
+     */
+    public static boolean isForeground(Context context, String className) {
+        if (context == null || TextUtils.isEmpty(className))
+            return false;
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(1);
+        if (list != null && list.size() > 0) {
+            ComponentName cpn = list.get(0).topActivity;
+            if (className.equals(cpn.getClassName()))
+                return true;
+        }
+        return false;
+    }
+    /**
+     * 判断服务是否开启
+     *
+     * @return
+     */
+    public static boolean isServiceRunning(Context context, String ServiceName) {
+        try{
+            if (TextUtils.isEmpty(ServiceName)) {
+                return false;
+            }
+            ActivityManager myManager = (ActivityManager) context
+                    .getSystemService(Context.ACTIVITY_SERVICE);
+            ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) myManager
+                    .getRunningServices(Integer.MAX_VALUE);
+            for (int i = 0; i < runningService.size(); i++) {
+                if (runningService.get(i).service.getClassName().toString()
+                        .equals(ServiceName)) {
+                    return true;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

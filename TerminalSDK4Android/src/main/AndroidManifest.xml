@@ -41,6 +41,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name = "android.hardware.camera" />
     <uses-feature android:name = "android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="true" />
@@ -64,7 +67,7 @@
         <!--<service android:name="org.easydarwin.easypusher.BackgroundCameraService"/>-->
         <service android:name=".service.MessageService"
                  android:enabled="true"
-                 android:process=":remote"
+                 android:process=":message"
                  android:exported="true">
         </service>
 
@@ -132,11 +135,27 @@
                 <action android:name="vsxin.action.fileexpiretime" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".broadcastreceiver.PowerSaveReceiver">
+            <intent-filter >
+                <action android:name="vsxin.action.powersave.presavestatus" />
+                <action android:name="vsxin.action.powersave.savestatus" />
+                <action android:name="vsxin.action.powersave.activitytatus" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".broadcastreceiver.LocationRequestReceiver">
+            <intent-filter >
+                <action android:name="vsxin.action.location.request" />
+            </intent-filter>
+        </receiver>
         <receiver android:name=".broadcastreceiver.LivingStopTimeReceiver">
             <intent-filter >
                 <action android:name="vsxin.action.livingstoptime" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".broadcastreceiver.KeepLiveNotificationClickReceiver"
+            android:enabled="true"
+            android:exported="true" />
         <service
             android:name="org.easydarwin.push.UVCCameraService"
             android:enabled="true" />
@@ -150,6 +169,19 @@
         <service android:name=".service.TestGroupCallService"
             android:enabled="true"
             android:exported="false" />
+        <!-- 仿真卡服务 -->
+        <service
+            android:name=".service.CardService"
+            android:exported="true"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.cardemulation.host_apdu_service"
+                android:resource="@xml/aid_list" />
+        </service>
         
 <!--        <receiver android:name=".broadcastreceiver.PTTDownAndUpReceiver">-->
 <!--            <intent-filter>-->

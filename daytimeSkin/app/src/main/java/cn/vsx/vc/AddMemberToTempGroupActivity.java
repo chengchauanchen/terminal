@@ -8,8 +8,6 @@ import android.view.View.OnClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.vsx.vsxsdk.VsxSDK;
-
 public class AddMemberToTempGroupActivity extends AppCompatActivity {
 
     @Override
@@ -26,7 +24,7 @@ public class AddMemberToTempGroupActivity extends AppCompatActivity {
                 List<String> nos = new ArrayList<>();
                 nos.add("10000201");
                 nos.add("020446");
-                VsxSDK.getInstance().getJumpSDK().addMemberToTempGroup(nos, "T20190823010188");
+                //VsxSDK.getInstance().getJumpSDK().addMemberToTempGroup(nos, "T20190823010188");
             }
         });
     }

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.text.TextUtils;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.text.DecimalFormat;
@@ -13,11 +15,10 @@ import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.FileBean;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.nfc.NfcManager;
 
 public class FileTransgerUtil {
 
@@ -47,6 +48,9 @@ public class FileTransgerUtil {
     public static final String UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS ="文件不存在";
     public static final String UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_NO_RESPONSE ="服务器无响应";
     public static final String UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR ="服务器出错";
+    public static final String UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_FAEL ="上传文件失败";
+    public static final String UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL ="更新文件信息失败";
+    public static final String UPLOAD_FILE_FAIL_RESULT_DESC_POWER_SAVE_STATUS ="设备省电模式中，稍后再试";
 
     //未上传的文件限定时间，超过就自动上传
     private static final int FILE_EXPIRE_TIME = 48;
@@ -83,11 +87,28 @@ public class FileTransgerUtil {
      * @return
      */
     public static String getWarningId() {
-        RecorderBindBean bean = DataUtil.getRecorderBindBean();
-        if(bean!=null){
-             return bean.getWarningId();
+        String result = "";
+        String tag = getTag();
+        if(!TextUtils.isEmpty(tag)){
+            try{
+                JSONObject jsonObject = JSONObject.parseObject(tag);
+                if(jsonObject.containsKey(NfcManager.WID)){
+                    result = jsonObject.getString(NfcManager.WID);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
-        return "";
+        return result;
+    }
+
+    /**
+     * 获取tag
+     *
+     * @return
+     */
+    public static String getTag() {
+        return MyTerminalFactory.getSDK().getNfcManager().getFileTag();
     }
 
     /**
@@ -231,6 +252,7 @@ public class FileTransgerUtil {
         bean.setTerminalMemberNo(getPoliceIdInt());
         bean.setTerminalUniqueNo(getPoliceUniqueNo());
         bean.setWarningId(getWarningId());
+        bean.setTag(getTag());
         bean.setName(getFileName(path));
         String type =  getBITFileType(path);
         bean.setType(type);

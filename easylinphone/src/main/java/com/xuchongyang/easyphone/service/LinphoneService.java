@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.xuchongyang.easyphone.callback.PhoneCallback;
 import com.xuchongyang.easyphone.callback.RegistrationCallback;
@@ -68,7 +67,7 @@ public class LinphoneService extends Service implements LinphoneCoreListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e(TAG, "LinphoneService onDestroy execute");
+        System.out.println(TAG+"LinphoneService onDestroy execute");
         removeAllCallback();
         try{
 //            LinphoneManager.getLc().destroy();
@@ -76,6 +75,7 @@ public class LinphoneService extends Service implements LinphoneCoreListener {
         }catch(Exception e){
             e.printStackTrace();
         }
+        instance = null;
         //        if (mWakeLock != null) {
 //            mWakeLock.release();
 //            mWakeLock = null;
@@ -133,7 +133,7 @@ public class LinphoneService extends Service implements LinphoneCoreListener {
 
     @Override
     public void callState(final LinphoneCore linphoneCore, final LinphoneCall linphoneCall, LinphoneCall.State state, String s) {
-        Log.e(TAG, "callState: " + state.toString());
+        System.out.println(TAG+"callState: " + state.toString());
         if (state == LinphoneCall.State.IncomingReceived && sPhoneCallback != null) {
             sPhoneCallback.incomingCall(linphoneCall);
         }

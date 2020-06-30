@@ -3,7 +3,6 @@ package com.xuchongyang.easyphone.linphone;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 
 /**
@@ -15,14 +14,14 @@ public class KeepAliveHandler extends BroadcastReceiver {
     private static final String TAG = "KeepAliveHandler";
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e(TAG, "电话来了");
+        System.out.println(TAG+"电话来了");
         if (LinphoneManager.getLcIfManagerNotDestroyOrNull() != null) {
             LinphoneManager.getLc().refreshRegisters();
 //            SPUtils.save(context, "keepAlive", true);
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                Log.e(TAG, "Cannot sleep for 2s");
+                System.out.println(TAG+"Cannot sleep for 2s");
             }
         }
     }

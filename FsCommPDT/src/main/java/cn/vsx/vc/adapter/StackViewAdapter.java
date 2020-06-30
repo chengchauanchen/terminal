@@ -23,6 +23,7 @@ import java.util.List;
 
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -202,20 +203,20 @@ public class StackViewAdapter extends BaseAdapter{
                     Log.e("StackViewAdapter","有上报者，但是liver里没有_，无法获取编号和名字");
                 }
             }else {
-//                TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(data.get(position).messageFromId,false);
+                //判断是否是没有注册的用户上报的图像
+                if(TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(message.messageBody)){
+                    viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),context.getString(R.string.text_temporary_authorization)));
+                }else{
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(message.messageFromId,false);
                     if(account!=null){
-//                        myHandler.post(() -> {
-                            if(TextUtils.isEmpty(account.getDepartmentName())){
-                                viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(account.getNo())));
-                            }else {
-                                viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(account.getNo()),account.getDepartmentName()));
-                            }
-                            viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),account.getName()));
-
-//                        });
+                        if(TextUtils.isEmpty(account.getDepartmentName())){
+                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),message.messageFromName,HandleIdUtil.handleId(account.getNo())));
+                        }else {
+                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),message.messageFromName,HandleIdUtil.handleId(account.getNo()),account.getDepartmentName()));
+                        }
+                        viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),account.getName()));
                     }
-//                });
+                }
             }
             //如果有标题就设置标题，这个放在最后设置
             if(!TextUtils.isEmpty(data.get(position).messageBody.getString(JsonParam.TITLE))){

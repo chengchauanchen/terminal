@@ -1,7 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -27,8 +26,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,7 +54,6 @@ import org.easydarwin.easypusher.BackgroundCameraService;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 import java.util.TimerTask;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
@@ -65,6 +63,7 @@ import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.StopGroupCallReason;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
+import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
@@ -79,6 +78,8 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
@@ -91,7 +92,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablis
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -106,18 +106,17 @@ import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiveMoveTaskToBackHandler;
 import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
-import cn.vsx.vc.service.CardService;
 import cn.vsx.vc.service.LockScreenService;
-import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HongHuUtils;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
@@ -127,8 +126,8 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.permission.FloatWindowManager;
+import ptt.terminalsdk.service.CardService;
 import ptt.terminalsdk.tools.PhoneAdapter;
-import ptt.terminalsdk.tools.PinyinUtils;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -173,30 +172,25 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
     };
 
-    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
-        @Override
-        public void handler(int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                myHandler.post(()->{
-                    tv_status.setText(R.string.login_success);
-                    noNetWork.setVisibility(View.GONE);
-                });
-            }
-        }
-    };
+//    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
+//        @Override
+//        public void handler(int errorCode, String errorDesc){
+//            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+//                updateLoginStateView(1);
+//            }else{
+//                updateLoginStateView(-1);
+//            }
+//        }
+//    };
 
     private ReceiveLoginResponseHandler receiveLoginResponseHandler = new ReceiveLoginResponseHandler(){
         @Override
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                myHandler.post(()-> tv_status.setText(R.string.login_success));
-                myHandler.postDelayed(()-> noNetWork.setVisibility(View.GONE),1000);
-                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
+                updateLoginStateView(1,R.string.login_success);
+//                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
             }else {
-                myHandler.post(()->{
-                    noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText(R.string.login_fail);
-                });
+                updateLoginStateView(0,R.string.login_fail);
             }
         }
     };
@@ -208,19 +202,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int code,LoginState state){
             if(code == BaseCommonCode.SUCCESS_CODE){
-                myHandler.post(()->{
-                    noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText(R.string.logining);
-                });
+                updateLoginStateView(0,R.string.logining);
             }else if(state!=null&&state == LoginState.IDLE){
-                myHandler.post(()->{
-                    noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText(R.string.authing);
-                });
+                updateLoginStateView(0,R.string.authing);
             }else if(state!=null&&state == LoginState.LOGIN){
                 //正在登录时，再次登录不修改UI
             }else{
-                myHandler.post(()-> noNetWork.setVisibility(View.GONE));
+                updateLoginStateView(-1,0);
             }
         }
     };
@@ -228,12 +216,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
         @Override
         public void handler(boolean connected){
-            if(!connected){
-                myHandler.post(()->{
-                    noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText(R.string.text_disconnection_of_network_connection);
-                });
-            }
+            updateLoginStateView(0,connected?R.string.logining:R.string.text_disconnection_of_network_connection);
         }
     };
 
@@ -246,19 +229,24 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 myHandler.post(()->{
                     if (isRegisted) {//注册过，在后台登录，session超时也走这
-                        noNetWork.setVisibility(View.VISIBLE);
-                        tv_status.setText(R.string.connecting_server);
+                        updateLoginStateView(0,R.string.connecting_server);
                     } else {//没注册过，关掉主界面，去注册界面
                         startActivity(new Intent(NewMainActivity.this, RegistActivity.class));
                         NewMainActivity.this.finish();
                         stopService(new Intent(NewMainActivity.this, LockScreenService.class));
                     }
                 });
+            }else if(resultCode == TerminalErrorCode.REGISTER_DEVICE_KILL.getErrorCode()){
+                //设备被遥毙
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyMemberKilledHandler.class, true);
+            }else if(resultCode == TerminalErrorCode.REGISTER_ACCOUNT_DELETE.getErrorCode()
+                    ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()
+                    ||resultCode == TerminalErrorCode.UNKNOWN_ERROR.getErrorCode()){
+                //账号不存在
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExitHandler.class, getString(R.string.accunt_no_exist),true);
             }else {
-                myHandler.post(()->{
-                    noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText("认证时"+resultDesc);
-                });
+                boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
+                updateLoginStateView(0,hasCompleteData?R.string.connecting_server:R.string.auth_fail);
             }
         }
     };
@@ -281,13 +269,41 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //					MyTerminalFactory.getSDK().getGroupCallManager().requestCall();
                 }
                 MyApplication.instance.notifyAll();
-                NfcUtil.writeData();
             }
+            NfcUtil.writeData();
             //切到对讲页面，前提是在该页面做的切组操作
             if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
 //                if(contactsFragmentNew!=null&&currentCheckedId == R.id.bv_group_contacts && !contactsFragmentNew.getHiddenState()){
                 if(contactsFragmentNew!=null&&currentCheckedId == R.id.bv_group_contacts){
                     myHandler.post(() -> setTabSelection(R.id.bv_talk_back));
+                }
+            }
+        }
+    };
+
+    /**
+     * 真实网络的状态
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if (!connected) {
+                myHandler.post(() -> {
+                    updateLoginStateView(0,R.string.net_work_disconnect);
+                    if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
+                        ll_emergency_prompt.setVisibility(View.GONE);
+                        ICTV_emergency_time.onStop();
+                    }
+                    if (ll_groupCall_prompt != null && ll_groupCall_prompt.getVisibility() == View.VISIBLE) {
+                        ll_groupCall_prompt.setVisibility(View.GONE);
+                        ICTV_groupCall_time.stop();
+                    }
+                });
+            }else{
+                if(TerminalFactory.getSDK().isServerConnected()){
+                    updateLoginStateView(-1,0);
+                }else {
+                    updateLoginStateView(0,R.string.authing);
                 }
             }
         }
@@ -302,8 +318,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             logger.info("主界面收到服务是否连接的通知ReceiveOnLineStatusChangedHandler" + connected);
             if (!connected) {
                 myHandler.post(() -> {
-                    noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText(R.string.net_work_disconnect);
+                    updateLoginStateView(0,R.string.net_work_disconnect);
                     if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
                         ll_emergency_prompt.setVisibility(View.GONE);
                         ICTV_emergency_time.onStop();
@@ -315,7 +330,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 });
             } else {
                 //网络连接上，需要更新组数据（防止在断网的时候有些组不存在）
-                TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
+                TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(true);
             }
         }
     };
@@ -353,21 +368,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handle(String msg,boolean isExit){
             if(isExit){
-                cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this,msg);
                 myHandler.postDelayed(() -> {
-                    Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-                    stoppedCallIntent.putExtra("stoppedResult","0");
-                    SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
+                    cn.vsx.vc.utils.ToastUtil.showToast(msg);
+                },3000);
 
-                    for (Activity activity : ActivityCollector.getAllActivity().values()) {
-                        activity.finish();
-                    }
-//                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-//                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-                    MyApplication.instance.isClickVolumeToCall = false;
-                    MyApplication.instance.isPttPress = false;
-                    MyApplication.instance.stopHandlerService();
-                },2000);
+                myHandler.postDelayed(() -> {
+                    exitApp();
+                },5000);
             }
         }
     };
@@ -406,9 +413,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             myHandler.post(() -> {
                 if (MyApplication.instance.isPttPress) {
                     MyApplication.instance.isPttPress = false;
-
                     logger.info("小手雷pttUp事件，停止说话");
-
                 }
                 if (PhoneAdapter.isF25()) {
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
@@ -614,7 +619,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             });
         }
     };
-
     /**=====================================================================================================Listener================================================================================================================================**/
     private CallManager callManager;
 
@@ -670,50 +674,53 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             //加载手势库
             boolean loadStatus = gestureLibrary.load();
             //如果手势库加载成功
-            if (loadStatus) {
-                //识别手势  Prediction是一个相似度对象,集合中的相似度是从高到低进行排列
-                ArrayList<Prediction> pres = gestureLibrary.recognize(gesture);
-                if (!pres.isEmpty()) {
-                    //拿到相似度最高的对象
-                    Prediction pre = pres.get(0);
-                    //用整型的数表示百分比  >30%
-                    if (pre.score > 3) {
-                        //拿到手势的名字判断进行下一步逻辑
-                        if ("lightning".equals(pre.name)) {
-                            //处理紧急呼叫事件
-                            isEmergencyCall = true;
-                            MyTerminalFactory.getSDK().getEmergencyCallManager().emergencyCall();
-                            //跟据紧急呼叫的类型，展示不同的呼叫界面
-                            int emergencyType = MyTerminalFactory.getSDK().getParam(Params.EMERGENCYTYPE, 0);
-                            if (emergencyType == MessageType.GROUP_CALL.getCode()) {
-                                //紧急呼叫到组，屏蔽组呼，个呼，显示组呼通话状态
-                                //在收到receiveRequestGroupCallConformationHandler的消息的时候处理
-                            } else if (emergencyType == MessageType.PRIVATE_CALL.getCode()) {
-                                //紧急呼叫到人，屏蔽组呼，个呼，显示个呼通话状态
-                                myHandler.post(() -> {
-                                    int emergencyMemberId = MyTerminalFactory.getSDK().getParam(Params.EMERGENCYID, 0);
+            if (!loadStatus) {
+                return;
+            }
+            //识别手势  Prediction是一个相似度对象,集合中的相似度是从高到低进行排列
+            ArrayList<Prediction> pres = gestureLibrary.recognize(gesture);
+            if (pres.isEmpty()) {
+                cn.vsx.vc.utils.ToastUtil.showToast( getString(R.string.text_load_gesture_lib_fail));
+                return;
+            }
+            //拿到相似度最高的对象
+            Prediction pre = pres.get(0);
+            //用整型的数表示百分比  >30%
+            if(pre == null){
+                return;
+            }
+            if (pre.score <= 3) {
+                cn.vsx.vc.utils.ToastUtil.showToast( getString(R.string.text_gesture_mismatch));
+                return;
+            }
+            //拿到手势的名字判断进行下一步逻辑
+            if (!TextUtils.equals("lightning",pre.name)) {
+                return;
+            }
+            //处理紧急呼叫事件
+            isEmergencyCall = true;
+            MyTerminalFactory.getSDK().getEmergencyCallManager().emergencyCall();
+            //跟据紧急呼叫的类型，展示不同的呼叫界面
+            int emergencyType = MyTerminalFactory.getSDK().getParam(Params.EMERGENCYTYPE, 0);
+            if (emergencyType == MessageType.GROUP_CALL.getCode()) {
+                //紧急呼叫到组，屏蔽组呼，个呼，显示组呼通话状态
+                //在收到receiveRequestGroupCallConformationHandler的消息的时候处理
+            } else if (emergencyType == MessageType.PRIVATE_CALL.getCode()) {
+                //紧急呼叫到人，屏蔽组呼，个呼，显示个呼通话状态
+                myHandler.post(() -> {
+                    int emergencyMemberId = MyTerminalFactory.getSDK().getParam(Params.EMERGENCYID, 0);
 //                                    calleeMember = DataUtil.getMemberByMemberNo(emergencyMemberId);
+                    //弹出个呼的呼叫请求界面
+                    ll_emergency_prompt.setVisibility(View.VISIBLE);
+                    tv_emergency_member.setText(String.format(getString(R.string.text_in_emergency_call_now),calleeMember.getName()));
+                    ICTV_emergency_time.setVisibility(View.GONE);
 
-                                    //弹出个呼的呼叫请求界面
-                                    ll_emergency_prompt.setVisibility(View.VISIBLE);
-                                    tv_emergency_member.setText(String.format(getString(R.string.text_in_emergency_call_now),calleeMember.getName()));
-                                    ICTV_emergency_time.setVisibility(View.GONE);
-
-                                    if (timerTask != null) {
-                                        timerTask.cancel();
-                                        timerTask = null;
-                                    }
-                                    popupWindow.showAsDropDown(my_view);
-
-                                });
-                            }
-                        }
-                    } else {
-                        cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, getString(R.string.text_gesture_mismatch));
+                    if (timerTask != null) {
+                        timerTask.cancel();
+                        timerTask = null;
                     }
-                } else {
-                    cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, getString(R.string.text_load_gesture_lib_fail));
-                }
+                    popupWindow.showAsDropDown(my_view);
+                });
             }
         }
     }
@@ -789,7 +796,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             moveTop += dy;
                             moveRight += dx;
                             moveBottom += dy;
-
                             if (moveLeft > 0 && moveRight < width && moveTop > 0 && moveBottom < height) {
                                 imgbtn_ptt.layout(moveLeft, moveTop, moveRight, moveBottom);
                             }
@@ -810,7 +816,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             imgbtn_ptt.layout(moveLeft, moveTop, moveRight, moveBottom);
                         }
                     });
-
                     if (!isCircleTouchEvent) {
                         if (isLongClickToGroupCall) {
                             isLongClickToGroupCall = false;
@@ -831,67 +836,35 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyApplication.instance.usbAttached = connected;
     };
 
-
     //其他页面组呼圆形按钮
-
     RelativeLayout rl_main_activity;
-
     Button imgbtn_ptt;
-
     LinearLayout ll_sliding_chenge_volume;
-
     TextView tv_volume_fw;
-
     View my_view;//popuwindow依附的view
-
     View pop_view;
-
     TextView tv_status;
-
     //紧急呼叫提示风格
-
     LinearLayout ll_emergency_prompt;
-
     IndividualCallTimerView ICTV_emergency_time;
-
     TextView tv_emergency_member;
-
     //其他页面组呼提示
-
     LinearLayout ll_groupCall_prompt;
-
     TextView tv_current_group;
-
     TextView incomming_call_current_speaker;
-
     TimerView ICTV_groupCall_time;
-
     //视频来了提示
-
     RelativeLayout rl_livecome;
-
     TextView tv_live_theme;
-
     ImageView lv_live_return;
-
     TextView tv_live_name;
-
     Button btn_live_gowatch;
-
     LinearLayout noNetWork;
-
-
     FrameLayout fl_fragment_container_main;
-
-
     BottomView bv_talk_back;
-
     BottomView bv_person_contacts;
-
     BottomView bv_group_contacts;
-
     BottomView bv_setting;
-
     LinearLayout ll_content;
     public static boolean isForeground=false;
 
@@ -912,15 +885,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     public static int mCurrentFragmentCode;
     protected Logger logger = Logger.getLogger(getClass());
 
-    private Timer timer = new Timer();
-
     private PopupWindow popupWindow;
     private int moveLeft, moveTop, moveRight, moveBottom;
     private static final int RECEIVEVOICECHANGED = 0;
-
-
-//    private NfcAdapter mNfcAdapter;
-//    private PendingIntent mPendingIntent;
     public Handler myHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg){
@@ -956,7 +923,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     @Override
     public void initView() {
-
         // 设置底部导航图片的大小
         ll_content = (LinearLayout) findViewById(R.id.ll_content);
         bv_setting = (BottomView) findViewById(R.id.bv_setting);
@@ -987,22 +953,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         initBottomImage();
         //        initBadgeView();
         fragmentManager = getSupportFragmentManager();
-
         // 先初始化界面加载第一个Fragment
         initFragment();
-
         imgbtn_ptt.setVisibility(View.GONE);
         ll_emergency_prompt.setVisibility(View.GONE);
         MyTerminalFactory.getSDK().registNetworkChangeHandler();
-//        thridAppJoin();
-//        //初始化 向地三方应用同步消息的service
-//        ThirdSendMessage.initVsxSendMessage(this);
-//        //注册 连接jumpService的广播
-//        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
-////        GetPublicKey.getSignInfo(this);
-//        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
-
-        getPinYin();
     }
 
     @Override
@@ -1013,18 +968,16 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //悬浮按钮
         imgbtn_ptt.setOnTouchListener(new OnTouchListenerImplementationToRemovePttFloatWindow());
         imgbtn_ptt.setOnLongClickListener(new OnLongClickListenerImplementationToGroupCall());
-
         //退到后台
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveMoveTaskToBackHandler);
-
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
-
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
@@ -1051,15 +1004,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         bv_person_contacts.setOnClickListener(new BottomViewClickListener());
         bv_group_contacts.setOnClickListener(new BottomViewClickListener());
         bv_setting.setOnClickListener(new BottomViewClickListener());
-        noNetWork.setOnClickListener(v -> {
-            LoginState loginState = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState();
-            if(loginState!= LoginState.LOGIN && loginState != LoginState.UPDATE_DATA && loginState != LoginState.ONLINE){
-                if (TerminalFactory.getSDK().isServerConnected()) {
-                    TerminalFactory.getSDK().disConnectToServer();
-                }
-                TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
-                tv_status.setText(R.string.authing);
-            }
+        noNetWork.setOnClickListener(v -> { startAuth();
         });
         if(null != callManager){
             callManager.addPhysicalPttListener(b -> {
@@ -1123,20 +1068,29 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         WindowManager windowManager = (WindowManager) getSystemService(Service.WINDOW_SERVICE);
         width = windowManager.getDefaultDisplay().getWidth();
         height = windowManager.getDefaultDisplay().getHeight();
+        //机型适配
+        checkPhoneModel();
+        //判断权限
+        judgePermission();
+        //初始化某些功能
+        initSameFunction();
+        //判断是否是直接进入主页面的，直接进入主页面就再登录
+        checkNeedAuth();
+    }
+
+    /**
+     * 机型适配
+     */
+    private void checkPhoneModel() {
+        String machineType = Build.MODEL;
+        logger.error(TAG+"-machineType :"+machineType);
+        MyTerminalFactory.getSDK().putParam(Params.ANDROID_BUILD_MODEL,machineType);
+        //是否是F25机型
         if (PhoneAdapter.isF25()) {
             MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
         }
-
-        //开启服务，开启锁屏界面
-        startService(new Intent(NewMainActivity.this, LockScreenService.class));
-        SpecificSDK.initVoipSpecificSDK();
-
-        MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);
-
-        String machineType = Build.MODEL;
-        MyTerminalFactory.getSDK().putParam(Params.ANDROID_BUILD_MODEL,machineType);
-        logger.error("machineType :"+machineType);
-        if (machineType.equals("PDC760")) {
+        //是否是F25机型
+        if (PhoneAdapter.isPDC760()) {
             //监听海能达PTT按钮
             try{
                 CommonManager mCommonManager = SDKManager.getCommonManager(getApplicationContext());
@@ -1148,7 +1102,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             callManager.interceptPtt();
                         }
                     }
-
                     @Override
                     public void onApiDisconnected(int i){
                         logger.info("onApiDisconnected:"+i);
@@ -1160,26 +1113,33 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             }catch(SDKException e){
                 e.printStackTrace();
             }
-
         }
-        judgePermission();
+    }
 
+    /**
+     * 初始化某些功能
+     */
+    private void initSameFunction() {
+        //开启服务，开启锁屏界面
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(NewMainActivity.this, LockScreenService.class));
+        } else {
+            startService(new Intent(NewMainActivity.this, LockScreenService.class));
+        }
+        SpecificSDK.initVoipSpecificSDK();
+        MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);
 //        initNFC();
         startService(new Intent(this,CardService.class));
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
-        //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
-//        manager.checkStartExpireFileAlarm();
         //上传没有上传的文件信息
         manager.uploadFileTreeBean(null);
-
+        //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
+        manager.checkStartExpireFileAlarm();
         if(!FloatWindowManager.getInstance().checkPermission(this)){
             FloatWindowManager.getInstance().applyPermission(this);
         }
-        NfcUtil.writeData();
-
     }
-
 //    private void initNFC() {
 //        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 //        mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,getClass()), 0);
@@ -1190,6 +1150,34 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //            mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
 //        }
 //    }
+
+    /**
+     * 判断是否需要认证
+     */
+    private void checkNeedAuth() {
+        Intent intent = getIntent();
+        if(intent!=null && intent.getBooleanExtra(Params.IS_NEED_lOGIN,false)){
+            //认证
+            startAuth();
+            //获取省电模式的配置信息
+            TerminalFactory.getSDK().getPowerSaveManager().requestSaveStatusAndActivityStatusTime(true);
+        }
+    }
+
+    /**
+     * 开始认证
+     */
+    private void startAuth(){
+        LoginState loginState = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState();
+        if(loginState!= LoginState.LOGIN && loginState != LoginState.UPDATE_DATA && loginState != LoginState.ONLINE){
+            if (TerminalFactory.getSDK().isServerConnected()) {
+                TerminalFactory.getSDK().disConnectToServer();
+            }
+            TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, "")
+                    , TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
+            updateLoginStateView(0,R.string.authing);
+        }
+    }
 
     private void initFragment() {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -1414,6 +1402,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //        if (mNfcAdapter != null) {
 //            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
 //        }
+
+        if(!NetworkUtil.isConnected(this)){
+            updateLoginStateView(0,R.string.net_work_disconnect);
+        }
     }
 
 
@@ -1441,8 +1433,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 }
             }
         } else if (requestCode == CODE_FNC_REQUEST) {
-            int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-            checkNFC(userId,false);
+            int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+            checkNFC(groupId,false);
         }else if(requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK){
             if (data != null) {
                 String result = data.getStringExtra(Constant.CODED_CONTENT);
@@ -1481,6 +1473,15 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     permissionDenied(requestCode);
                 }
                 break;
+            case  CallPhoneUtil.PHONE_PERMISSIONS_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //同意，拨打电话
+                    CallPhoneUtil.callPhone( NewMainActivity.this, TerminalFactory.getSDK().getParam(Params.TEMP_CALL_PHONE_NUMBER,""));
+                }else {
+                    //不同意，提示
+                    cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_phone_not_open_call_is_unenabled));
+                }
+                break;
             default:
                 break;
 
@@ -1511,6 +1512,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }else {
             if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)){
                 if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+                    MyTerminalFactory.getSDK().getLocationManager().startLocation(true,false,false,false);
                     if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
                         CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
                     }
@@ -1594,10 +1596,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestLoginHandler );
 
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler );
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler );
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTDownHandler);
@@ -1718,10 +1721,25 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         });
     }
 
-
-
-    private void getPinYin(){
-        Log.e("pingying", PinyinUtils.getPingYin("邱志文"));
-        Log.e("pingying",PinyinUtils.converterToFirstSpell("邱志文"));
+    /**
+     * 更新登录的状态
+     * @param type -1：Gone 0：离线中  1：登录成功
+     */
+    private void updateLoginStateView(int type,int stringId){
+        try{
+            myHandler.post(()->{
+                if(type == 0){
+                    noNetWork.setVisibility(View.VISIBLE);
+                    tv_status.setText(stringId);
+                }else if(type == 1){
+                    tv_status.setText(stringId);
+                    myHandler.postDelayed(()-> noNetWork.setVisibility(View.GONE),1000);
+                }else {
+                    noNetWork.setVisibility(View.GONE);
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

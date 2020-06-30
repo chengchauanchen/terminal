@@ -22,8 +22,8 @@ android {
         applicationId "cn.vsx.vc"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 25
-        versionName "1.0.25"
+        versionCode 28
+        versionName "1.0.28"
 
         multiDexEnabled true
 

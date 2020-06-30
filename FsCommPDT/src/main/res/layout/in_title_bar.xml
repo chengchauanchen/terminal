@@ -68,7 +68,7 @@
             android:layout_height="@dimen/x25"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/x20"
-            android:background="@drawable/live_theme_confirm_bg"
+            android:background="@drawable/bg_button_live_theme_confirm"
             android:text="@string/text_sure"
             android:textColor="@color/white"
             android:textSize="@dimen/sp_12" />

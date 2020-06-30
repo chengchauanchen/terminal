@@ -39,7 +39,7 @@ public class BackgroundCameraService extends Service implements TextureView.Surf
         if(!uvcPush){
             if (mPenddingStartPreview && mMediaStream != null){
                 mMediaStream.setSurfaceTexture(mTexture);
-                mMediaStream.startPreview();
+                mMediaStream.startPreviewByHandle();
             }
         }else {
             if (mPenddingStartPreview && uvcMediaStream != null){
@@ -84,10 +84,10 @@ public class BackgroundCameraService extends Service implements TextureView.Surf
 
     public void activePreview() {
         if (mMediaStream != null) {
-            mMediaStream.stopPreview();
+            mMediaStream.stopPreviewByHandle();
             if (mTexture != null){
                 mMediaStream.setSurfaceTexture(mTexture);
-                mMediaStream.startPreview();
+                mMediaStream.startPreviewByHandle();
             }else{
                 mPenddingStartPreview = true;
             }

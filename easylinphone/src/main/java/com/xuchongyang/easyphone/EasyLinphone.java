@@ -3,6 +3,7 @@ package com.xuchongyang.easyphone;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
+import android.text.TextUtils;
 import android.view.SurfaceView;
 
 import com.xuchongyang.easyphone.callback.PhoneCallback;
@@ -107,7 +108,7 @@ public class EasyLinphone {
         if (!LinphoneService.isReady() || !LinphoneManager.isInstanceiated()) {
             return;
         }
-        if (!"".equals(num)) {
+        if (!TextUtils.isEmpty(num)) {
             PhoneBean phone = new PhoneBean();
             phone.setUserName(num);
             phone.setHost(mServerIP);
@@ -311,5 +312,36 @@ public class EasyLinphone {
 
     public static void destroy(){
         LinphoneUtils.destroy();
+    }
+
+    /**
+     * 清空用户信息
+     */
+    public static void removeAuthInfo(){
+        mUsername = null;
+        mPassword = null;
+        mServerIP = null;
+        try {
+            LinphoneCore core = LinphoneManager.getLc();
+            if(core!=null){
+                if(core.getAuthInfosList()!=null&&core.getAuthInfosList().length>0){
+                    LinphoneManager.getLc().clearAuthInfos();
+                }
+                LinphoneManager.getLc().clearProxyConfigs();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //       destroy();
+    }
+    /**
+     * 清空用户信息
+     */
+    public static void clearUtil(){
+        try {
+            LinphoneUtils.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

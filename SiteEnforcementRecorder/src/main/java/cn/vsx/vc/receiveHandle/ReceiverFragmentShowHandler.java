@@ -1,5 +1,7 @@
 package cn.vsx.vc.receiveHandle;
 
+import android.os.Bundle;
+
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 /**
@@ -7,5 +9,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverFragmentShowHandler extends ReceiveHandler {
-    public void handler(String tag);
+    public void handler(String tag, Bundle bundle);
 }

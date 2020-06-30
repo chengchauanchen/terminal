@@ -58,8 +58,8 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePowerSaveStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetCurrentGroupHandler;
@@ -79,7 +79,6 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
-import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
@@ -96,8 +95,6 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
  */
 
 public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnClickListener {
-
-    LinearLayout noNetWork;
 
     ImageView newsBarReturn;
 
@@ -150,6 +147,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     public static int mGroupId;
     //获取组内正在上报人数的间隔时间
     private static final long GET_GROUP_LIVING_INTERVAL_TIME = 20*1000;
+//    private static final long GET_GROUP_LIVING_INTERVAL_TIME = 5*1000;
     @SuppressWarnings("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
@@ -203,6 +201,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @Override
     public void initView() {
         noNetWork = (LinearLayout) findViewById(R.id.noNetWork);
+        tv_status = (TextView) findViewById(R.id.tv_status);
         newsBarReturn = (ImageView) findViewById(R.id.news_bar_return);
         groupLiveHistory = (ImageView) findViewById(R.id.group_live_history);
         groupCallActivityMemberInfo = (ImageView) findViewById(R.id.group_call_activity_member_info);
@@ -286,6 +285,15 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     }
 
+    @Override
+    protected void handleMesage(Message msg) {
+        switch (msg.what) {
+            case VIDEO_LIVE_COUNT:
+                getGroupLivingList();
+                break;
+        }
+    }
+
     public void initListener() {
         newsBarReturn.setOnClickListener(this);
         groupLiveHistory.setOnClickListener(this);
@@ -313,7 +321,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mmReceiveGetGroupCurrentOnlineMemberListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveForceChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
@@ -321,6 +328,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupLivingListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetCurrentGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receivePowerSaveStatusChangedHandler);
         super.initListener();
     }
 
@@ -345,9 +353,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 //        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
         TerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(userId, TerminalMemberStatusEnum.ONLINE.toString() );
         //获取组内正在上报的人数
-        getGroupLivingList();
+        handler.sendEmptyMessage(VIDEO_LIVE_COUNT);
         refreshPtt();
-        NfcUtil.writeData();
     }
 
     private void switchToGroup(){
@@ -387,7 +394,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
@@ -401,6 +407,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupLivingListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetCurrentGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receivePowerSaveStatusChangedHandler);
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
         }
@@ -436,28 +443,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private void setIvMonitorDrawable(){
-        if(checkIsMonitorGroup(userId)){
+        if(DataUtil.checkIsMonitorGroup(userId)){
             iv_monitor.setImageResource(R.drawable.monitor_open);
         }else {
             iv_monitor.setImageResource(R.drawable.monitor_close);
         }
-    }
-
-    private boolean checkIsMonitorGroup(int groupNo){
-        Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
-        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
-            return true;
-        }
-        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
-            return true;
-        }
-        if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
-            return true;
-        }
-        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
-            return true;
-        }
-        return false;
     }
 
     private void stateView() {
@@ -843,24 +833,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     };
 
     /**
-     * 网络连接状态
-     */
-    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
-
-        @Override
-        public void handler(final boolean connected) {
-            logger.info("组会话页面收到服务是否连接的通知" + connected);
-            GroupCallNewsActivity.this.runOnUiThread(() -> {
-                if (!connected) {
-                    noNetWork.setVisibility(View.VISIBLE);
-                } else {
-                    noNetWork.setVisibility(View.GONE);
-                }
-            });
-        }
-    };
-
-    /**
      * 被动方组呼来了
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode,uniqueNo) -> {
@@ -1075,22 +1047,44 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             }
         });
         if(forNumber){
-            handler.postDelayed(() -> getGroupLivingList(),GET_GROUP_LIVING_INTERVAL_TIME);
+            if(!MyTerminalFactory.getSDK().getPowerSaveManager().isSave()){
+                handler.sendEmptyMessageDelayed(VIDEO_LIVE_COUNT,GET_GROUP_LIVING_INTERVAL_TIME);
+            }
         }
     };
 
     private ReceiveSetCurrentGroupHandler receiveSetCurrentGroupHandler = new ReceiveSetCurrentGroupHandler(){
         @Override
         public void handler(int currentGroupId, int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                if(currentGroupId == userId){
-                    refreshPtt();
+            handler.post(() -> {
+                if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                    if(currentGroupId == userId){
+                        refreshPtt();
 
-                    TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-                    isCurrentGroup = !isCurrentGroup;
+                        TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
+                        isCurrentGroup = !isCurrentGroup;
+                    }
+                }else {
+                    ToastUtils.showShort(errorDesc);
+                }
+            });
+        }
+    };
+
+    /**
+     * 省电模式状态改变的通知
+     */
+    private ReceivePowerSaveStatusChangedHandler receivePowerSaveStatusChangedHandler = new ReceivePowerSaveStatusChangedHandler(){
+        @Override
+        public void handler(boolean isSave){
+            if (isSave) {
+                if(handler.hasMessages(VIDEO_LIVE_COUNT)){
+                    handler.removeMessages(VIDEO_LIVE_COUNT);
                 }
             }else {
-                ToastUtils.showShort(errorDesc);
+                if(!handler.hasMessages(VIDEO_LIVE_COUNT)){
+                    handler.sendEmptyMessageDelayed(VIDEO_LIVE_COUNT,GET_GROUP_LIVING_INTERVAL_TIME);
+                }
             }
         }
     };
@@ -1132,13 +1126,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         }
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        NfcUtil.writeData();
-    }
-
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

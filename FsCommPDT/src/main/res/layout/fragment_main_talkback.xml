@@ -106,9 +106,11 @@
 
                     <LinearLayout
                         android:id="@+id/ll_speak_state"
-                        android:layout_width="fill_parent"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="top|center_horizontal"
+                        android:paddingRight="@dimen/dp_10"
+                        android:paddingLeft="@dimen/dp_10"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical">
 
                         <!-- 我正在说话 -->
@@ -132,7 +134,8 @@
                         <!-- 听别人说话 -->
                         <LinearLayout
                             android:id="@+id/ll_listening"
-                            style="@style/wrap_content_style"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/x11"
                             android:gravity="center_horizontal"
                             android:orientation="vertical"
@@ -141,10 +144,13 @@
                             <LinearLayout
                                 style="@style/wrap_content_style"
                                 android:orientation="horizontal">
-
-
                                 <TextView
                                     android:id="@+id/incomming_call_current_speaker"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:maxLines="2"
+                                    android:ellipsize="end"
                                     style="@style/current_speaker" />
 
                                 <ImageView

@@ -42,7 +42,7 @@ import java.util.TimerTask;
  */
 
 public class LinphoneManager implements LinphoneCoreListener {
-    private static final String TAG = "LinphoneManager";
+    private static final String TAG = "LinphoneManager---";
     private static LinphoneManager instance;
     private Context mServiceContext;
     private LinphoneCore mLc;
@@ -88,7 +88,7 @@ public class LinphoneManager implements LinphoneCoreListener {
 
     public static synchronized LinphoneCore getLcIfManagerNotDestroyOrNull() {
         if (sExited || instance == null) {
-            Log.e("Trying to get linphone core while LinphoneManager already destroyed or not created");
+            System.out.println(TAG+"Trying to get linphone core while LinphoneManager already destroyed or not created");
             return null;
         }
         return getLc();
@@ -143,7 +143,7 @@ public class LinphoneManager implements LinphoneCoreListener {
             mTimer.schedule(task, 0, 20);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e(TAG, "startLibLinphone: cannot start linphone");
+            System.out.println(TAG+ "startLibLinphone: cannot start linphone");
         }
     }
 
@@ -161,11 +161,11 @@ public class LinphoneManager implements LinphoneCoreListener {
         //mLc.setCallErrorTone(Reason.NotFound, mErrorToneFile);//设置呼叫错误播放的铃声
         setBackCamAsDefault();
         int availableCores = Runtime.getRuntime().availableProcessors();
-        Log.w(TAG, "MediaStreamer : " + availableCores + " cores detected and configured");
+        System.out.println(TAG+"MediaStreamer : " + availableCores + " cores detected and configured");
         mLc.setCpuCount(availableCores);
 
         int migrationResult = getLc().migrateToMultiTransport();
-        Log.d(TAG, "Migration to multi transport result = " + migrationResult);
+        System.out.println(TAG+"Migration to multi transport result = " + migrationResult);
 
         mLc.setNetworkReachable(true);
 
@@ -223,7 +223,7 @@ public class LinphoneManager implements LinphoneCoreListener {
         }
         for (PayloadType payloadType : mLc.getVideoCodecs()) {
             try {
-                android.util.Log.e(TAG, "setCodecMime: mime: " + payloadType.getMime() + " rate: " + payloadType.getRate());
+                System.out.println(TAG+"setCodecMime: mime: " + payloadType.getMime() + " rate: " + payloadType.getRate());
                 mLc.enablePayloadType(payloadType, true);
             } catch (LinphoneCoreException e) {
                 e.printStackTrace();
@@ -266,9 +266,14 @@ public class LinphoneManager implements LinphoneCoreListener {
     private void doDestroy() {
         try {
             mTimer.cancel();
+            mLc.clearProxyConfigs();
+            mLc.clearCallLogs();
+            mLc.clearAuthInfos();
             mLc.destroy();
 
         } catch (RuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             mLc = null;

@@ -45,9 +45,12 @@ import java.util.TimerTask;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.GroupScanType;
+import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.common.TempGroupType;
+import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.UserStatus;
@@ -59,6 +62,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -79,15 +83,18 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetCurrentGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ResponseSetUserStatusMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.BindEquipmentListActivity;
@@ -191,6 +198,10 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         public void run() {
             myHandler.post(() -> {
                 tv_current_group.setText(group.getName());
+                if(Util.equals(group.getGroupType(), GroupType.TEMPORARY.toString())
+                    &&Util.equals(group.getTempGroupType(), TempGroupType.COMMON_TEAM_GROUP.toString())){
+                    group.setDepartmentName("临时组");
+                }
                 tv_current_folder.setText(group.getDepartmentName());
             });
         }
@@ -335,11 +346,17 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
                 return;
             }
             logger.info("TalkbackFragment收到强制切组： toGroupId：" + toGroupId);
+            //获取当前组的在线成员列表
+            getCurrentGroupOnlineMembers();
             myHandler.post(() -> {
                 setCurrentGroupView();
-                if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
-                    change2Silence();
-                }
+                //需要判断是否是响应组
+                //如果是响应组，禁止组呼状态
+                //如果不是响应组，空闲状态
+                setPttText();
+//                if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
+//                    change2Silence();
+//                }
             });
         }
     };
@@ -371,6 +388,18 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
                     setCurrentGroupView();
                     setPttText();
                 });
+                //获取当前组在线成员人数
+                getCurrentGroupOnlineMembers();
+            }
+        }
+    };
+
+    private ReceiveSetCurrentGroupHandler receiveSetCurrentGroupHandler = new ReceiveSetCurrentGroupHandler(){
+        @Override
+        public void handler(int currentGroupId, int errorCode, String errorDesc){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE||errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
+                //获取当前组在线成员人数
+                getCurrentGroupOnlineMembers();
             }
         }
     };
@@ -523,6 +552,8 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         @Override
         public void handler(int resultCode, String resultDes) {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                //获取当前组在线成员人数
+                getCurrentGroupOnlineMembers();
                 myHandler.post(() -> {
                     //当前文件夹、组数据的显示设置
                     setCurrentGroupView();
@@ -907,6 +938,21 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         }
     };
 
+    /**
+     * 获取临时组的成员列表
+     */
+    private ReceiveTempGroupMembersHandler receiveTempGroupMembersHandler = new ReceiveTempGroupMembersHandler(){
+        @Override
+        public void handler(int groupId, List<Member> members, int total, int onlineNumber, int offlineNumber){
+            //判断是否是当前组，并且是临时组
+            int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+            if(currentGroupId == groupId && DataUtil.isTemporaryGroup(groupId)&& members!=null){
+                online_number = onlineNumber;
+                myHandler.postDelayed(() -> tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members), online_number)),1000);
+            }
+        }
+    };
+
     private ReceivePTTUpHandler receivePTTUpHandler = new ReceivePTTUpHandler() {
         @Override
         public void handler() {
@@ -961,19 +1007,6 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
             }
         }
     }
-
-    /**
-     * 取消和监听通知
-     */
-    private ReceiveSetMonitorGroupViewHandler receiveSetMonitorGroupViewHandler = new ReceiveSetMonitorGroupViewHandler() {
-        @Override
-        public void handler() {
-            myHandler.post(() -> {
-
-            });
-        }
-    };
-
     /**
      * 收到测试组呼
      */
@@ -1121,8 +1154,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
     private int groupScanId;
     private boolean isFlex = false;
     private TimerTask timerTaskLock;
-
-
+    private boolean isHidden  = false;
     @Override
     public int getContentViewId() {
         return R.layout.fragment_main_talkback;
@@ -1289,6 +1321,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetCurrentGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -1321,12 +1354,13 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTestGroupCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(responseSetUserStatusMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllGroupHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverBindDeviceHandler);
@@ -1339,9 +1373,9 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
     public void initData() {
 
         // 如果是F25机型，则将PTT按键隐藏
-        if (PhoneAdapter.isF25()) {
+//        if (PhoneAdapter.isF25()) {
 //            view_pager.setVisibility(View.GONE);
-        }
+//        }
 
         MyApplication.instance.isPttViewPager = true;
         online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
@@ -1356,12 +1390,29 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
             rl_uav_push.setVisibility(View.GONE);
         }
 //        setScanGroupIcon();//设置组扫描相关图标
+        //判断是否是直接进入主页面的，直接进入主页面就再登录
+        if(getActivity()!=null&&getActivity().getIntent()!=null && !getActivity().getIntent().getBooleanExtra(Params.IS_NEED_lOGIN,false)){
+            //获取当前组在线成员人数
+            getCurrentGroupOnlineMembers();
+        }
+    }
 
+    /**
+     * 获取当前组的在线人数
+     */
+    private void getCurrentGroupOnlineMembers(){
+        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        if(DataUtil.isTemporaryGroup(currentGroupId)){
+            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getDataManager().getMemberByTempNo(currentGroupId));
+        }else{
+            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(currentGroupId, TerminalMemberStatusEnum.ONLINE.toString());
+        }
     }
 
     private void setPttText() {
         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
+        logger.info("setPttText---groupByGroupNo:"+groupByGroupNo);
         //响应组  普通用户  不在响应状态
         if (ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
                 !groupByGroupNo.isHighUser() &&
@@ -1701,6 +1752,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetCurrentGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
@@ -1717,14 +1769,15 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTestGroupCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(responseSetUserStatusMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllGroupHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverBindDeviceHandler);
@@ -1942,9 +1995,20 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
     };
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        isHidden = hidden;
+        if(!hidden){
+            setPttText();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        setPttText();
+        if(!isHidden){
+            setPttText();
+        }
         HongHuUtils.isHonghuDep(isDonghu -> {
             if(isDonghu){
                 //获取已绑定的装备列表
@@ -2003,5 +2067,18 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         }
     };
 
-
+    /**
+     * 所有组的数据已更新
+     */
+    private ReceiveUpdateAllGroupHandler receiveUpdateAllGroupHandler = new ReceiveUpdateAllGroupHandler() {
+        @Override
+        public void handler(List<Group> phoneMember) {
+            if(phoneMember!=null&&!phoneMember.isEmpty()){
+                myHandler.post(() -> {
+                    setCurrentGroupView();
+                    setPttText();
+                });
+            }
+        }
+    };
 }

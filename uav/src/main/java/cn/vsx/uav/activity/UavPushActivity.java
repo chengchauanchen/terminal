@@ -100,6 +100,9 @@ import dji.ux.panel.CameraSettingExposurePanel;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.DialogUtils;
 
+import ptt.terminalsdk.broadcastreceiver.BatteryBroadcastReceiver;
+import ptt.terminalsdk.listener.BaseListener;
+
 public class UavPushActivity extends BaseActivity{
 
     private TextureView mSvAircraftLive;
@@ -164,7 +167,7 @@ public class UavPushActivity extends BaseActivity{
     private TextView mVDrakBackgroupd;
     private static final int REQUEST_FILE_CODE = 99;
     private List<String> pushMemberList = new ArrayList<>();
-
+    private BatteryBroadcastReceiver batteryBroadcastReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         //去除title
@@ -297,6 +300,14 @@ public class UavPushActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAirCraftStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
+
+        //初始化手机信号的监听
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).initPhoneStateListener();
+        //注册手机信号的监听
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).registPhoneStateListener();
+        //注册电量广播
+        batteryBroadcastReceiver = new BatteryBroadcastReceiver();
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).registBatterBroadcastReceiver(batteryBroadcastReceiver);
     }
 
     @Override
@@ -367,6 +378,11 @@ public class UavPushActivity extends BaseActivity{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAirCraftStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
+
+        //注销电量的广播
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).unRegistBatterBroadcastReceiver(batteryBroadcastReceiver);
+        //注册手机信号的监听
+        BaseListener.getInstance(MyTerminalFactory.getSDK().application).unRegistPhoneStateListener();
     }
 
     @Override

@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import cn.vsx.vc.receiveHandle.ReceiveSelectedMemberChangedHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +51,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
 
     private ArrayList<ContactItemBean> selectedMembers;
 
-//    private List<Integer> selectedMemberNos;
+    //    private List<Integer> selectedMemberNos;
     private List<Member> pcSelectMember = new ArrayList<>();
     private List<Member> policeSelectMember = new ArrayList<>();
     private List<Member> recoderSelectMember = new ArrayList<>();
@@ -85,7 +86,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         pcFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PC.toString());
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
         fragmentTransaction.add(R.id.contacts_viewPager, pcFragment).
-                show(pcFragment).commit();
+            show(pcFragment).commit();
         currentFragment = pcFragment;
     }
 
@@ -271,16 +272,16 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         if(contactItemBean.getBean() instanceof Member){
             Member member = (Member) contactItemBean.getBean();
             selectedMembers.remove(contactItemBean);
-//            Iterator<ContactItemBean> iterator = selectedMembers.iterator();
-//            while(iterator.hasNext()){
-//                ContactItemBean next = iterator.next();
-//                if(next.getType() == Constants.TYPE_USER){
-//                    Member member1 = (Member) next.getBean();
-//                    if(member1.getNo() == member.getNo() && member1.getType() == member.getType()){
-//                        iterator.remove();
-//                    }
-//                }
-//            }
+            //            Iterator<ContactItemBean> iterator = selectedMembers.iterator();
+            //            while(iterator.hasNext()){
+            //                ContactItemBean next = iterator.next();
+            //                if(next.getType() == Constants.TYPE_USER){
+            //                    Member member1 = (Member) next.getBean();
+            //                    if(member1.getNo() == member.getNo() && member1.getType() == member.getType()){
+            //                        iterator.remove();
+            //                    }
+            //                }
+            //            }
             removeSelectedMember(member);
         }
     }
@@ -313,5 +314,6 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         }else{
             mLlSelected.setVisibility(View.VISIBLE);
         }
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSelectedMemberChangedHandler.class, (selectedMembers!=null)?selectedMembers.size():0);
     }
 }

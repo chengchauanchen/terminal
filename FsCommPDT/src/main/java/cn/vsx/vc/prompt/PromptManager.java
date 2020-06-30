@@ -346,7 +346,7 @@ public class PromptManager {
 			soundMap.put(R.raw.exten_storage_not_engou, soundPool.load(MyApplication.instance, R.raw.exten_storage_not_engou,1));
 			soundMap.put(R.raw.start_report_by_notify, soundPool.load(MyApplication.instance, R.raw.start_report_by_notify,1));
 			soundMap.put(R.raw.start_play_by_notify, soundPool.load(MyApplication.instance, R.raw.start_play_by_notify,1));
-			soundMap.put(R.raw.temp_group_expire, soundPool.load(MyApplication.instance, R.raw.temp_group_expire,10));
+			soundMap.put(R.raw.temp_group_expire, soundPool.load(MyApplication.instance, R.raw.temp_group_expire,1));
 			MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
 			MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 			MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);

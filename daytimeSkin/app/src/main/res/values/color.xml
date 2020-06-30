@@ -566,4 +566,20 @@
     <color name="warning_item_bg">#b5b5b5</color>
 
     <color name="merge_transmit_text_color">#313131</color>
+
+    <color name="news_fragment_top_layout_bg">#EDEDEE</color>
+    <color name="video_meeting_text_name">#313131</color>
+    <color name="video_meeting_text_time">#b5b5b5</color>
+
+    <color name="work_bg">#fffeff</color><!--任务字体灰色1 -->
+    <color name="work_text_gray">#313131</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_1">#898989</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_2">#2CCEDC</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_3">#0091FF</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_4">#21BFE2</color><!--任务字体灰色1 -->
+    <color name="work_text_gray_5">#313131</color><!--任务字体灰色1 -->
+
+    <color name="funcation_top_et_underline">#33313131</color>
+    <color name="upload_log_button">#0191ff</color>
+    <color name="push_live_wiht_no_regist_log_text">#990091ff</color>
 </resources>

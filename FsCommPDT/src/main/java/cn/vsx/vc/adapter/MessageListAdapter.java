@@ -96,6 +96,8 @@ public class MessageListAdapter extends BaseAdapter {
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_telephone_assistant));
             }else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){//警情
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_to_warning));
+            }else if(terminalMessage.messageType == MessageType.VIDEO_MEETING.getCode()){//视频会商
+                viewHolder.tv_user_name.setText(context.getString(R.string.text_video_meeting));
             }
             else {
                 if (isReceiver) {//接受消息，显示对方名字
@@ -131,8 +133,9 @@ public class MessageListAdapter extends BaseAdapter {
             viewHolder.iv_user_photo.setImageResource(R.drawable.video_photo);
         }else if(terminalMessage.messageType == MessageType.CALL_RECORD.getCode()){/** 电话助手 **/
             viewHolder.iv_user_photo.setImageResource(R.drawable.call_photo);
-        }
-        else if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+        }else if(terminalMessage.messageType == MessageType.VIDEO_MEETING.getCode()){/** 视频会商 **/
+            viewHolder.iv_user_photo.setImageResource(R.drawable.video_meeting);
+        } else if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
             Group groupInfo = DataUtil.getGroupByGroupNo(terminalMessage.messageToId);
             if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
                 viewHolder.iv_user_photo.setImageResource(R.drawable.response_group_photo);
@@ -194,143 +197,153 @@ public class MessageListAdapter extends BaseAdapter {
                 userId = terminalMessage.messageToId;
             }
         }
-        String unsendMessage = context.getSharedPreferences("unsendMessage", Context.MODE_PRIVATE).getString(String.valueOf(userId),"");
-        if(!Util.isEmpty(unsendMessage)){
-            String text = String.format("<font color='red'>[草稿]</font>%s",unsendMessage);
-            viewHolder.tv_last_msg.setText(Html.fromHtml(text));
-        }else {
-            if(terminalMessage.messageType ==  MessageType.SHORT_TEXT.getCode()) {
+        //视频会商的最后一条消息
+        if(terminalMessage.messageType == MessageType.VIDEO_MEETING.getCode()){
+            if(terminalMessage.messageBody!=null&&terminalMessage.messageBody.containsKey(JsonParam.CONTENT)){
                 String content = terminalMessage.messageBody.getString(JsonParam.CONTENT);
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+content);
-                }else {
-                    viewHolder.tv_last_msg.setText(content);
-                }
+                viewHolder.tv_last_msg.setText(content);
+            }else{
+                viewHolder.tv_last_msg.setText("");
             }
-            if(terminalMessage.messageType ==  MessageType.LONG_TEXT.getCode()) {
-                String path = terminalMessage.messagePath;
-                File file = new File(path);
-                if (!file.exists()) {
-                    MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
-                    MyTerminalFactory.getSDK().download(terminalMessage, true);
+        }else{
+            String unsendMessage = context.getSharedPreferences("unsendMessage", Context.MODE_PRIVATE).getString(String.valueOf(userId),"");
+            if(!Util.isEmpty(unsendMessage)){
+                String text = String.format("<font color='red'>[草稿]</font>%s",unsendMessage);
+                viewHolder.tv_last_msg.setText(Html.fromHtml(text));
+            }else {
+                if(terminalMessage.messageType ==  MessageType.SHORT_TEXT.getCode()) {
+                    String content = terminalMessage.messageBody.getString(JsonParam.CONTENT);
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+content);
+                    }else {
+                        viewHolder.tv_last_msg.setText(content);
+                    }
                 }
-                String content = FileUtil.getStringFromFile(file);
-                logger.info("长文本： path:"+path+"    content:"+content);
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_text_),terminalMessage.messageFromName,content));
-                } else {
-                    viewHolder.tv_last_msg.setText(content);
+                if(terminalMessage.messageType ==  MessageType.LONG_TEXT.getCode()) {
+                    String path = terminalMessage.messagePath;
+                    File file = new File(path);
+                    if (!file.exists()) {
+                        MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+                        MyTerminalFactory.getSDK().download(terminalMessage, true);
+                    }
+                    String content = FileUtil.getStringFromFile(file);
+                    logger.info("长文本： path:"+path+"    content:"+content);
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_text_),terminalMessage.messageFromName,content));
+                    } else {
+                        viewHolder.tv_last_msg.setText(content);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_picture_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_picture);
+                if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_picture_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_picture);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_voice_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_voice);
+                if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_voice_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_voice);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_video_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_video);
+                if(terminalMessage.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_video_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_video);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.CALL_RECORD.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_call_record_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_call_record);
+                if(terminalMessage.messageType ==  MessageType.CALL_RECORD.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_call_record_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_call_record);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_file_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_file);
+                if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_file_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_file);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.POSITION.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_location_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_location);
+                if(terminalMessage.messageType ==  MessageType.POSITION.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_location_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_location);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.AFFICHE.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_notice_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_notice);
+                if(terminalMessage.messageType ==  MessageType.AFFICHE.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_notice_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_notice);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.WARNING_INSTANCE.getCode()) {
-                if(TerminalMessageUtil.hasWarningDetail(terminalMessage)){
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageBody.getString(JsonParam.SUMMARY));
-                }else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_warning);
+                if(terminalMessage.messageType ==  MessageType.WARNING_INSTANCE.getCode()) {
+                    if(TerminalMessageUtil.hasWarningDetail(terminalMessage)){
+                        viewHolder.tv_last_msg.setText(terminalMessage.messageBody.getString(JsonParam.SUMMARY));
+                    }else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_warning);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.PRIVATE_CALL.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_personal_call_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_personal_call);
+                if(terminalMessage.messageType ==  MessageType.PRIVATE_CALL.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_personal_call_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_personal_call);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.VIDEO_LIVE.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_image_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_image);
+                if(terminalMessage.messageType ==  MessageType.VIDEO_LIVE.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_image_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_image);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.GROUP_CALL.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_group_call_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_group_call);
+                if(terminalMessage.messageType ==  MessageType.GROUP_CALL.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_group_call_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_group_call);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_sound_recording_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_sound_recording);
+                if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_sound_recording_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_sound_recording);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.HYPERLINK.getCode()) {//人脸识别
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_face_recognition_),terminalMessage.messageFromName));
-                } else {
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_face_recognition);
+                if(terminalMessage.messageType ==  MessageType.HYPERLINK.getCode()) {//人脸识别
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_face_recognition_),terminalMessage.messageFromName));
+                    } else {
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_face_recognition);
+                    }
                 }
-            }
-            if(terminalMessage.messageType ==  MessageType.MERGE_TRANSMIT.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_merge_transmit_),terminalMessage.messageFromName));
-                }else{
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_merge_transmit);
+                if(terminalMessage.messageType ==  MessageType.MERGE_TRANSMIT.getCode()) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_merge_transmit_),terminalMessage.messageFromName));
+                    }else{
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_merge_transmit);
+                    }
                 }
-            }
-            //消息撤回
-            if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_with_draw_),terminalMessage.messageFromName));
-                }else{
-                    viewHolder.tv_last_msg.setText(R.string.text_message_list_with_draw);
+                //消息撤回
+                if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                        viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_with_draw_),terminalMessage.messageFromName));
+                    }else{
+                        viewHolder.tv_last_msg.setText(R.string.text_message_list_with_draw);
+                    }
+                }if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                    viewHolder.tv_last_msg.setText(R.string.text_message_LTE_live);
+                }else if(terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+                    viewHolder.tv_last_msg.setText(R.string.text_message_city_live);
                 }
-            }if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
-                viewHolder.tv_last_msg.setText(R.string.text_message_LTE_live);
-            }else if(terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
-                viewHolder.tv_last_msg.setText(R.string.text_message_city_live);
             }
         }
     }

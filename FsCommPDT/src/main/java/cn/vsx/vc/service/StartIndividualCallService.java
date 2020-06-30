@@ -18,6 +18,7 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
@@ -30,6 +31,7 @@ import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -104,6 +106,7 @@ public class StartIndividualCallService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         mIvIndividualCallRetractRequest.setOnClickListener(retractOnClickListener);
         mLlIndividualCallHangupRequest.setOnClickListener(stopCallListener);
         mPopMinimize.setOnTouchListener(miniPopOnTouchListener);
@@ -137,6 +140,9 @@ public class StartIndividualCallService extends BaseService{
             ToastUtil.individualCallFailToast(MyTerminalFactory.getSDK().application, resultCode);
         }
 
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+memberId);
+        SearchUtil.setUpdateUseTimeTag(memberId);
     }
 
     @Override
@@ -169,6 +175,7 @@ public class StartIndividualCallService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
@@ -230,13 +237,13 @@ public class StartIndividualCallService extends BaseService{
             logger.info("对方接受了你的个呼:" + resultCode + resultDesc + "callType;" + individualCallType);
             mHandler.post(() -> callAnswer(individualCallType));
         }else{//对方拒绝
-            ToastUtil.showToast(StartIndividualCallService.this, resultDesc);
             //发送通知关闭CallingService(防止已经跳转到CallingService)
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopCallingServiceHandler.class);
             mHandler.postDelayed(() -> {
                 PromptManager.getInstance().IndividualHangUpRing();
                 PromptManager.getInstance().delayedStopRing();
                 stopBusiness();
+                ToastUtil.showToast(resultDesc);
             },500);
         }
     };
@@ -258,6 +265,12 @@ public class StartIndividualCallService extends BaseService{
     private ReceiveStopStartReceiveCallServiceHandler receiveStopStartReceiveCallServiceHandler = () -> mHandler.post(() -> {
         mHandler.postDelayed(this::removeView,500);
     });
+
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+        if(!connected){
+            stopBusiness();
+        }
+    };
 
     private void callAnswer(int individualCallType){
         PromptManager.getInstance().stopRing();

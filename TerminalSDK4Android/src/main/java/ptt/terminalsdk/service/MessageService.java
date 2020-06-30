@@ -40,24 +40,24 @@ public class MessageService extends Service {
 
     @Override
     public void onCreate() {
+        super.onCreate();
+        logger.info(TAG+"执行了onCreate()");
         configLogger();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Params.BR_START_CONNECT_CLIENT);
         registerReceiver(receiveStartConnectClientHandler, intentFilter);
-        logger.info("MessageService执行了onCreate()");
     }
 
     @Override
     public void onLowMemory(){
         super.onLowMemory();
-        logger.error("MessageService---onLowMemory");
+        logger.error(TAG+"onLowMemory");
     }
 
     @Override
     public int onStartCommand(Intent intent,  int flags, int startId) {
-        logger.info("MessageService执行了onStartCommand()---flags:"+flags+"------startId:"+startId);
+        logger.info(TAG+"执行了onStartCommand()---flags:"+flags+"------startId:"+startId);
         KeepLiveManager.getInstance().setServiceForeground(this);
-
         return super.onStartCommand(intent,flags,startId);
     }
 
@@ -85,19 +85,19 @@ public class MessageService extends Service {
                 protocolType = intent.getStringExtra("protocolType");
             }
         }
-        logger.info("MessageService ----> onStartCommand---- protocolType:"+protocolType+"--uuid = "+ uuid.length+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
+        logger.info(TAG+"onStartCommand-protocolType:"+protocolType+"--uuid = "+ uuid.length+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
         initClient(protocolType);
         startClient(uuid,accessServerIp,accessServerPort);
     }
 
     private synchronized void initClient(String protocolType){
-        logger.info("initClient---protocolType:"+protocolType);
+        logger.info(TAG+"initClient---protocolType:"+protocolType);
         if(Params.TCP.equals(protocolType)){
             connectionClient = MyNettyClient.newInstance(this);
         }else if(Params.UDP.equals(protocolType)){
             connectionClient = MyUDPClient.newInstance(this);
         }else {
-            logger.error("没有获取到通信方式！！");
+            logger.error(TAG+"没有获取到通信方式！！");
         }
     }
     private void startClient(byte[] uuid, String accessServerIp, int accessServerPort){
@@ -105,20 +105,20 @@ public class MessageService extends Service {
         try {
             if(uuid.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0){
                 if(connectionClient.isConnected()){
-                    logger.info("connectionClient isConnected");
+                    logger.info(TAG+"connectionClient isConnected");
                     connectionClient.stop(false);
                 }
-                logger.info("MessageService连接到信令服务器，调用了connectionClient的start()");
+                logger.info(TAG+"连接到信令服务器，调用了connectionClient的start()");
                 connectionClient.setUuid(uuid);
                 connectionClient.setServerIp(accessServerIp);
                 connectionClient.setServerPort(accessServerPort);
                 connectionClient.start();
             }else {
-                logger.error("接入服务地址不对！！不能出现这种情况！");
+                logger.error(TAG+"接入服务地址不对！！不能出现这种情况！");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("连接到信令服务器时，出现异常", e);
+            logger.error(TAG+"连接到信令服务器时，出现异常", e);
 
             //连接失败继续重连
 //            TerminalFactory.getSDK().connectToServer();
@@ -128,21 +128,21 @@ public class MessageService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        logger.info("MessageService执行了onBind()");
+        logger.info(TAG+"执行了onBind()");
         return messageServiceStub;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        logger.info("MessageService执行了onUnbind()");
+        logger.info(TAG+"执行了onUnbind()");
         try {
             if(connectionClient!=null){
                 connectionClient.stop(true);
                 connectionClient = null;
             }
-            logger.info("MessageService调用了connectionClient的stop()");
+            logger.info(TAG+"调用了connectionClient的stop()");
         } catch (Exception e) {
-            logger.error("MessageService调用了onUnbind--e"+e);
+            logger.error(TAG+"调用了onUnbind--e"+e);
             e.printStackTrace();
         }
         // Service 有时被系统杀死，会调用此方法，此时应该重新去连接
@@ -158,7 +158,7 @@ public class MessageService extends Service {
 
     @Override
     public void onDestroy() {
-        logger.info("MessageService执行了onDestroy()--connectionClient:"+(connectionClient!=null));
+        logger.info(TAG+"执行了onDestroy()--connectionClient:"+(connectionClient!=null));
         if(receiveStartConnectClientHandler != null){
             unregisterReceiver(receiveStartConnectClientHandler);
         }
@@ -167,7 +167,7 @@ public class MessageService extends Service {
                 connectionClient.stop(true);
             }
             connectionClient = null;
-            logger.info("MessageService调用了connectionClient的stop()");
+            logger.info(TAG+"调用了connectionClient的stop()");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -216,7 +216,7 @@ public class MessageService extends Service {
 
         @Override
         public void initConnectionClient(String protocolType) throws RemoteException{
-            logger.info("initConnectionClient--"+protocolType);
+            logger.info(TAG+"initConnectionClient--"+protocolType);
             initClient(protocolType);
         }
 
@@ -279,7 +279,7 @@ public class MessageService extends Service {
         public void onReceive(Context context, Intent intent){
             String action = intent.getAction();
             if(action != null && TextUtils.equals(Params.BR_START_CONNECT_CLIENT,action)){
-                logger.info("receiveStartConnectClientHandler--开始连接服务器");
+                logger.info(TAG+"receiveStartConnectClientHandler--开始连接服务器");
                 startConnect(intent);
             }
         }

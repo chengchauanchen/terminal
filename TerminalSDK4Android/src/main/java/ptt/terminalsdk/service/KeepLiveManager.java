@@ -12,6 +12,8 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
+import org.apache.log4j.Logger;
+
 /**
  * 作者：xuxiaolong
  * 创建日期：2018/8/16
@@ -19,6 +21,8 @@ import android.support.v4.app.NotificationCompat;
  */
 
 public class KeepLiveManager{
+    protected Logger logger = Logger.getLogger(this.getClass());
+    private static final String TAG = "KeepLiveManager---";
     /**
      * 前台进程的NotificationId
      */
@@ -41,8 +45,7 @@ public class KeepLiveManager{
      * @param service
      */
     public void setServiceForeground(Service service){
-
-
+        logger.info(TAG+"setServiceForeground--service："+service);
         //设置service为前台服务，提高优先级
         if (Build.VERSION.SDK_INT < 18) {
             //Android4.3以下 ，此方法能有效隐藏Notification上的图标
@@ -98,6 +101,7 @@ public class KeepLiveManager{
     public static class GrayInnerService extends Service {
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
+
             startForeground(GRAY_SERVICE_ID, new Notification());
             stopForeground(true);
             stopSelf();

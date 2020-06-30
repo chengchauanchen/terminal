@@ -270,6 +270,16 @@ public class PromptManager {
     }
 
     /**
+     * 存储空间没有找到
+     */
+    public void startExternNoFind() {
+        if (soundPool != null) {
+            logger.info("存储空间没有找到！");
+            soundPool.play(soundMap.get(R.raw.exten_no_find), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
      * 存储空间严重不足
      */
     public void startExternNoStorage() {
@@ -360,6 +370,42 @@ public class PromptManager {
     }
 
     /**
+     * 开始车厢巡视
+     */
+    public void startVideoTapByCarriageInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.start_carriageInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
+     * 停止车厢巡视
+     */
+    public void stopVideoTapByCarriageInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.stop_carriageInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
+     * 开始列车终到检查
+     */
+    public void startVideoTapByTrainArrivalInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.start_trainArrivalInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
+     * 停止列车终到检查
+     */
+    public void stopVideoTapByTrainArrivalInspection() {
+        if (soundPool != null) {
+            soundPool.play(soundMap.get(R.raw.stop_trainArrivalInspection), 0.5f, 0.5f, 0, 0, 1);
+        }
+    }
+
+    /**
      * 开始录音
      */
     public void startRecordAudio() {
@@ -399,39 +445,6 @@ public class PromptManager {
         }
     }
 
-    /**
-     * 电量不足时提示
-     *
-     * @param values
-     */
-    public void lowPower(int values) {
-        switch (values) {
-            case 50:
-                if (soundPool != null) {
-                    soundPool.play(soundMap.get(R.raw.lowpower_50), 0.5f, 0.5f, 0, 0, 1);
-                }
-                break;
-            case 30:
-                if (soundPool != null) {
-                    soundPool.play(soundMap.get(R.raw.lowpower_30), 0.5f, 0.5f, 0, 0, 1);
-                }
-                break;
-            case 10:
-                if (soundPool != null) {
-                    soundPool.play(soundMap.get(R.raw.lowpower_10), 0.5f, 0.5f, 0, 0, 1);
-                }
-                break;
-        }
-    }
-
-    /**
-     * 信号弱时提示
-     */
-    public void weakSignal() {
-        if (soundPool != null) {
-            soundPool.play(soundMap.get(R.raw.weaksignal), 0.5f, 0.5f, 0, 0, 1);
-        }
-    }
 
     /**
      * 将要到达上报最大时长时的提示
@@ -480,6 +493,7 @@ public class PromptManager {
         soundMap.put(R.raw.change_group_ok, soundPool.load(MyApplication.instance, R.raw.change_group_ok, 1));
         soundMap.put(R.raw.request_call_wait, soundPool.load(MyApplication.instance, R.raw.request_call_wait, 1));
         soundMap.put(R.raw.passive_dropped_warning, soundPool.load(MyApplication.instance, R.raw.passive_dropped_warning, 1));
+        soundMap.put(R.raw.exten_no_find, soundPool.load(MyApplication.instance, R.raw.exten_no_find, 1));
         soundMap.put(R.raw.exten_no_storage, soundPool.load(MyApplication.instance, R.raw.exten_no_storage, 1));
         soundMap.put(R.raw.exten_storage_not_engou, soundPool.load(MyApplication.instance, R.raw.exten_storage_not_engou, 1));
         soundMap.put(R.raw.photograph, soundPool.load(MyApplication.instance, R.raw.photograph, 1));
@@ -489,19 +503,22 @@ public class PromptManager {
         soundMap.put(R.raw.stop_report, soundPool.load(MyApplication.instance, R.raw.stop_report, 1));
         soundMap.put(R.raw.start_videotape, soundPool.load(MyApplication.instance, R.raw.start_videotape, 1));
         soundMap.put(R.raw.stop_videotape, soundPool.load(MyApplication.instance, R.raw.stop_videotape, 1));
+        soundMap.put(R.raw.start_carriageInspection, soundPool.load(MyApplication.instance, R.raw.start_carriageInspection, 1));
+        soundMap.put(R.raw.stop_carriageInspection, soundPool.load(MyApplication.instance, R.raw.stop_carriageInspection, 1));
+        soundMap.put(R.raw.start_trainArrivalInspection, soundPool.load(MyApplication.instance, R.raw.start_trainArrivalInspection, 1));
+        soundMap.put(R.raw.stop_trainArrivalInspection, soundPool.load(MyApplication.instance, R.raw.stop_trainArrivalInspection, 1));
+
         soundMap.put(R.raw.start_record_audio, soundPool.load(MyApplication.instance, R.raw.start_record_audio, 1));
         soundMap.put(R.raw.stop_record_audio, soundPool.load(MyApplication.instance, R.raw.stop_record_audio, 1));
 
-        soundMap.put(R.raw.lowpower_10, soundPool.load(MyApplication.instance, R.raw.lowpower_10, 1));
-        soundMap.put(R.raw.lowpower_30, soundPool.load(MyApplication.instance, R.raw.lowpower_30, 1));
-        soundMap.put(R.raw.lowpower_50, soundPool.load(MyApplication.instance, R.raw.lowpower_50, 1));
+
         soundMap.put(R.raw.reported_2hours, soundPool.load(MyApplication.instance, R.raw.reported_2hours, 1));
         soundMap.put(R.raw.reported_4hours, soundPool.load(MyApplication.instance, R.raw.reported_4hours, 1));
         soundMap.put(R.raw.reported_6hours, soundPool.load(MyApplication.instance, R.raw.reported_6hours, 1));
         soundMap.put(R.raw.reported_8hours, soundPool.load(MyApplication.instance, R.raw.reported_8hours, 1));
         soundMap.put(R.raw.reported_10hours, soundPool.load(MyApplication.instance, R.raw.reported_10hours, 1));
         soundMap.put(R.raw.reported_12hours, soundPool.load(MyApplication.instance, R.raw.reported_12hours, 1));
-        soundMap.put(R.raw.weaksignal, soundPool.load(MyApplication.instance, R.raw.weaksignal, 1));
+
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);

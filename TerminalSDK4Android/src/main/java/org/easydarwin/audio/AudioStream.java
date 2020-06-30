@@ -294,7 +294,7 @@ public class AudioStream{
         packet[6] = (byte) 0xFC;
     }
 
-    private void stop() {
+    public void stop() {
         logger.info("audioStream---stop");
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);

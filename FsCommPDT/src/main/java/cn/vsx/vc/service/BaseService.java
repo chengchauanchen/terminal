@@ -39,14 +39,17 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDeparmentChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
@@ -63,6 +66,7 @@ import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiverBusinessInServiceStatusHandler;
 import ptt.terminalsdk.service.KeepLiveManager;
 
 /**
@@ -117,25 +121,30 @@ public abstract class BaseService extends Service{
         initHomeBroadCastReceiver();
         initBroadCastReceiver();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveDeparmentChangeHandler);
 
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverBusinessInServiceStatusHandler.class,this.getClass().getSimpleName(),true);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         KeepLiveManager.getInstance().setServiceForeground(this);
-        logger.info(TAG+"---onStartCommand--"+dialogAdd);
+        logger.info(TAG+"---onStartCommand--"+dialogAdd+"-intent-"+(null != intent));
         if(!dialogAdd){
             windowManager.addView(rootView, layoutParams1);
             MyApplication.instance.viewAdded = true;
             dialogAdd = true;
             if(null != intent){
                 initView(intent);
+            }else{
+                stopBusiness();
             }
         }
         return super.onStartCommand(intent, flags, startId);
@@ -236,13 +245,16 @@ public abstract class BaseService extends Service{
     public void onDestroy(){
         super.onDestroy();
         logger.info(TAG+":onDestroy");
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverBusinessInServiceStatusHandler.class,this.getClass().getSimpleName(),false);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveDeparmentChangeHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
@@ -250,16 +262,18 @@ public abstract class BaseService extends Service{
      * 重置状态机
      */
     protected void revertStateMachine(){
-
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
         }
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ceaseWatching();
         }
-        Log.d("BaseService", "MyApplication.instance.getIndividualState():" + MyApplication.instance.getIndividualState());
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
             MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+        }
+        //如果切组是在听组呼，先停止
+        if(MyApplication.instance.getGroupListenenState() != GroupCallListenState.IDLE){
+            TerminalFactory.getSDK().getGroupCallManager().getGroupCallListenStateMachine().cleanListen(false);
         }
     }
 
@@ -267,20 +281,24 @@ public abstract class BaseService extends Service{
      * 移除view并停止service
      */
     protected void removeView(){
-        logger.info(TAG+"--ReceiverRemoveWindowViewHandler:"+dialogAdd);
-        mHandler.removeCallbacksAndMessages(null);
-        if(dialogAdd){
-            windowManager.removeView(rootView);
-            dialogAdd = false;
-            MyApplication.instance.viewAdded = false;
-        }
-        MyApplication.instance.isMiniLive = false;
-        PromptManager.getInstance().stopRing();
-        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
-        stopSelf();
-        finishTransparentActivity();
+        try{
+            logger.info(TAG+"--ReceiverRemoveWindowViewHandler:"+dialogAdd);
+            mHandler.removeCallbacksAndMessages(null);
+            if(dialogAdd){
+                windowManager.removeView(rootView);
+                dialogAdd = false;
+                MyApplication.instance.viewAdded = false;
+            }
+            MyApplication.instance.isMiniLive = false;
+            PromptManager.getInstance().stopRing();
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
+            stopSelf();
+            finishTransparentActivity();
 
-        AppKeyUtils.setAppKey(null);//退出业务将appKey重置
+            AppKeyUtils.setAppKey(null);//退出业务将appKey重置
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -295,6 +313,18 @@ public abstract class BaseService extends Service{
 
     private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> {
         mHandler.post(this::stopBusiness);
+    };
+
+    //成员被删除了
+    private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
+        @Override
+        public void handler() {
+            mHandler.post(() -> {
+                PromptManager.getInstance().stopRing();
+                revertStateMachine();
+                removeView();
+            });
+        }
     };
 
     /**
@@ -315,8 +345,21 @@ public abstract class BaseService extends Service{
      * 服务端通知强制重新认证登陆
      */
     private ReceiveForceReloginHandler receiveForceReloginHandler = version -> {
-        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
-        mHandler.post(() -> removeView());
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE
+                &&MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
+            mHandler.post(() -> stopBusiness());
+        }
+    };
+
+    /**
+     * 部门修改之后，提示用户重新登录
+     */
+    private ReceiveDeparmentChangeHandler receiveDeparmentChangeHandler = new ReceiveDeparmentChangeHandler() {
+        @Override
+        public void handler() {
+            mHandler.post(() -> stopBusiness());
+        }
     };
 
     /**
@@ -340,7 +383,10 @@ public abstract class BaseService extends Service{
      */
     private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
         if(resultCode != BaseCommonCode.SUCCESS_CODE){
-            removeView();
+            if(MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE
+                    && MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE){
+                stopBusiness();
+            }
         }
     });
 
@@ -354,7 +400,9 @@ public abstract class BaseService extends Service{
             if(action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)){
                 String reason = intent.getStringExtra(Constants.SYSTEM_DIALOG_REASON_KEY);
                 if(Constants.SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason) || Constants.SYSTEM_DIALOG_REASON_RECENT_APPS.equals(reason)){
-                    showPopMiniView();
+                    if(!MyApplication.instance.isMiniLive){
+                        showPopMiniView();
+                    }
                 }
             }
         }

@@ -486,8 +486,10 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
             String url = "http://"+serverIp+":"+serverPort+"/api/v1/query_records";
             Map<String,String> paramsMap = new HashMap<>();
             logger.info("消息："+terminalMessage);
-            paramsMap.put("id",getCallId(terminalMessage));
-            logger.info("获取视频回放url："+url);
+            paramsMap.put("callId",getCallId(terminalMessage));
+            paramsMap.put("id",getLiveUniqueNo(terminalMessage));
+            paramsMap.put("filter","1");
+//            logger.info("获取视频回放url："+url);
             String result = TerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
             //            result = "{\"msg\":\"success\",\"code\":0,\"data\":{\"list\":[{\"name\":\"88045832_6540978884229379386\",\"start_time\":\"20190517154511\",\"duration\":\"13.598\",\"hls\":\"/hls/88045832_6540978884229379386/20190517/20190517154511/88045832_6540978884229379386_record.m3u8\"}]}}";
             logger.info("获取视频回放结果："+result);
@@ -502,14 +504,13 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
                         finish();
                         return;
                     }
+                    String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
+                    String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,0)+"";
                     for(int i = 0; i < list.size(); i++){
                         JSONObject jsonObject = list.getJSONObject(i);
                         String hls = jsonObject.getString("hls");
                         String startTime = jsonObject.getString("start_time");
-                        String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
-                        String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,0)+"";
                         String liveUrl = "http://"+fileServerIp+":"+port+hls;
-                        logger.info("liveUrl："+liveUrl);
                         MediaBean mediaBean = new MediaBean();
                         mediaBean.setUrl(liveUrl);
                         mediaBean.setStartTime(startTime);
@@ -681,22 +682,39 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
     private String getCallId(TerminalMessage terminalMessage){
         String id = "";
         if(terminalMessage.messageBody!=null){
+            if(terminalMessage.messageBody.containsKey(JsonParam.CALLID)){
+                id = terminalMessage.messageBody.getString(JsonParam.CALLID);
+            }
+        }
+        return id;
+    }
+
+    /**
+     * 获取UniqueNo
+     * @param terminalMessage
+     * @return
+     */
+    private String getLiveUniqueNo(TerminalMessage terminalMessage){
+        String id = "";
+        if(terminalMessage.messageBody!=null){
             if(terminalMessage.messageBody.containsKey(JsonParam.EASYDARWIN_RTSP_URL)){
                 String url = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
-
-                boolean shijuSDP = TerminalFactory.getSDK().getLiveManager().isShijuSDP();
-                if(shijuSDP){
-                    if(!TextUtils.isEmpty(url)&&url.contains("/")&&url.contains(".")){
-                        int index = url.lastIndexOf("/");
-                        //TODO sdp,武铁市局环境目前有.sdp,所以需要截 "."
-                        int pointIndex = url.lastIndexOf(".");
-                        id = url.substring(index+1,pointIndex);
-                    }
+                if(TextUtils.isEmpty(url)){
+                    return id;
+                }
+                if(!url.contains("/")){
+                    return id;
+                }
+                String string = url.substring(url.lastIndexOf("/")+1);
+                if(TextUtils.isEmpty(string)){
+                    return id;
+                }
+                if(string.contains("_")){
+                    id = string.substring(0,string.indexOf("_"));
+                }else if(string.contains(".")){
+                    id = url.substring(0,url.lastIndexOf("."));
                 }else{
-                    if(!TextUtils.isEmpty(url)&&url.contains("/")){
-                        int index = url.lastIndexOf("/");
-                        id = url.substring(index+1);
-                    }
+                    id = string;
                 }
             }
         }

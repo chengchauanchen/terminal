@@ -4,17 +4,12 @@ import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
-import android.text.TextUtils;
-
-import com.google.gson.Gson;
 
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-
-import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 
 public class NFCCardReader implements NfcAdapter.ReaderCallback{
 
@@ -25,7 +20,7 @@ public class NFCCardReader implements NfcAdapter.ReaderCallback{
     public static final int RESULT_CODE_TYPE_ERROR=1;
     public static final int RESULT_CODE_ERROR=2;
 
-    private static final String RESULT_CONTENT_SUCCESS = "已刷入成员信息！";
+    private static final String RESULT_CONTENT_SUCCESS = "已刷入数据！";
     private static final String RESULT_CONTENT_TYPE_ERROR = "不能识别的信息类型！";
     private static final String RESULT_CONTENT_ERROR = "信息读取失败！";
 
@@ -68,10 +63,10 @@ public class NFCCardReader implements NfcAdapter.ReaderCallback{
 
             // 检验响应数据
             if (Arrays.equals(SELECT_OK, statusWord)) {
-                String accountNumber = new String(payload, "UTF-8");
-                logger.info(TAG + "NfcAdapter.ACTION_TECH_DISCOVERED:proccessIntent：content:"+accountNumber);
+                String data = new String(payload, "UTF-8");
+                logger.info(TAG + "NfcAdapter.ACTION_TECH_DISCOVERED:proccessIntent：content:"+data);
                 if(onReadListener!=null){
-                    onReadListener.get().onReadResult(RESULT_CODE_SUCCESS,NfcAdapter.ACTION_TECH_DISCOVERED,RESULT_CONTENT_SUCCESS, getRecorderBindTranslateBean(accountNumber));
+                    onReadListener.get().onReadResult(RESULT_CODE_SUCCESS,NfcAdapter.ACTION_TECH_DISCOVERED,RESULT_CONTENT_SUCCESS, data);
                 }
             } else {
                 String info = bytesToString(result);
@@ -149,29 +144,9 @@ public class NFCCardReader implements NfcAdapter.ReaderCallback{
     }
 
     /**
-     * 解析获取警情和临时组id
-     * @param content
-     * @return
-     */
-    public static RecorderBindTranslateBean getRecorderBindTranslateBean(String content) {
-        RecorderBindTranslateBean bean = null;
-        if(TextUtils.isEmpty(content)){
-            return bean;
-        }
-        try{
-            bean =  new Gson().fromJson(content, RecorderBindTranslateBean.class);
-        }catch (Exception e){
-            e.printStackTrace();
-            bean = null;
-        }finally {
-            return bean;
-        }
-    }
-
-    /**
      * 写入数据结果的回调
      */
     public interface OnReadListener{
-        void onReadResult(int resultCode, String readType, String resultDescribe, RecorderBindTranslateBean bean);
+        void onReadResult(int resultCode, String readType, String resultDescribe, String data);
     }
 }

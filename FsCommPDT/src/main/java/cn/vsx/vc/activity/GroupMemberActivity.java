@@ -1,12 +1,12 @@
 package cn.vsx.vc.activity;
 
-import android.app.AlertDialog;
+import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.HeaderViewListAdapter;
@@ -20,22 +20,27 @@ import com.blankj.utilcode.util.ToastUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimerTask;
 
 import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMemberListHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseAddMemberToTempGroupMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseDestroyTempGroup4PCHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRemoveMemberToTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupMemberAdapter;
+import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.DestroyTemporaryGroupsDialog;
+import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
@@ -49,45 +54,31 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
 
 
     ImageView newsBarBack;
-
     ImageView newsBarBackTemp;
-
     TextView barTitle;
     TextView temp_bar_title;
-
     LinearLayout in_title_bar;
-
     ImageView rightBtn;
-
     Button ok_btn;
-
-
     LinearLayout temp_title_bar;
-
     ImageView add_btn;
-
     ImageView delete_btn;
-
     TextView cancel_text;
-
     TextView delete_text;
-
     LinearLayout ll_member_num;
     TextView memberNum;
-
     ListView memberList;
-
-
 
     VolumeViewLayout volumeViewLayout;
     private GroupMemberAdapter sortAdapter;
-    private Handler myHandler = new Handler();
+    private Handler myHandler = new Handler(Looper.getMainLooper());
     private List<Member> currentGroupMembers = new ArrayList<>();
     private int groupId;
     String groupName;
-    private int total=0;
     private boolean canDelete;//只有自己创建的临时组才能删除人
     private boolean isTemporaryGroup;
+    private DestroyTemporaryGroupsDialog destroyDialog;
+    private boolean isDestroyTempGroup = false;
     public void setListViewHeightBasedOnChildren(ListView listView) {
         if (listView == null)
             return;
@@ -167,16 +158,20 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRemoveMemberToTempGroupMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseAddMemberToTempGroupMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseDestroyTempGroup4PCHandler);
     }
 
     @Override
     public void initData() {
+        isDestroyTempGroup = false;
         groupId = getIntent().getIntExtra("groupId", 0);
         groupName = getIntent().getStringExtra("groupName");
         Group group = DataUtil.getTempGroupByGroupNo(groupId);
         if(null ==group){
             group = DataUtil.getGroupByGroupNo(groupId);
         }
+        logger.info( "临时组---group:" + group);
         if(group != null){
             isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
             if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){
@@ -214,10 +209,13 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void doOtherDestroy() {
+        dismissDialog();
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGroupCurrentOnlineMemberListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRemoveMemberToTempGroupMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseAddMemberToTempGroupMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseDestroyTempGroup4PCHandler);
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
         }
@@ -245,58 +243,35 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             delete_btn.setVisibility(View.GONE);
             delete_text.setVisibility(View.VISIBLE);
             cancel_text.setVisibility(View.VISIBLE);
+            clearCheckStatus();
             sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true,isTemporaryGroup);
-            sortAdapter.setOnItemClickListener((view1, position, checked, member) -> {
-                if(checked){
-                    total++;
-                }else{
-                    total--;
-                }
-                if(total > 0){
-                    delete_text.setText(String.format(getString(R.string.button_delete_number), total));
-                }else{
-                    delete_text.setText(R.string.text_delete);
-                }
+            sortAdapter.setOnItemClickListener((view1,position,member) -> {
+                setDeleteCountText();
             });
             memberList.setAdapter(sortAdapter);
             sortAdapter.notifyDataSetChanged();
+            setDeleteCountText();
         }else if(i == R.id.delete_text){
-            if(currentGroupMembers.size() <= 2){//当前组仅剩创建者本身的时候点击删除销临时组
-                final AlertDialog alertDialog = new AlertDialog.Builder(GroupMemberActivity.this).create();
-                alertDialog.show();
-                Display display = getWindowManager().getDefaultDisplay();
-                int heigth = display.getWidth();
-                int width = display.getHeight();
-                Window window = alertDialog.getWindow();
-                WindowManager.LayoutParams layoutParams = window.getAttributes();
-                layoutParams.width = width / 2;
-                layoutParams.height = heigth / 2;
-                window.setAttributes(layoutParams);
-                window.setContentView(R.layout.dialog_delete_temporary_group);
-                final LinearLayout ll_select = window.findViewById(R.id.ll_select);
-                final LinearLayout ll_success = window.findViewById(R.id.ll_success);
-                Button btn_confirm = window.findViewById(R.id.btn_confirm);
-                btn_confirm.setOnClickListener(v -> myHandler.post(() -> {
-                    ll_success.setVisibility(View.VISIBLE);
-                    ll_select.setVisibility(View.GONE);
-                    MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(groupId);
-                    TimerTask task = new TimerTask(){
-                        @Override
-                        public void run(){
-                            alertDialog.dismiss();
-                            finish();
-                        }
-                    };
-                    MyTerminalFactory.getSDK().getTimer().schedule(task, 1000);
-                }));
-                Button btn_cancel = window.findViewById(R.id.btn_cancel);
-                btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
-            }else{
-                List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
-                if(deleteMemberList.isEmpty()){
+            if (sortAdapter!=null) {
+                List<Long> deleteMemberList = sortAdapter.getDeleteMemberList();
+                //判断是否选择了账号
+                if(deleteMemberList.isEmpty()) {
                     ToastUtils.showShort(R.string.please_select_delete_member);
+                    return;
+                }
+                List<Member> tempList = new ArrayList<>(currentGroupMembers);
+                //删除自己
+                tempList.remove(new Member(MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L)));
+                //删除选择的
+                for (Long uniqueNo: deleteMemberList) {
+                    tempList.remove(new Member(uniqueNo));
+                }
+                //判断是否为空
+                if(tempList.isEmpty()){
+                    showDestroyTempGroupDialog();
                 }else{
-                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l), DataUtil.getUniqueNos(deleteMemberList));
+                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
+                            MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L), deleteMemberList);
                     add_btn.setVisibility(View.VISIBLE);
                     delete_btn.setVisibility(View.VISIBLE);
                     delete_text.setVisibility(View.GONE);
@@ -311,6 +286,18 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false,isTemporaryGroup);
             memberList.setAdapter(sortAdapter);
             sortAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void setDeleteCountText(){
+        if(sortAdapter!=null && !sortAdapter.getDeleteMemberList().isEmpty()){
+            if(delete_text!=null){
+                delete_text.setText(String.format(getString(R.string.button_delete_number), sortAdapter.getDeleteMemberList().size()));
+            }
+        }else{
+            if(delete_text!=null){
+                delete_text.setText(R.string.text_delete);
+            }
         }
     }
 
@@ -389,12 +376,16 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                     ok_btn.setVisibility(View.GONE);
                     in_title_bar.setVisibility(View.GONE);
                     temp_title_bar.setVisibility(View.VISIBLE);
-                    rightBtn.setVisibility(View.GONE);
-                    ok_btn.setVisibility(View.GONE);
-                    add_btn.setVisibility(View.VISIBLE);
-                    delete_btn.setVisibility(canDelete?View.VISIBLE:View.GONE);
                     temp_bar_title.setText(String.format(getString(R.string.text_temp_group_members_title),onlineNumber,total));
                     ll_member_num.setVisibility(View.GONE);
+                    if(delete_text.getVisibility() == View.VISIBLE && cancel_text.getVisibility() == View.VISIBLE){
+                        setDeleteCountText();
+                        add_btn.setVisibility(View.GONE);
+                        delete_btn.setVisibility(View.GONE);
+                    }else{
+                        add_btn.setVisibility(View.VISIBLE);
+                        delete_btn.setVisibility(canDelete?View.VISIBLE:View.GONE);
+                    }
                 }
             });
         }
@@ -437,5 +428,137 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             }
         }
     };
+
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler() {
+        @Override
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType) {
+            if (!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)) {
+                if (!isAdd && tempGroupNo == groupId) {
+                    try{
+                        if(!isDestroyTempGroup){
+                            myHandler.post(GroupMemberActivity.this::finish);
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    };
+    private ReceiveResponseDestroyTempGroup4PCHandler receiveResponseDestroyTempGroup4PCHandler = new ReceiveResponseDestroyTempGroup4PCHandler() {
+        @Override
+        public void handler(int tempGroupNo, int resultCode, String resultDesc) {
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                myHandler.post(() -> updateDialog(DestroyTemporaryGroupsDialog.STATE_SUCCESS, ""));
+                myHandler.postDelayed(() -> { dismissDialog();GroupMemberActivity.this.finish(); },1000);
+            }else{
+                myHandler.post(() -> updateDialog(DestroyTemporaryGroupsDialog.STATE_FAIL, resultDesc));
+                myHandler.postDelayed(() -> { dismissDialog(); },1000);
+            }
+        }
+    };
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == CallPhoneUtil.PHONE_PERMISSIONS_REQUEST_CODE){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //同意，拨打电话
+                CallPhoneUtil.callPhone( GroupMemberActivity.this, TerminalFactory.getSDK().getParam(Params.TEMP_CALL_PHONE_NUMBER,""));
+            }else {
+                //不同意，提示
+                cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_phone_not_open_call_is_unenabled));
+            }
+        }
+    }
+
+    /**
+     * 清空选择的状态
+     */
+    private void clearCheckStatus() {
+        for (Member member: currentGroupMembers) {
+            if(member!=null){
+                member.isChecked = false;
+            }
+        }
+    }
+
+    /**
+     * 提示销毁临时组
+     */
+    private void showDestroyTempGroupDialog() {
+        try{
+            //当前组仅剩创建者本身的时候点击删除销临时组
+            isDestroyTempGroup = false;
+            destroyDialog = new DestroyTemporaryGroupsDialog(GroupMemberActivity.this,
+                    new DestroyTemporaryGroupsDialog.OnClickListener() {
+                @Override
+                public void onConfirm() {
+                    isDestroyTempGroup = true;
+                    destroyTempGroup();
+                }
+
+                @Override
+                public void onCancel() {
+                    dismissDialog();
+                }
+            });
+            updateDialog(DestroyTemporaryGroupsDialog.STATE_INIT,"");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 发送销毁临时组
+     */
+    private void destroyTempGroup() {
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup(groupId, (sendOk, uuid) -> {
+                myHandler.post(() -> {
+                    if(sendOk){
+                        updateDialog(DestroyTemporaryGroupsDialog.STATE_DESTROYING, "");
+                    }else{
+                        updateDialog(DestroyTemporaryGroupsDialog.STATE_FAIL,getResources().getString(R.string.text_disbanded_fail_by_send_fail));
+                        myHandler.postDelayed(this::dismissDialog,1000);
+                    }
+                });
+            });
+        });
+    }
+
+    /**
+     * 检查弹窗是否正在显示
+     * @return
+     */
+    private boolean checkDialogShowing(){
+        return (destroyDialog!=null&&destroyDialog.isShowing());
+    }
+
+    /**
+     * 检查是否可以显示弹窗
+     * @return
+     */
+    private boolean checkCanShow(){
+        return (!GroupMemberActivity.this.isFinishing() && destroyDialog!=null);
+    }
+
+    private void updateDialog(int type,String failMessage){
+        if(checkCanShow()){
+            destroyDialog.updateDialog(type, failMessage);
+        }
+    }
+
+    /**
+     * 关闭弹窗
+     */
+    private void dismissDialog(){
+        if(destroyDialog!=null){
+            destroyDialog.dismiss();
+            destroyDialog = null;
+        }
+        isDestroyTempGroup = false;
+    }
 
 }

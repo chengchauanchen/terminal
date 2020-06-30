@@ -3,17 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ll_user_info"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/y40"
+    android:layout_height="wrap_content"
     android:background="@color/itemblue"
+    android:paddingLeft="@dimen/dp_20"
+    android:paddingRight="@dimen/dp_20"
+    android:paddingTop="@dimen/dp_10"
+    android:paddingBottom="@dimen/dp_10"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
     <org.raphets.roundimageview.RoundImageView
         android:id="@+id/user_logo"
-        android:layout_width="@dimen/x45"
-        android:layout_height="@dimen/y32"
+        android:layout_width="@dimen/dp_55"
+        android:layout_height="@dimen/dp_55"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="@dimen/x15"
         app:border_width="-1dp"
         app:border_color="@android:color/transparent"
         app:leftBottom_corner_radius="8dp"
@@ -30,33 +33,35 @@
         <!--android:layout_marginLeft="@dimen/x15" />-->
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/x19"
+        android:minHeight="@dimen/dp_55"
+        android:layout_marginLeft="@dimen/dp_20"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/y2"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/user_name"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/user_logo"
-                android:layout_toRightOf="@+id/user_logo"
+                android:layout_weight="1"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:text=""
                 android:textColor="@color/setting_text_gray"
                 android:textSize="@dimen/sp_18" />
 
             <ImageView
-                android:layout_width="@dimen/x13"
-                android:layout_height="@dimen/x13"
-                android:layout_marginLeft="@dimen/x5"
-                android:layout_marginTop="@dimen/x1"
-                android:layout_toRightOf="@id/user_name"
+                android:layout_width="@dimen/dp_15"
+                android:layout_height="@dimen/dp_15"
+                android:layout_marginLeft="@dimen/dp_10"
                 android:background="@drawable/new_men_icon" />
         </LinearLayout>
 
@@ -64,11 +69,11 @@
             android:id="@+id/user_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/user_name"
-            android:layout_marginTop="@dimen/y2"
-            android:layout_toRightOf="@+id/user_logo"
+            android:layout_marginTop="@dimen/dp_7"
+            android:text=""
             android:textColor="@color/setting_text_gray_two"
-            android:textSize="@dimen/sp_14" />
+            android:textSize="@dimen/sp_14"
+            android:visibility="visible"/>
     </LinearLayout>
 
 </LinearLayout>

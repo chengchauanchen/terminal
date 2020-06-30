@@ -331,6 +331,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
                 default:
                     break;
             }
+            logger.info("PhonePushService--PushCallback--msg:"+resultData.getString("event-msg")+"--code:"+code);
         }
     };
 

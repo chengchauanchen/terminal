@@ -3,7 +3,9 @@ package cn.vsx.vc.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -44,6 +46,7 @@ import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.manager.search.SearchUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -70,7 +73,6 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
 
     ImageView rightBtn;
 
-    TextView add_note;
 
     VolumeViewLayout volumeViewLayout;
 
@@ -95,7 +97,6 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         tvUnit = (TextView) findViewById(R.id.tv_unit);
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
-        add_note = (TextView) findViewById(R.id.add_note);
         rightBtn = (ImageView) findViewById(R.id.right_btn);
         barTitle = (TextView) findViewById(R.id.bar_title);
         newsBarBack = (ImageView) findViewById(R.id.news_bar_back);
@@ -124,6 +125,10 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         userName = getIntent().getStringExtra("userName");
         String avatarUrl = getIntent().getStringExtra("avatarUrl");
         loadData();
+
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+userId);
+        SearchUtil.setUpdateUseTimeTag(userId);
     }
 
     /**
@@ -250,21 +255,25 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
      * 拨打电话
      */
     private void goToCall(Member member) {
-        if(TextUtils.isEmpty(member.getPhone())){
-            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
-            return;
-        }
-        if(member.getUniqueNo() == 0){
-            //普通电话
-            CallPhoneUtil.callPhone( UserInfoActivity.this, member.getPhone());
-        }else{
-            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                Intent intent = new Intent(UserInfoActivity.this, VoipPhoneActivity.class);
-                intent.putExtra("member",member);
-                startActivity(intent);
-            }else {
-                ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
+        try{
+            if(TextUtils.isEmpty(member.getPhone())){
+                ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+                return;
             }
+            if(member.getUniqueNo() == 0){
+                //普通电话
+                CallPhoneUtil.callPhone( UserInfoActivity.this, member.getPhone());
+            }else{
+                if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                    Intent intent = new Intent(UserInfoActivity.this, VoipPhoneActivity.class);
+                    intent.putExtra("member",member);
+                    startActivity(intent);
+                }else {
+                    ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -370,4 +379,18 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
             });
         }
     };
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == CallPhoneUtil.PHONE_PERMISSIONS_REQUEST_CODE){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //同意，拨打电话
+                CallPhoneUtil.callPhone( UserInfoActivity.this, TerminalFactory.getSDK().getParam(Params.TEMP_CALL_PHONE_NUMBER,""));
+            }else {
+                //不同意，提示
+                cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_phone_not_open_call_is_unenabled));
+            }
+        }
+    }
 }

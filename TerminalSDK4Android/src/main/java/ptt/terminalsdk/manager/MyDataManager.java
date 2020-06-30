@@ -29,6 +29,7 @@ import cn.vsx.hamster.terminalsdk.tools.Util;
 import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.bean.DepData;
 import ptt.terminalsdk.bean.GroupBean;
+import ptt.terminalsdk.bean.MediaServerInfoBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.http.AppUrlConfig;
 import ptt.terminalsdk.receiveHandler.ReceiveGetTerminalDeviceHandler;
@@ -46,6 +47,12 @@ public class MyDataManager extends DataManager{
     private Logger logger = Logger.getLogger(getClass());
     private static List<GroupBean> depAllGroup = new ArrayList<>();
     private boolean uavVoiceOpen = true;
+
+    @Override
+    public void stop() {
+        super.stop();
+        depAllGroup.clear();
+    }
 
     @Override
     protected void setUrl(JSONObject resultJsonObject){
@@ -166,6 +173,7 @@ public class MyDataManager extends DataManager{
                                 member.setDeptId(department.getIntValue("id"));
                                 member.setDepartmentName(department.getString("name"));
                                 member.setUniqueNo(terminal.getLongValue("uniqueNo"));
+                                member.setUniqueNoStr(member.getUniqueNo()+"");
                                 member.setType((TerminalMemberType.valueOf(terminal.getString("terminalMemberType")).getCode()));
                                 member.setTerminalMemberType(terminal.getString("terminalMemberType"));
                                 member.setStatus(TerminalMemberStatusEnum.valueOf(terminal.getString("terminalMemberStatus")).getCode());
@@ -269,6 +277,7 @@ public class MyDataManager extends DataManager{
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                                 member.setId(Integer.valueOf(jsonObject.getString("id")));
                                 member.setUniqueNo(Long.parseLong(jsonObject.getString("uniqueNo")));
+                                member.setUniqueNoStr(member.getUniqueNo()+"");
                                 member.setType(TerminalMemberType.valueOf(jsonObject.getString("terminalMemberType")).getCode());
                                 member.setStatus(TerminalMemberStatusEnum.valueOf(jsonObject.getString("terminalMemberStatus")).getCode());
                                 JSONObject account = jsonObject.getJSONObject("account");
@@ -330,6 +339,46 @@ public class MyDataManager extends DataManager{
                 }catch (Exception e){
                     e.printStackTrace();
                     TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
+                }
+            }
+        });
+    }
+
+    /**
+     * 未注册时获取流媒体服务信息
+     */
+    @Override
+    public void noRegistGetMediaServerInfo(){
+
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    String serverIp = TerminalFactory.getSDK().getParam(Params.REGIST_IP, "");
+                    String serverPort = TerminalFactory.getSDK().getParam(Params.REGIST_PORT, "");
+                    String url = "http://" + serverIp + ":" + serverPort + "/mediaServerInfo";
+                    String serverInfo = serverIp+":"+serverPort;
+                    String result = TerminalFactory.getSDK().getHttpClient().sendGet(url);
+                    logger.info("未注册时获取流媒体服务信息:"+result);
+                    if(!Util.isEmpty(result)&&JSONObject.parseObject(result)!=null){
+                        JSONObject jsonObject = JSONObject.parseObject(result);
+                        if(jsonObject.containsKey(serverInfo)){
+                            String json = jsonObject.getJSONObject(serverInfo).toJSONString();
+                            if(!TextUtils.isEmpty(json)){
+                                MediaServerInfoBean bean = new Gson().fromJson(json, MediaServerInfoBean.class);
+                                if(bean != null ){
+                                    if(!TextUtils.isEmpty(bean.getMediaServerIp())){
+                                        TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_IP, bean.getMediaServerIp());
+                                    }
+                                    if(bean.getMediaServerPort()> 0){
+                                        TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_PORT, bean.getMediaServerPort());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
             }
         });

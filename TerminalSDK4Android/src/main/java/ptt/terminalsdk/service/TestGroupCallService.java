@@ -211,7 +211,7 @@ public class TestGroupCallService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-        KeepLiveManager.getInstance().setServiceForeground(this);
+//        KeepLiveManager.getInstance().setServiceForeground(this);
         logger.info(TAG+"---onStartCommand--"+dialogAdd);
         if(!dialogAdd){
             windowManager.addView(rootView, layoutParams);

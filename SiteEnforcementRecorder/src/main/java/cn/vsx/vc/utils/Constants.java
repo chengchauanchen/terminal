@@ -51,6 +51,7 @@ public class Constants {
     public static final String FRAGMENT_TAG_NFC = "nfcFragment";//nfcFragment
     public static final String FRAGMENT_TAG_QR = "qrScanFragment";//qrScanFragment
     public static final String FRAGMENT_TAG_INPUT = "inputPoliceIdFragment";//inputPoliceIdFragment
+    public static final String FRAGMENT_TAG_FILE_LIST = "fileListFragment";//fileListFragment
     public static final String FRAGMENT_TAG_SET = "setFragment";//setFragment
     public static final String FRAGMENT_TAG_SET_SERVER = "setServerFragment";//setServerFragment
     public static final String FRAGMENT_TAG_GROUP_CHANGE = "groupChangeFragment";//groupChangeFragment
@@ -58,8 +59,15 @@ public class Constants {
     public static final String FRAGMENT_TAG_SET_LIVING_STOP_TIME = "setLivingStopTimeFragment";//setLivingStopTimeFragment
     public static final String FRAGMENT_TAG_INFRA_RED = "infraRedFragment";//infraRedFragment
     public static final String FRAGMENT_TAG_APP_LIST = "appListFragment";//appListFragment
+    public static final String FRAGMENT_TAG_FILE_VIDEO_SHOW = "fileVideoShowFragment";//fileVideoShowFragment
+    public static final String FRAGMENT_TAG_FILE_VIDEO_SHOW_TIME = "fileVideoShowItemFragment";//fileVideoShowItemFragment
+    public static final String FRAGMENT_TAG_FILE_PICTURE_SHOW = "filePictureShowFragment";//filePictureShowFragment
 
     public static final long LIVING_STOP_DELAY_TIME = 2*60*1000;//上报停止延时时间
+    public static final String FILE_TYPE = "fileType";//文件的类型
+    public static final String FILE_PATH = "filePath";//文件的路径
+    public static final String FILE_PATHS = "filePaths";//文件的路径的集合
+    public static final String FILE_INDEX = "fileIndex";//文件的索引
 
 
 }

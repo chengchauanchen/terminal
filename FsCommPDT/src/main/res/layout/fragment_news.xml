@@ -15,6 +15,11 @@
         layout="@layout/layout_pc_login_state"
         android:visibility="gone"/>
 
+    <include
+        android:id="@+id/layout_video_meeting_state"
+        layout="@layout/layout_video_meeting_state"
+        android:visibility="gone"/>
+
     <ListView
         android:id="@+id/news_list"
         android:layout_width="match_parent"

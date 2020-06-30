@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -51,7 +52,7 @@ public class ToastUtil {
 				if (toast == null)
 					toast = Toast.makeText(Utils.getApp(), message, Toast.LENGTH_LONG);
 				String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-				if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PAD.getCode()){
+				if(!TextUtils.isEmpty(deviceType)&&TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PAD.getCode()){
 					LinearLayout layout = (LinearLayout) toast.getView();
 					TextView tv = (TextView) layout.getChildAt(0);
 					tv.setTextSize(25);
@@ -77,7 +78,7 @@ public class ToastUtil {
 					toast = Toast.makeText(Utils.getApp(), text, Toast.LENGTH_LONG);
 
 				String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-				if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PAD.getCode()){
+				if(!TextUtils.isEmpty(deviceType)&&TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PAD.getCode()){
 					LinearLayout layout = (LinearLayout) toast.getView();
 					TextView tv = (TextView) layout.getChildAt(0);
 					tv.setTextSize(25);
@@ -101,7 +102,7 @@ public class ToastUtil {
 					toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
 
 				String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-				if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PAD.getCode()){
+				if(!TextUtils.isEmpty(deviceType)&&TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PAD.getCode()){
 					LinearLayout layout = (LinearLayout) toast.getView();
 					TextView tv = (TextView) layout.getChildAt(0);
 					tv.setTextSize(25);

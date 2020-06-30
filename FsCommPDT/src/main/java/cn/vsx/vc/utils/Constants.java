@@ -142,4 +142,21 @@ public class Constants{
 
     public static final String PTT_DOWN_EVENT = "com.chivin.action.MEDIA_PTT_DOWN";
     public static final String PTT_UP_EVENT = "com.chivin.action.MEDIA_PTT_UP";
+
+    //视频会商的会议id
+    public static final String ROOM_ID = "roomId";
+    //视频会商的类型
+    public static final String VIDEO_MEETING_TYPE = "videoMeetingType";
+
+    //视频会商的组No
+    public static final String VIDEO_MEETING_GROUP_NO = "videoMeetingGroupNo";
+
+    public static final String VIDEO_MEETING_URL = "videoMeetingUrl";
+    //视频会议的消息
+    public static final String VIDEO_MEETING_MESSAGE = "videoMeetingMessage";
+
+    //跳转到注册页面
+    public static final String GO_TO_REGIST_TYPE = "goToRegistType";
+    public static final int GO_TO_REGIST_TYPE_DEFLAT = 0;
+    public static final int GO_TO_REGIST_TYPE_CLEAR = 1;
 }

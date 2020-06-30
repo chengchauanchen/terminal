@@ -22,6 +22,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 /**
  * 作者：xuxiaolong
@@ -79,6 +80,7 @@ public class ReceiveLiveCommingService extends BaseService{
     protected void initListener(){
         mLlLiveRespondAcceptTotal.setOnClickListener(acceptOnClickListener);
         mLlLiveRespondRefuseTotal.setOnClickListener(refuseOnClickListener);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNobodyRequestVideoLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRemoveSwitchCameraViewHandler);
@@ -92,6 +94,10 @@ public class ReceiveLiveCommingService extends BaseService{
         mTvLiveReportId.setText(HandleIdUtil.handleId(memberId));
         PromptManager.getInstance().VideoLiveInCommimgRing();
         wakeLock.acquire(10 * 1000);
+
+        //设置常用联系人 的Tag
+        logger.info("设置常用联系人 memberId:"+memberId);
+        SearchUtil.setUpdateUseTimeTag(memberId);
     }
 
     @Override
@@ -109,22 +115,29 @@ public class ReceiveLiveCommingService extends BaseService{
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
-            }
-        }else {
-            mHandler.removeMessages(OFF_LINE);
-        }
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNobodyRequestVideoLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSwitchCameraViewHandler);
     }
+
+//    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+//        @Override
+//        public void handler(boolean connected){
+////            if(!connected){
+////                if(!mHandler.hasMessages(OFF_LINE)){
+////                    mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
+////                }
+////            }else {
+////                mHandler.removeMessages(OFF_LINE);
+////            }
+//        }
+//    };
 
     //收到没人请求我开视频的消息，关闭界面和响铃
     private ReceiveNobodyRequestVideoLiveHandler receiveNobodyRequestVideoLiveHandler = () -> {

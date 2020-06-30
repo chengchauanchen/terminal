@@ -33,6 +33,7 @@ import dagger.Module;
 import dagger.Provides;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.tools.AppUtil;
 import ptt.terminalsdk.tools.FileTransgerUtil;
 
 import static android.graphics.ImageFormat.NV21;
@@ -325,9 +326,19 @@ public class AirCraftMediaStream {
 //            overlay.overlay(data, txt);
 
         }
-
+        overLayBatteryDbm(data,mApplicationContext,12);
         mVC.onVideo(data, NV21);
 
+    }
+
+    //添加电量信号状态水印
+    public void overLayBatteryDbm(byte[] data, Context context, int textSize){
+        String status = AppUtil.getDbmStatusStr(context);
+        int strWidth = this.width - AppUtil.getStrWidth(status, textSize) - 40;
+        if (strWidth < 0){
+            strWidth = 0;
+        }
+        overlay.overlay(data, status, strWidth,0);
     }
 
     public void startPreView(int width,int height){

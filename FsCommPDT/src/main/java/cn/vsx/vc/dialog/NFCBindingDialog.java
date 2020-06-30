@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.Display;
 import android.view.View;
 import android.view.Window;
@@ -17,12 +18,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
-import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
+import cn.vsx.vc.utils.NfcUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiveNFCWriteResultHandler;
 
 public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismissListener {
 
@@ -108,7 +108,13 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
             //设置刷NFC需要传的数据
             int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
             long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
-            MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId,voiceDes));
+            String action = "";
+            if(TextUtils.isEmpty(warningId)){
+                action = MyTerminalFactory.getSDK().getNfcManager().getBindString(memberId,uniqueNo+"",groupId,voiceDes);
+            }else{
+                action = MyTerminalFactory.getSDK().getNfcManager().getBindWarningAndVideoPushString(memberId,uniqueNo+"",groupId,warningId,1,voiceDes);
+            }
+            MyTerminalFactory.getSDK().getNfcManager().setTransmitData(action);
             MyTerminalFactory.getSDK().registReceiveHandler(receiveNFCWriteResultHandler);
         }
         show();
@@ -120,7 +126,7 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
      */
     @Override
     public void onDismiss(DialogInterface dialog) {
-        MyApplication.instance.setBindTranslateBean(null);
+        NfcUtil.writeData();
         type = TYPE_WAIT;
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNFCWriteResultHandler);
         handler.removeCallbacksAndMessages(null);

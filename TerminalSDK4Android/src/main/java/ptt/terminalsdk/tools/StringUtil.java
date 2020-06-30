@@ -173,6 +173,22 @@ public class StringUtil{
     }
 
     /**
+     * String 转long
+     * @return
+     */
+    public static  long  stringToLong(String string){
+        long data = -1L;
+        if(!TextUtils.isEmpty(string)){
+            try{
+                data = Long.valueOf(string);
+            }catch (Exception e){
+                data =  -1 ;
+            }
+        }
+        return data;
+    }
+
+    /**
      * 小时转秒
      * @return
      */
@@ -193,6 +209,22 @@ public class StringUtil{
      */
     public static  long  secondsToMinute(long time){
         return time/60;
+    }
+
+    /**
+     * 获取长名字（截取）
+     * @param name
+     * @return
+     */
+    public static String getLongName(int length,String name){
+        try{
+            if(!TextUtils.isEmpty(name)&&name.length()>length){
+                name = name.substring(0,length)+"...";
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return name;
     }
 
 }

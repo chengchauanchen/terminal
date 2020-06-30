@@ -110,7 +110,7 @@ public class MenuFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    @OnClick({R.id.iv_close, R.id.ll_change_group, R.id.ll_bind, R.id.ll_set})
+    @OnClick({R.id.iv_close, R.id.ll_change_group, R.id.ll_bind,R.id.ll_file, R.id.ll_set})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.iv_close:
@@ -119,15 +119,19 @@ public class MenuFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.ll_change_group:
                 //转组
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_GROUP_CHANGE);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_GROUP_CHANGE,new Bundle());
                 break;
             case R.id.ll_bind:
                 //绑定、解绑
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_BIND);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_BIND,new Bundle());
+                break;
+            case R.id.ll_file:
+                //录像、照片
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_FILE_LIST,new Bundle());
                 break;
             case R.id.ll_set:
                 //设置
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_SET);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_SET,new Bundle());
                 break;
         }
     }

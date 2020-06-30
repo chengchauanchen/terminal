@@ -33,6 +33,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -173,6 +174,7 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveStopCallingServiceHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHeadSetPlugHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         mLlIndividualCallRetractSpeaking.setOnClickListener(retractListener);
         mIvIndividualCallRetractHalfDuplex.setOnClickListener(retractListener);
         mIvIndividualCallHangupSpeaking.setOnClickListener(stopCallListener);
@@ -247,6 +249,7 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopCallingServiceHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHeadSetPlugHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
@@ -472,6 +475,12 @@ public class CallingService extends BaseService{
             });
         }
     };
+
+  private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+    if(!connected){
+      stopBusiness();
+    }
+  };
 
 
     private void stopCall(){

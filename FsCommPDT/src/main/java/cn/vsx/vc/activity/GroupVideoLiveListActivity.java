@@ -19,9 +19,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -30,7 +28,6 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingHistoryListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingListHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupVideoLiveListAdapter;
@@ -218,21 +215,19 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     private ReceiveGetGroupLivingHistoryListHandler receiveGetGroupLivingHistoryListHandler = (beanList, resultCode, resultDesc) -> {
         handler.post(() -> {
             layoutSrl.setRefreshing(false);
-            if (resultCode == BaseCommonCode.SUCCESS_CODE && !beanList.isEmpty()) {
+            if (!beanList.isEmpty()) {
                 if (mPage == 0) {
-                    adapter.getData().clear();
-                    adapter.loadMoreEnd(true);
+                    adapter.setNewData(beanList);
                     adapter.setEnableLoadMore(!(beanList.size() < mPageSize));
 //                    ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
                 } else {
-                    adapter.loadMoreComplete();
+                    adapter.addData(beanList);
                     if (beanList.size() < mPageSize) {
                         adapter.loadMoreEnd();
                     } else {
-                        adapter.setEnableLoadMore(true);
+                        adapter.loadMoreComplete();
                     }
                 }
-                adapter.getData().addAll(beanList);
                 adapter.notifyDataSetChanged();
             } else {
                 if (mPage == 0) {
@@ -241,16 +236,20 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                     adapter.setEnableLoadMore(false);
                     adapter.notifyDataSetChanged();
                 } else {
-                    adapter.loadMoreComplete();
+                    //adapter.loadMoreComplete();
                     if (resultCode != BaseCommonCode.SUCCESS_CODE) {
                         adapter.loadMoreFail();
+                    }else{
+                        adapter.loadMoreEnd();
                     }
-                    adapter.setEnableLoadMore(true);
+                    //adapter.setEnableLoadMore(true);
                 }
+                ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
+            }
+            if (resultCode != BaseCommonCode.SUCCESS_CODE) {
                 if (mPage > 0) {
                     mPage = mPage - 1;
                 }
-                ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
             }
         });
     };
@@ -271,50 +270,35 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     @Override
     public void goToWatch(TerminalMessage item) {
         if (isGroupVideoLiving) {
-            String callId = "";
-            if(item!=null&&item.messageBody!=null&&!TextUtils.isEmpty(item.messageBody.toJSONString())&&item.messageBody.containsKey(JsonParam.CALLID)){
-                callId = item.messageBody.getString(JsonParam.CALLID);
+            String liveUrl = "";
+            if(item!=null&&item.messageBody!=null&&!TextUtils.isEmpty(item.messageBody.toJSONString())&&item.messageBody.containsKey(JsonParam.EASYDARWIN_RTSP_URL)){
+                liveUrl = item.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
             }else{
                 return;
             }
-
-            String finalCallId = callId;
+            String finalLiveUrl = liveUrl;
             MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-                int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-                String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
-                Map<String, String> paramsMap = new HashMap<>();
-                paramsMap.put("callId", finalCallId);
-                paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-//             logger.info("查看视频播放是否结束url：" + url);
-                String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-//             logger.info("查看视频播放是否结束结果：" + result);
-                if (!Util.isEmpty(result)) {
-                    JSONObject jsonObject = JSONObject.parseObject(result);
-                    boolean living = jsonObject.getBoolean("living");
-                    if (living) {
+                if(!android.text.TextUtils.isEmpty(finalLiveUrl)){
+                    boolean isLiving = TerminalFactory.getSDK().getLiveManager().checkPushLiveIsLivingByUrl(finalLiveUrl);
+                    if (isLiving) {
                         handler.post(() -> {
                             Intent intent = new Intent(GroupVideoLiveListActivity.this, PullLivingService.class);
                             intent.putExtra(Constants.WATCH_TYPE, Constants.ACTIVE_WATCH);
                             intent.putExtra(Constants.TERMINALMESSAGE, item);
                             startService(intent);
                         });
-
                     } else {
                         // TODO: 2018/8/7
-                        Intent intent = new Intent(GroupVideoLiveListActivity.this, PlayLiveHistoryActivity.class);
-                        intent.putExtra("terminalMessage", item);
-                        GroupVideoLiveListActivity.this.startActivity(intent);
+                        goToHistory(item);
                     }
+                }else{
+                    ToastUtil.showToast(getString(R.string.text_liveing_url_is_empty));
                 }
             });
         } else {
-            Intent intent = new Intent(GroupVideoLiveListActivity.this, PlayLiveHistoryActivity.class);
-            intent.putExtra("terminalMessage", item);
-            GroupVideoLiveListActivity.this.startActivity(intent);
+            goToHistory(item);
         }
     }
-
     @Override
     public void goToForward(TerminalMessage item) {
         transponMessage = item;
@@ -343,6 +327,24 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
             Intent intent = new Intent(GroupVideoLiveListActivity.this, TransponActivity.class);
             intent.putExtra(Constants.TRANSPON_TYPE, Constants.TRANSPON_TYPE_ONE);
             startActivityForResult(intent, CODE_TRANSPON_REQUEST);
+        }
+    }
+
+    /**
+     * 去观看历史录像
+     * @param item
+     */
+    private void goToHistory(TerminalMessage item){
+        try{
+            if(TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(item.messageBody)){
+                ToastUtil.showToast(getString(R.string.text_video_live_from_no_regist_can_not_watch_history));
+            }else{
+                Intent intent = new Intent(GroupVideoLiveListActivity.this, PlayLiveHistoryActivity.class);
+                intent.putExtra("terminalMessage", item);
+                GroupVideoLiveListActivity.this.startActivity(intent);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

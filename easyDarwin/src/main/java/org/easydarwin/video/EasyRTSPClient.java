@@ -484,11 +484,13 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
 
         mQueue.clear();
         if (mClient != null) {
-            mClient.unrigisterCallback(this);
-            mClient.closeStream();
             try {
+                mClient.unrigisterCallback(this);
+                mClient.closeStream();
                 mClient.close();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e){
                 e.printStackTrace();
             }
         }

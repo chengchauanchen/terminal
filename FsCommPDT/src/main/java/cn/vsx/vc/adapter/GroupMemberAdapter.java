@@ -41,7 +41,7 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class GroupMemberAdapter extends BaseAdapter {
     private List<Member> currentGroupMembers = new ArrayList<>();
-    private List<Member> deleteMembers = new ArrayList<>();
+//    private List<Member> deleteMembers = new ArrayList<>();
     private Context mContext;
     private boolean isDelete;
     private boolean isTempGroup;
@@ -54,24 +54,40 @@ public class GroupMemberAdapter extends BaseAdapter {
         this.isTempGroup = isTempGroup;
     }
 
+    @Override
     public int getCount() {
       return currentGroupMembers.size();
 
     }
 
+    @Override
     public Object getItem(int position) {
         return currentGroupMembers.get(position);
     }
 
+    @Override
     public long getItemId(int position) {
         return position;
     }
 
-    public List<Member> getDeleteMemberList() {
-
-        return deleteMembers;
+    /**
+     * 获取选择的设备UniqueNo集合
+     * @return
+     */
+    public List<Long> getDeleteMemberList() {
+        List<Long> uniqueNoList = new ArrayList<>();
+        uniqueNoList.clear();
+        if(currentGroupMembers!=null){
+            for (Member member:currentGroupMembers) {
+                if (member!=null&&member.isChecked) {
+                    uniqueNoList.add(member.getUniqueNo());
+                }
+            }
+        }
+        return uniqueNoList;
     }
 
+    @Override
     public View getView(final int position, View view, ViewGroup arg2) {
         final ViewHolder viewHolder ;
         final Member member = currentGroupMembers.get(position);
@@ -174,13 +190,11 @@ public class GroupMemberAdapter extends BaseAdapter {
             }
             if(member.isChecked()){
                 member.isChecked = false;
-                deleteMembers.remove(member);
             }else {
                 member.isChecked = true;
-                deleteMembers.add(member);
             }
             if(onItemClickListener!=null){
-                onItemClickListener.onItemClick(v,position,member.isChecked,member);
+                onItemClickListener.onItemClick(v,position,member);
             }
             notifyDataSetChanged();
         }
@@ -283,6 +297,6 @@ public class GroupMemberAdapter extends BaseAdapter {
         this.onItemClickListener = onItemClickListener;
     }
     public interface OnItemClickListener{
-        void onItemClick(View view, int position, boolean checked, Member member);
+        void onItemClick(View view, int position, Member member);
     }
 }
