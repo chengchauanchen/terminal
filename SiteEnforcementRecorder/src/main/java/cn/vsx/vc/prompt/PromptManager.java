@@ -388,24 +388,6 @@ public class PromptManager {
     }
 
     /**
-     * 开始列车终到检查
-     */
-    public void startVideoTapByTrainArrivalInspection() {
-        if (soundPool != null) {
-            soundPool.play(soundMap.get(R.raw.start_train_arrival_inspection), 0.5f, 0.5f, 0, 0, 1);
-        }
-    }
-
-    /**
-     * 停止列车终到检查
-     */
-    public void stopVideoTapByTrainArrivalInspection() {
-        if (soundPool != null) {
-            soundPool.play(soundMap.get(R.raw.stop_train_arrival_inspection), 0.5f, 0.5f, 0, 0, 1);
-        }
-    }
-
-    /**
      * 开始录音
      */
     public void startRecordAudio() {
@@ -505,8 +487,6 @@ public class PromptManager {
         soundMap.put(R.raw.stop_videotape, soundPool.load(MyApplication.instance, R.raw.stop_videotape, 1));
         soundMap.put(R.raw.start_carriage_inspection, soundPool.load(MyApplication.instance, R.raw.start_carriage_inspection, 1));
         soundMap.put(R.raw.stop_carriage_inspection, soundPool.load(MyApplication.instance, R.raw.stop_carriage_inspection, 1));
-        soundMap.put(R.raw.start_train_arrival_inspection, soundPool.load(MyApplication.instance, R.raw.start_train_arrival_inspection, 1));
-        soundMap.put(R.raw.stop_train_arrival_inspection, soundPool.load(MyApplication.instance, R.raw.stop_train_arrival_inspection, 1));
 
         soundMap.put(R.raw.start_record_audio, soundPool.load(MyApplication.instance, R.raw.start_record_audio, 1));
         soundMap.put(R.raw.stop_record_audio, soundPool.load(MyApplication.instance, R.raw.stop_record_audio, 1));

@@ -7,5 +7,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverVideoPushEventByPassiveHandler extends ReceiveHandler {
-    public void handler(int state,String type);
+    public void handler(int state);
 }

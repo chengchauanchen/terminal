@@ -1,8 +1,8 @@
 package ptt.terminalsdk.manager.nfc;
 
-import com.alibaba.fastjson.JSONObject;
 
 import ptt.terminalsdk.bean.NfcBusinessType;
+import ptt.terminalsdk.bean.NfcDataBean;
 import ptt.terminalsdk.bean.NfcPerformBean;
 
 public interface INfcManager {
@@ -25,10 +25,10 @@ public interface INfcManager {
     public String getBindWarningString(int bindNo, String bindUniqueNo, int groupNo, String warningId, String voiceString);
 
     //获取录像业务的传输数据
-    public String getVideoString(int state, JSONObject tag, String voiceString);
+    public String getVideoString(int state, String tag, String voiceString);
 
     //获取实时上报业务的传输数据
-    public String getVideoPushString(int state, JSONObject tag, String voiceString);
+    public String getVideoPushString(int state, String tag, String voiceString);
 
     //获取绑定警情和上报图像业务的传输数据
     public String getBindWarningAndVideoPushString(int bindNo, String bindUniqueNo, int groupNo, String warningId, int state,String voiceString);
@@ -44,11 +44,17 @@ public interface INfcManager {
     //更新业务的执行状态
     public void updatePerformBusinessState(NfcBusinessType type);
 
+    //更新录像的标示
+    public void updateVideoState(boolean isVideoState);
+
     //保存执行业务的数据
     public void savePerformBean(NfcPerformBean bean);
 
     //获取执行业务的数据
     public NfcPerformBean getPerformBean();
+
+    //更新执行业务的数据
+    public void updatePerformBeanByOtherWay(String warningId);
 
     //根据类型的code获取语音字符串
     public String getVoiceStringByCode(NfcBusinessType type);
@@ -58,6 +64,9 @@ public interface INfcManager {
 
     //获取标记
     public String getFileTag();
+
+    //获取警情编号
+    public String getWarningId(NfcDataBean data);
 
     //获取录像类型
     public int getVideoType();

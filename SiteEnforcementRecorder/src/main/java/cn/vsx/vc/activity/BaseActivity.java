@@ -94,7 +94,6 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DeviceUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.bean.NfcBusinessType;
-import ptt.terminalsdk.bean.NfcBusinessVideoType;
 import ptt.terminalsdk.broadcastreceiver.BatteryBroadcastReceiver;
 import ptt.terminalsdk.broadcastreceiver.LivingStopTimeReceiver;
 import ptt.terminalsdk.broadcastreceiver.MyPhoneStateListener;
@@ -277,6 +276,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
         //绑定成功之后，执法记录仪收到通知，退出默认账号，登录绑定账号
         DataUtil.saveRecorderBindBean(new RecorderBindBean(memberUuid, groupNo, isTempGroup, alarmNo));
+        //检查是否需要更新标记
+        MyTerminalFactory.getSDK().getNfcManager().updatePerformBeanByOtherWay(alarmNo);
         //切换到绑定账号
         if (isChange) {
             TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
@@ -1328,10 +1329,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected void promptStartVideoRecoder(){
         //判断提示不同提示音
         int type = MyTerminalFactory.getSDK().getNfcManager().getVideoType();
-        if(type == NfcBusinessVideoType.CARRIAGE_INSPECTION.getCode()){
+        if(type>0){
             PromptManager.getInstance().startVideoTapByCarriageInspection();
-        }else if(type == NfcBusinessVideoType.TRAIN_ARRIVAL_INSPECTION.getCode()){
-            PromptManager.getInstance().startVideoTapByTrainArrivalInspection();
         }else{
             PromptManager.getInstance().startVideoTap();
         }
@@ -1343,10 +1342,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected void promptStopVideoRecoder(){
         //判断提示不同提示音
         int type = MyTerminalFactory.getSDK().getNfcManager().getVideoType();
-        if(type == NfcBusinessVideoType.CARRIAGE_INSPECTION.getCode()){
+        if(type>0){
             PromptManager.getInstance().stopVideoTapByCarriageInspection();
-        }else if(type == NfcBusinessVideoType.TRAIN_ARRIVAL_INSPECTION.getCode()){
-            PromptManager.getInstance().stopVideoTapByTrainArrivalInspection();
         }else{
             PromptManager.getInstance().stopVideoTap();
         }

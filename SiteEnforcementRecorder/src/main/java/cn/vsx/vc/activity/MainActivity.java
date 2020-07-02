@@ -1220,7 +1220,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
      */
     private ReceiverVideoEventByPassiveHandler receiverVideoEventByPassiveHandler = new ReceiverVideoEventByPassiveHandler() {
         @Override
-        public void handler(int state,String type) {
+        public void handler(int state) {
           switch (state){
               case 1:
                   //开始录像
@@ -1242,7 +1242,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
      */
     private ReceiverVideoPushEventByPassiveHandler receiverVideoPushEventByPassiveHandler = new ReceiverVideoPushEventByPassiveHandler() {
         @Override
-        public void handler(int state,String type) {
+        public void handler(int state) {
             switch (state){
                 case 1:
                     //开始上报图像

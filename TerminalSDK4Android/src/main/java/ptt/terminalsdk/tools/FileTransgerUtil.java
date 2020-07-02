@@ -87,19 +87,7 @@ public class FileTransgerUtil {
      * @return
      */
     public static String getWarningId() {
-        String result = "";
-        String tag = getTag();
-        if(!TextUtils.isEmpty(tag)){
-            try{
-                JSONObject jsonObject = JSONObject.parseObject(tag);
-                if(jsonObject.containsKey(NfcManager.WID)){
-                    result = jsonObject.getString(NfcManager.WID);
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-        return result;
+        return MyTerminalFactory.getSDK().getNfcManager().getFileTag();
     }
 
     /**
@@ -252,7 +240,6 @@ public class FileTransgerUtil {
         bean.setTerminalMemberNo(getPoliceIdInt());
         bean.setTerminalUniqueNo(getPoliceUniqueNo());
         bean.setWarningId(getWarningId());
-        bean.setTag(getTag());
         bean.setName(getFileName(path));
         String type =  getBITFileType(path);
         bean.setType(type);

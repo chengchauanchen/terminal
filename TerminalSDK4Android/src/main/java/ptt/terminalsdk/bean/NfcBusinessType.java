@@ -9,7 +9,8 @@ public enum NfcBusinessType implements Serializable{
 	BIND("账号绑定", 1),
 	BIND_WARNING("警情绑定", 2),
 	VIDEO("录像", 3),
-	VIDEO_PUSH("实时上报", 4);
+	VIDEO_PUSH("实时上报", 4),
+	BIND_EQUIPMENT("装备绑定", 5);
 
 	private static final long serialVersionUID = 2L;
 

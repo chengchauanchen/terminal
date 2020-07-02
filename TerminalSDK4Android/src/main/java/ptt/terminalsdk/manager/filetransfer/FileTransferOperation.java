@@ -259,6 +259,21 @@ public class FileTransferOperation {
 
     /**
      * 生成文件完成
+     *isComplete是否是完成
+     * @param scanPath
+     * @param path
+     */
+    public void generateFileComplete(String scanPath, String path,boolean isComplete) {
+        logger.info(TAG + "generateFileComplete isComplete" + isComplete);
+        generateFileComplete(scanPath,path);
+        if(isComplete){
+            MyTerminalFactory.getSDK().getNfcManager().updateVideoState(false);
+        }
+    }
+
+
+    /**
+     * 生成文件完成
      *
      * @param scanPath
      * @param path

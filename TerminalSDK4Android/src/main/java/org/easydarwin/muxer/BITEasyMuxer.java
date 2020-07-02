@@ -134,7 +134,7 @@ public class BITEasyMuxer implements BaseEasyMuxer{
                     mVideoTrackIndex = mAudioTrackIndex = -1;
                     String directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
                     //生成文件
-                    operation.generateFileComplete(directoty,mFilePath+ FileTransgerUtil._TYPE_VIDEO_SUFFIX);
+                    operation.generateFileComplete(directoty,mFilePath+ FileTransgerUtil._TYPE_VIDEO_SUFFIX,false);
                     try {
                         checkIndexOutOfBounds();
                         logger.info(TAG+"5分钟后生成新的退图像文件，之前的 mFilePath====" + mFilePath);
@@ -183,7 +183,7 @@ public class BITEasyMuxer implements BaseEasyMuxer{
                         FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
                         operation.generateFileComplete(
                                 MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory()),
-                                mFilePath+ FileTransgerUtil._TYPE_VIDEO_SUFFIX);
+                                mFilePath+ FileTransgerUtil._TYPE_VIDEO_SUFFIX,true);
                     }
                     mAudioTrackIndex = mVideoTrackIndex = -1;
                 }
