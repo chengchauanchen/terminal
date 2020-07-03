@@ -897,7 +897,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 //通过NFCManager解析数据
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
                     MyTerminalFactory.getSDK().getNfcManager().parseData(data);
-                    MyTerminalFactory.getSDK().getNfcManager().performBusiness();
                 });
                 //切组，上报，录像
                 break;
@@ -1329,23 +1328,31 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected void promptStartVideoRecoder(){
         //判断提示不同提示音
         int type = MyTerminalFactory.getSDK().getNfcManager().getVideoType();
+        String content = "开始录像";
         if(type>0){
             PromptManager.getInstance().startVideoTapByCarriageInspection();
+            content = "开始巡视";
         }else{
             PromptManager.getInstance().startVideoTap();
         }
+        ToastUtil.showToast(MyApplication.instance, content);
     }
 
     /**
      * 提示停止录像的提示语
      */
-    protected void promptStopVideoRecoder(){
+    protected void promptStopVideoRecoder(boolean show){
         //判断提示不同提示音
         int type = MyTerminalFactory.getSDK().getNfcManager().getVideoType();
+        String content = "停止录像";
         if(type>0){
             PromptManager.getInstance().stopVideoTapByCarriageInspection();
+            content = "结束巡视";
         }else{
             PromptManager.getInstance().stopVideoTap();
+        }
+        if(show){
+            ToastUtil.showToast(MyApplication.instance, content);
         }
     }
 }

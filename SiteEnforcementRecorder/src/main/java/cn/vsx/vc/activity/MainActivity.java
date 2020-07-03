@@ -234,7 +234,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         //48小时未上传的文件上传
         manager.checkStartExpireFileAlarm();
         //上传没有上传的文件信息
-        manager.uploadFileTreeBean(null);
+        manager.uploadFileTreeBean(null,false);
 //        //检测内存卡的size
 //        manager.checkExternalUsableSize();
         showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
@@ -681,7 +681,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
 //                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
             } else {
                 //上传未上传的文件信息
-                MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null);
+                MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null,false);
             }
         });
     };
@@ -897,7 +897,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                     operation.checkExternalUsableSize();
                 }
                 if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(operation.getExternalUsableStorageDirectory())) {
-                    ToastUtil.showToast(MyApplication.instance, "开始录像");
                     //判断是否是用其他提示音
                     promptStartVideoRecoder();
                     mMediaStream.startRecord();
@@ -919,8 +918,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     private void stopVideoRecoder() {
         if (mMediaStream != null) {
             if (mMediaStream.isRecording()) {
-                ToastUtil.showToast(MyApplication.instance, "停止录像");
-                promptStopVideoRecoder();
+                promptStopVideoRecoder(true);
                 mMediaStream.stopRecord();
             }
         }
@@ -1764,7 +1762,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         if (mMediaStream != null && mMediaStream.isRecording()) {
             mMediaStream.stopRecord();
             if (!report) {
-                promptStopVideoRecoder();
+                promptStopVideoRecoder(false);
                 report = true;
             }
         }

@@ -265,10 +265,13 @@ public class FileTransferOperation {
      */
     public void generateFileComplete(String scanPath, String path,boolean isComplete) {
         logger.info(TAG + "generateFileComplete isComplete" + isComplete);
-        generateFileComplete(scanPath,path);
-        if(isComplete){
-            MyTerminalFactory.getSDK().getNfcManager().updateVideoState(false);
-        }
+        //扫描卡中的文件
+        SDCardUtil.scanMtpAsync(context, scanPath);
+        //上传文件目录和保存文件信息到本地
+        uploadFileTreeAndSaveFileToSqlite(path,isComplete);
+        //通知UI更新文件的显示
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGenerateFileCompleteHandler.class);
+
     }
 
 
@@ -283,7 +286,7 @@ public class FileTransferOperation {
         //扫描卡中的文件
         SDCardUtil.scanMtpAsync(context, scanPath);
         //上传文件目录和保存文件信息到本地
-        uploadFileTreeAndSaveFileToSqlite(path);
+        uploadFileTreeAndSaveFileToSqlite(path,false);
         //通知UI更新文件的显示
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGenerateFileCompleteHandler.class);
     }
@@ -291,17 +294,20 @@ public class FileTransferOperation {
     /**
      * 上传文件目录和保存文件的状态到数据库
      */
-    public void uploadFileTreeAndSaveFileToSqlite(String path) {
-        uploadFileTreeBean(path);
+    public void uploadFileTreeAndSaveFileToSqlite(String path,boolean isComplete) {
+        uploadFileTreeBean(path,isComplete);
         saveFileToSQlite(path);
     }
 
     /**
      * 上传文件目录树
      */
-    public void uploadFileTreeBean(final String path) {
+    public void uploadFileTreeBean(final String path,boolean isComplete) {
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             List<FileBean> list = saveAndGetBITFileTreeBean(path);
+            if (isComplete){
+                MyTerminalFactory.getSDK().getNfcManager().updateVideoState(false);
+            }
             if (!isConnected(context)) {
                 logger.info(TAG + "uploadFileTreeBean:isConnected:" + isConnected(context));
                 return;
@@ -859,6 +865,7 @@ public class FileTransferOperation {
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
         return (!TextUtils.isEmpty(deviceType)&&TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())
                 &&!TextUtils.isEmpty(apkType)&&TextUtils.equals(apkType, AuthManagerTwo.XINZHOU));
+      //return false;
     }
 
     /**

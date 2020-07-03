@@ -3,6 +3,7 @@ package ptt.terminalsdk.manager.nfc;
 import android.app.Application;
 import android.text.TextUtils;
 
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 
@@ -85,7 +86,26 @@ public class NfcManager implements INfcManager {
      */
     @Override
     public synchronized void setTransmitData(String data) {
-        transmitDataStr = data;
+        if(TextUtils.isEmpty(data)){
+            transmitDataStr = "";
+            return;
+        }
+        NfcBaseBean baseBean = getNfcBaseBeanByString(data);
+        if(baseBean == null || baseBean.getData() == null){
+            transmitDataStr = "";
+            return;
+        }
+        if(baseBean.getData().isHold()){
+            transmitDataStr = data;
+        }else {
+            NfcBaseBean bean = getNfcBaseBeanByString(transmitDataStr);
+            if(bean!=null&&bean.getData()!=null && bean.getData().isHold()){
+
+            }else {
+                transmitDataStr = data;
+            }
+        }
+        logger.info(LOGGER_TAG+"setTransmitData-data"+data+"-transmitDataStr"+transmitDataStr);
     }
 
     /**
@@ -253,6 +273,7 @@ public class NfcManager implements INfcManager {
         bean.setCodeState(map);
         bean.setData(data);
         savePerformBean(bean);
+        performBusiness();
     }
 
     /**
@@ -284,20 +305,11 @@ public class NfcManager implements INfcManager {
                 if (type != null) {
                     switch (type) {
                         case BIND:
-                        case BIND_WARNING:
-                            performBind(type, data);
-                            break;
-                        case VIDEO:
-                            performVideo(data);
-                            break;
-                        case VIDEO_PUSH:
-                            performVideoPush(data);
-                            break;
-                        case BIND_EQUIPMENT:
-                            performBindEquipment(data);
-                            break;
-                        default:
-                            break;
+                        case BIND_WARNING: performBind(type, data);break;
+                        case VIDEO: performVideo(data);break;
+                        case VIDEO_PUSH: performVideoPush(data);break;
+                        case BIND_EQUIPMENT: performBindEquipment(data);break;
+                        default: break;
                     }
                 }
             }
@@ -350,8 +362,13 @@ public class NfcManager implements INfcManager {
                 && !bean.getCodeState().isEmpty() && bean.getCodeState().containsKey(NfcBusinessType.VIDEO.getCode())){
                 bean.getCodeState().put(NfcBusinessType.VIDEO.getCode(), true);
                 if (bean.getData()!=null) {
-                    bean.getData().setvType(isVideoState);
+                    bean.getData().setVType(isVideoState);
                 }
+                //如果是装备绑定中的录像，清空tag
+                if(!isVideoState && bean.getCodeState().containsKey(NfcBusinessType.BIND_EQUIPMENT.getCode())){
+                    bean.getData().setTag("");
+                }
+                logger.info(LOGGER_TAG+"updateVideoState-isVideoState:"+isVideoState+"-bean:"+bean);
                 savePerformBean(bean);
             }
         } catch (Exception e) {
@@ -450,8 +467,9 @@ public class NfcManager implements INfcManager {
     public int getVideoType() {
         try {
             NfcPerformBean bean = getPerformBean();
+            logger.info(LOGGER_TAG + "getVideoType-bean:" + bean );
             if (bean != null &&!bean.getCodeState().isEmpty() && bean.getCodeState().containsKey(NfcBusinessType.VIDEO.getCode())
-                && bean.getData() != null && bean.getData().isvType()) {
+                && bean.getData() != null && bean.getData().isVType()) {
                 return 1;
             }
         } catch (Exception e) {
@@ -477,7 +495,7 @@ public class NfcManager implements INfcManager {
      * @return
      */
     @Override
-    public synchronized NfcPerformBean getPerformBean() {
+    public  NfcPerformBean getPerformBean() {
         String json = TerminalFactory.getSDK().getParam(Params.RECORDER_NFC_PERFORM_BEAN);
         return (TextUtils.isEmpty(json)) ? null : JSON.parseObject(json, NfcPerformBean.class);
     }
@@ -491,7 +509,7 @@ public class NfcManager implements INfcManager {
             NfcPerformBean bean = MyTerminalFactory.getSDK().getNfcManager().getPerformBean();
             if(bean!=null){
                 bean.getData().setTag(warningId);
-                bean.getData().setvType(false);
+                bean.getData().setVType(false);
                 savePerformBean(bean);
             }
         }catch (Exception e){
@@ -532,6 +550,7 @@ public class NfcManager implements INfcManager {
                 //更新执行的状态
                 updateVideoState(true);
                 MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverVideoEventByPassiveHandler.class, data.getState());
+                getPerformBean();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -563,6 +582,8 @@ public class NfcManager implements INfcManager {
         try{
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
                 if(data!=null){
+                    //更新执行的状态
+                    updatePerformBusinessState(NfcBusinessType.BIND_EQUIPMENT);
                     //int no = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
                     long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
                     String name = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
@@ -570,9 +591,11 @@ public class NfcManager implements INfcManager {
                         "DEVICE_BODY_WORN_CAMERA", (uniqueNo>0)?(uniqueNo+""):"", name,
                         data.getName(), data.getPhoneNo(), data.getDeptName(),
                         (msg, code) -> {
-                            //if(code == BaseCommonCode.SUCCESS_CODE){
-                            //} else {
-                            //}
+                            if(code == BaseCommonCode.SUCCESS_CODE||code == -2){
+                                //-2是绑定同一个设备的返回code
+                            } else {
+                                ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindFail();
+                            }
                             //检查业务，执行其他的业务
                             performBusinessByTime();
                         });
@@ -616,4 +639,20 @@ public class NfcManager implements INfcManager {
         logger.info(LOGGER_TAG + "getCodeIndex-key:" + key + "-bean:" + bean);
         return result;
     }
+
+    /**
+     * 根据字符串获取NfcBaseBean
+     * @param data
+     * @return
+     */
+    private NfcBaseBean getNfcBaseBeanByString(String data){
+        NfcBaseBean baseBean = null;
+        try{
+            baseBean = JSON.parseObject(data,NfcBaseBean.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return baseBean;
+    }
+
 }

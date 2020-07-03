@@ -19,10 +19,12 @@ public class NfcDataBean implements Serializable {
     private String phoneNo;
     //绑定账号的部门
     private String deptName;
-
-    private boolean vType;
+    //录像是否用其他提示音
+    private boolean isVType;
     //标记
     private String tag;
+    //是否是受保护的（不被修改的）
+    private boolean isHold;
     //语音提示
     private List<String> vStr;
 
@@ -98,12 +100,20 @@ public class NfcDataBean implements Serializable {
         this.deptName = deptName;
     }
 
-    public boolean isvType() {
-        return vType;
+    public boolean isVType() {
+        return isVType;
     }
 
-    public void setvType(boolean vType) {
-        this.vType = vType;
+    public void setVType(boolean VType) {
+        isVType = VType;
+    }
+
+    public boolean isHold() {
+        return isHold;
+    }
+
+    public void setHold(boolean hold) {
+        isHold = hold;
     }
 
     @Override public String toString() {
@@ -115,8 +125,9 @@ public class NfcDataBean implements Serializable {
             ", state=" + state +
             ", phoneNo='" + phoneNo + '\'' +
             ", deptName='" + deptName + '\'' +
-            ", vType=" + vType +
-            ", tag=" + tag +
+            ", isVType=" + isVType +
+            ", tag='" + tag + '\'' +
+            ", isHold=" + isHold +
             ", vStr=" + vStr +
             '}';
     }
