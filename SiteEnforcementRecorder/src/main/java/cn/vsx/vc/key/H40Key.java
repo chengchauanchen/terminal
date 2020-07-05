@@ -2,6 +2,7 @@ package cn.vsx.vc.key;
 
 import android.view.KeyEvent;
 
+import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
 
@@ -10,6 +11,8 @@ import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
  */
 public class H40Key extends BaseKey {
 
+    //组呼
+    private static final int KEY_CODE_PTT = 313;
     //上报图像和录像
     private static final int KEY_CODE_VIDEO = 318;
     //录音
@@ -20,6 +23,12 @@ public class H40Key extends BaseKey {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
+            case KEY_CODE_PTT:
+                //ptt
+                if (event.getRepeatCount() == 0) {
+                    pttButton(Constants.PTTEVEVT_ACTION_DOWN);
+                }
+                return true;
             case KEY_CODE_VIDEO:
                 //摄像按键
 //                dismissDialog();
@@ -50,6 +59,10 @@ public class H40Key extends BaseKey {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
+            case KEY_CODE_PTT:
+                //ptt
+                pttButton(Constants.PTTEVEVT_ACTION_UP);
+                return true;
             case KeyEvent.KEYCODE_CAMERA:
                 //拍照按键
                 photoButton();
