@@ -340,7 +340,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
 
-        enableReaderMode();
+        //enableReaderMode();
 
         FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
         boolean onlyUserSdCard = operation.checkOnlyUseSdCardStorage();
@@ -353,7 +353,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     @Override
     public void onPause() {
         super.onPause();
-        disableReaderMode();
     }
 
     @Override
@@ -408,6 +407,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             unRegistPhoneStateListener();//注册手机信号的监听
             DeviceUtil.unRegistListener();
             DeviceUtil.stopInfraRed();
+            disableReaderMode();
         }catch (Exception e){
             e.printStackTrace();
         }

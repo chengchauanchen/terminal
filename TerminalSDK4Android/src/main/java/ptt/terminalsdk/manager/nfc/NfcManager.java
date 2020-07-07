@@ -594,8 +594,8 @@ public class NfcManager implements INfcManager {
                             if(code == BaseCommonCode.SUCCESS_CODE||code == -2){
                                 //-2是绑定同一个设备的返回code
                             } else {
-                                ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindFail();
                             }
+                            ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
                             //检查业务，执行其他的业务
                             performBusinessByTime();
                         });

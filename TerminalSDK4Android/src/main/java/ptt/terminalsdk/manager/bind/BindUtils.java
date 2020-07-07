@@ -179,7 +179,8 @@ public class BindUtils {
             param.put("userName", TextUtils.isEmpty(userName)?"":userName);
             param.put("phoneNumber", TextUtils.isEmpty(phoneNumber)?"":phoneNumber);
             param.put("department", TextUtils.isEmpty(department)?"":department);
-            final String url = getBindUrl() + "/ldcs/bindRelationship/bind";
+            //final String url = getBindUrl() + "/ldcs/bindRelationship/bind";
+            final String url = getBindUrl() + "/ldcs//bindRelationship/bindByNFC";
             String result = MyTerminalFactory.getSDK().getHttpClient().post(url, param);
             JSONObject jsonObject = parseObject(result);
              msg = jsonObject.getString(RESULT_MSG);
