@@ -340,7 +340,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
 
-        //enableReaderMode();
+        enableReaderMode();
 
         FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
         boolean onlyUserSdCard = operation.checkOnlyUseSdCardStorage();
