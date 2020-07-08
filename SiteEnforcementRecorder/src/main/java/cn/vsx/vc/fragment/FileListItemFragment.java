@@ -25,6 +25,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.FileListAdapter;
@@ -102,26 +103,31 @@ public class FileListItemFragment extends Fragment  {
         adapter = new FileListAdapter(getContext(), datas);
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener((position,file) -> {
-            if(file!=null&&file.exists()){
-             //点击查看录像、图片
-                String fileType = FileTransgerUtil.getBITFileType(file.getName());
-                String fragment = "";
-                if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_VIDEO)) {
-                    fragment = Constants.FRAGMENT_TAG_FILE_VIDEO_SHOW;
-                }else if(TextUtils.equals(fileType, FileTransgerUtil.TYPE_IMAGE)){
-                    fragment = Constants.FRAGMENT_TAG_FILE_PICTURE_SHOW;
+            TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+                @Override
+                public void run() {
+                    if(file!=null&&file.exists()){
+                        //点击查看录像、图片
+                        String fileType = FileTransgerUtil.getBITFileType(file.getName());
+                        String fragment = "";
+                        if (TextUtils.equals(fileType, FileTransgerUtil.TYPE_VIDEO)) {
+                            fragment = Constants.FRAGMENT_TAG_FILE_VIDEO_SHOW;
+                        }else if(TextUtils.equals(fileType, FileTransgerUtil.TYPE_IMAGE)){
+                            fragment = Constants.FRAGMENT_TAG_FILE_PICTURE_SHOW;
+                        }
+                        if(!TextUtils.isEmpty(fragment)){
+                            ArrayList<String> list = getPathByFile();
+                            String finalFragment = fragment;
+                            mHandler.post(() -> {
+                                Bundle bundle = new Bundle();
+                                bundle.putStringArrayList(Constants.FILE_PATHS,list);
+                                bundle.putInt(Constants.FILE_INDEX,position);
+                                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, finalFragment,bundle);
+                            });
+                        }
+                    }
                 }
-                if(!TextUtils.isEmpty(fragment)){
-                    Bundle bundle = new Bundle();
-//                    if(TextUtils.equals(fileType, FileTransgerUtil.TYPE_VIDEO)){
-//                        bundle.putString(Constants.FILE_PATH,file.getAbsolutePath());
-//                    }else{
-                        bundle.putStringArrayList(Constants.FILE_PATHS,getPathByFile());
-                        bundle.putInt(Constants.FILE_INDEX,position);
-//                    }
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, fragment,bundle);
-                }
-            }
+            });
         });
     }
     /**

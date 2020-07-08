@@ -71,4 +71,7 @@ public interface INfcManager {
     //获取录像类型
     public int getVideoType();
 
+    //获取车次
+    public String getTrains();
+
 }

@@ -299,7 +299,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 TerminalFactory.getSDK().getGroupManager().changeGroup(groupNo);
             }
             //Todo 市局对接绿之云
-        } else if (currentGroupId == groupNo && TextUtils.equals(bean.getWarningId(), alarmNo)) {
+        } else if (!TextUtils.isEmpty(alarmNo) && TextUtils.equals(bean.getWarningId(), alarmNo)) {
             logger.info(TAG + "第二次贴，组相同，警情也相同，则解绑");
             TerminalFactory.getSDK().getRecorderBindManager().requestUnBind();
         }
@@ -334,11 +334,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 if(!TextUtils.isEmpty(voice)){
                     MscV5Api.getInstance(this).startSpeaking(voice);
                 }else{
-                    if (TextUtils.isEmpty(recorderBindBean.getWarningId())) {
-                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceSuccess();
-                    } else {
-                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceAlertSuccess();
-                    }
+                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
+//                    if (TextUtils.isEmpty(recorderBindBean.getWarningId())) {
+//                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
+//                    } else {
+//                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
+//                    }
                 }
             }
         }
@@ -389,9 +390,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         //判断横竖屏
         setRequestedOrientation(SystemUtil.isScreenLandscape(this) ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         //常亮
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         //透明状态栏
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);

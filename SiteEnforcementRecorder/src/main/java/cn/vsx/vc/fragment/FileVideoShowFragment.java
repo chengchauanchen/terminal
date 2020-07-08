@@ -157,36 +157,14 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
             fileIndex = 0;
         }
         tvTitle.setText(String.format(getString(R.string.text_show_picture_index), (fileIndex+1), filePaths.size()));
-        videoViews.clear();
-        videoViews.addAll(getVideoViews(filePaths));
-
-        myAdapter =  new MyAdapter(videoViews);
+        myAdapter =  new MyAdapter(filePaths);
         viewPager.setAdapter(myAdapter);
-        viewPager.setOffscreenPageLimit(0);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                logger.info("onPageSelected--position:"+position);
-                fileIndex = position;
-                try{
-                    tvTitle.setText(String.format(getString(R.string.text_show_picture_index), (position + 1), filePaths.size()));
-                    clearPlayOthers(position);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.addOnPageChangeListener(onPageChangeListener);
         viewPager.setOnTouchListener(new OnTouchListenerImpChengeVolume());
         viewPager.setCurrentItem(fileIndex);
         clearPlayOthers(fileIndex);
+        viewPager.post(() -> onPageChangeListener.onPageSelected(fileIndex));
     }
 
     /**
@@ -194,6 +172,26 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
      */
     private void initListener() {
     }
+
+    private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrollStateChanged(int arg0) { }
+
+        @Override
+        public void onPageScrolled(int arg0, float arg1, int arg2) { }
+
+        @Override
+        public void onPageSelected(int position) {
+            logger.info("onPageSelected--position:"+position);
+            fileIndex = position;
+            try{
+                tvTitle.setText(String.format(getString(R.string.text_show_picture_index), (position + 1), filePaths.size()));
+                clearPlayOthers(position);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    };
 
     /**
      * 获取数据
@@ -279,9 +277,9 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
     }
 
     class MyAdapter extends PagerAdapter {
-        private List<VideoView> data;
+        private List<String> data ;
 
-        MyAdapter(List<VideoView> data){
+        MyAdapter(List<String> data){
             this.data = data;
         }
         @Override
@@ -296,14 +294,29 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
 
         @Override
         public View instantiateItem(ViewGroup container, int position){
-            VideoView videoView = data.get(position);
-            container.addView(videoView);
-            return videoView;
+            try{
+                String path = data.get(position);
+                VideoView videoView = getVideoViewByPath(path);
+                if(videoView!=null){
+                    videoView.setTag(path);
+                    videoViews.add(videoView);
+                    container.addView(videoView);
+                }
+                return videoView;
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return null;
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object){
-            container.removeView((View) object);
+            try{
+                container.removeView((View) object);
+                videoViews.remove(object);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -376,51 +389,50 @@ public class FileVideoShowFragment extends Fragment implements View.OnClickListe
      * @param position
      */
     private void clearPlayOthers(int position) {
-        for (int i = 0; i < videoViews.size(); i++) {
-            VideoView videoView = videoViews.get( i);
-            if(videoView!=null){
-                videoView.pause();
-            }
-        }
-        if(position>=0 && position<videoViews.size()){
-            VideoView videoView =  videoViews.get(position);
-            if(videoView!=null){
-                videoView.start();
-            }
-        }
-    }
-
-    /**
-     * 初始化videoview集合
-     * @param filePaths
-     * @return
-     */
-    private ArrayList<VideoView> getVideoViews(ArrayList<String> filePaths) {
-        ArrayList<VideoView> videoViews = new ArrayList<>();
         try{
-            if(filePaths!=null && !filePaths.isEmpty()){
-                for (String path: filePaths) {
-                    if(!TextUtils.isEmpty(path)){
-                        VideoView videoView = new VideoView(this.getContext());
-//                        ViewGroup v = (ViewGroup) View.inflate(getContext(), R.layout.layout_video_view, null);
-//                        VideoView videoView = (VideoView) v.findViewById(R.id.video_view);
-                        videoView.setMediaController(new MediaController(this.getContext()));
-                        videoView.setVideoPath(path);
-                        videoView.seekTo(0);
-                        setTextureViewSize(videoView,path);
-                        videoView.setOnErrorListener((mp, what, extra) -> {
-                            videoView.stopPlayback();
-                            return true;
-                        });
-                        videoViews.add(videoView);
+            String path = "";
+
+            if(position>=0 && position<filePaths.size()){
+                path =  filePaths.get(position);
+
+            }
+            logger.info("-----clearPlayOthers:"+path);
+            for (int i = 0; i < videoViews.size(); i++) {
+                VideoView videoView = videoViews.get( i);
+                if(videoView!=null){
+                    logger.info("-----clearPlayOthers-videoView:"+videoView.getTag());
+                    if(!TextUtils.isEmpty(path)&&TextUtils.equals((String) videoView.getTag(),path)){
+                        videoView.start();
+                    }else{
+                        videoView.pause();
                     }
+
                 }
             }
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
 
-        return videoViews;
+    private VideoView getVideoViewByPath(String path){
+        try{
+            if(!TextUtils.isEmpty(path)){
+                VideoView videoView = new VideoView(FileVideoShowFragment.this.getContext());
+                videoView.setMediaController(new MediaController(FileVideoShowFragment.this.getContext()));
+                videoView.setVideoPath(path);
+                videoView.seekTo(0);
+                setTextureViewSize(videoView,path);
+                videoView.setOnErrorListener((mp, what, extra) -> {
+                    videoView.stopPlayback();
+                    return true;
+                });
+//                videoViews.add(videoView);
+                return videoView;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
