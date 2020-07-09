@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimerTask;
 
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.R;
@@ -263,6 +262,11 @@ public class NfcManager implements INfcManager {
         if (code == null || code.isEmpty() || data == null) {
             ToastUtil.showToast(context.getString(R.string.nfc_transmit_data_error));
             return;
+        }
+        //保存之前的数据
+        NfcPerformBean beanOld = getPerformBean();
+        if(beanOld!=null){
+            savePerformBeanOld(beanOld);
         }
         //保存执行的命令
         NfcPerformBean bean = new NfcPerformBean();
@@ -522,6 +526,27 @@ public class NfcManager implements INfcManager {
     }
 
     /**
+     * 保存执行业务的数据（old）
+     *
+     * @param bean
+     */
+
+    public synchronized void savePerformBeanOld(NfcPerformBean bean) {
+        TerminalFactory.getSDK().putParam(Params.RECORDER_NFC_PERFORM_BEAN_OLD, (bean != null) ? JSON.toJSONString(bean) : "");
+    }
+
+    /**
+     * 获取执行业务的数据(old)
+     *
+     * @return
+     */
+    public NfcPerformBean getPerformBeanOld() {
+        String json = TerminalFactory.getSDK().getParam(Params.RECORDER_NFC_PERFORM_BEAN_OLD);
+        return (TextUtils.isEmpty(json)) ? null : JSON.parseObject(json, NfcPerformBean.class);
+    }
+
+
+    /**
      * 保存执行业务的数据
      *
      * @param bean
@@ -636,11 +661,16 @@ public class NfcManager implements INfcManager {
                             "DEVICE_BODY_WORN_CAMERA", (uniqueNo > 0) ? (uniqueNo + "") : "", name,
                             data.getName(), data.getPhoneNo(), data.getDeptName(),
                             (msg, code) -> {
-                                if (code == BaseCommonCode.SUCCESS_CODE || code == -2) {
+                                if (code == -2) {
                                     //-2是绑定同一个设备的返回code
                                 } else {
                                 }
-                                ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
+                                NfcPerformBean beanOld = getPerformBeanOld();
+                                if(beanOld != null && beanOld.getData() != null && !TextUtils.isEmpty(beanOld.getData().getuNo())
+                                        && TextUtils.equals(beanOld.getData().getuNo(),data.getuNo())){
+                                }else{
+                                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
+                                }
                                 //检查业务，执行其他的业务
                                 performBusinessByTime();
                             });
@@ -649,7 +679,6 @@ public class NfcManager implements INfcManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**

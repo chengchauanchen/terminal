@@ -390,9 +390,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         //判断横竖屏
         setRequestedOrientation(SystemUtil.isScreenLandscape(this) ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         //常亮
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         //透明状态栏
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);

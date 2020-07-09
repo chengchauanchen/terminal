@@ -195,9 +195,12 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
 
     ArrayList<String> availableIPlist = new ArrayList<>();
 
-    private NFCCardReader nfcCardReader = new NFCCardReader(this);
+//    private NFCCardReader nfcCardReader = new NFCCardReader(this);
     public static int READER_FLAGS =
-            NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK;
+            NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_NFC_B
+                    |NfcAdapter.FLAG_READER_NFC_F |NfcAdapter.FLAG_READER_NFC_V
+                    |NfcAdapter.FLAG_READER_NFC_BARCODE
+                    |NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK;
 
     private BatteryBroadcastReceiver batteryBroadcastReceiver;
     private UsbConnetStateReceiver usbConnetStateReceiver;
@@ -353,6 +356,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     @Override
     public void onPause() {
         super.onPause();
+        disableReaderMode();
     }
 
     @Override
@@ -407,7 +411,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             unRegistPhoneStateListener();//注册手机信号的监听
             DeviceUtil.unRegistListener();
             DeviceUtil.stopInfraRed();
-            disableReaderMode();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1193,7 +1196,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         @Override
         public void handler(boolean isConnected) {
             ToastUtil.showToast(MyApplication.instance,isConnected?"USB连接":"USB断开");
-            DeviceUtil.usbConnetStatus(isConnected);
+//            DeviceUtil.usbConnetStatus(isConnected);
         }
     };
 
@@ -1952,11 +1955,11 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     }
 
     private void enableReaderMode() {
-        Log.i(TAG, "Enabling reader mode");
+        logger.info(TAG+"Enabling reader mode");
         try{
             NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
             if (nfc != null) {
-                nfc.enableReaderMode(this, nfcCardReader, READER_FLAGS, null);
+                nfc.enableReaderMode(this,new NFCCardReader(this),READER_FLAGS, null);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -1964,7 +1967,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     }
 
     private void disableReaderMode() {
-        Log.i(TAG, "Disabling reader mode");
+        logger.info(TAG+"Disabling reader mode");
         try{
             NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
             if (nfc != null) {
