@@ -433,6 +433,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                 }
                 //显示头部的信息布局
                 showTopInfoLayout();
+                rlLoginBind.invalidate();
                 break;
             case R.id.tv_login_info:
                 //认证
@@ -680,6 +681,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             if (!connected) {
 //                TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().stop();
                 ToastUtil.showToast(MyApplication.instance, getString(R.string.text_network_is_disconnect));
+                MyTerminalFactory.getSDK().putParam("LOGIN_STATE",false);
 //                stopPush(false);
 //                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
             } else {

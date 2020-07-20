@@ -99,6 +99,7 @@ import ptt.terminalsdk.broadcastreceiver.LivingStopTimeReceiver;
 import ptt.terminalsdk.broadcastreceiver.MyPhoneStateListener;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.manager.nfc.NfcManager;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.DialogUtil;
@@ -136,9 +137,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     private AlertDialog pushDialog;
     private AlertDialog logDialog;
+    private static boolean isBound = false;
 //    private ExitAccountDialog exitAccountDialog;
 //    protected boolean isFristLogin = true;
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -327,20 +328,24 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 }, 1000);
             }
         } else {
-            if (recorderBindBean != null) {
-                ToastUtil.showToast(BaseActivity.this, getString(R.string.text_bind_success));
-                boolean isWarning = MyTerminalFactory.getSDK().getNfcManager().checkIsWarningBusiness();
-                String voice = MyTerminalFactory.getSDK().getNfcManager().getVoiceStringByCode(isWarning? NfcBusinessType.BIND_WARNING:NfcBusinessType.BIND);
-                if(!TextUtils.isEmpty(voice)){
-                    MscV5Api.getInstance(this).startSpeaking(voice);
-                }else{
-                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
+            MyTerminalFactory.getSDK().putParam("LOGIN_STATE",true);
+            if (recorderBindBean != null || isShow) {
+                if (NfcManager.getSoundBoolean()){
+                    ToastUtil.showToast(BaseActivity.this, getString(R.string.text_bind_success));
+                    boolean isWarning = MyTerminalFactory.getSDK().getNfcManager().checkIsWarningBusiness();
+                    String voice = MyTerminalFactory.getSDK().getNfcManager().getVoiceStringByCode(isWarning? NfcBusinessType.BIND_WARNING:NfcBusinessType.BIND);
+                    if(!TextUtils.isEmpty(voice)){
+                        MscV5Api.getInstance(this).startSpeaking(voice);
+                    }else{
+                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
 //                    if (TextUtils.isEmpty(recorderBindBean.getWarningId())) {
 //                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
 //                    } else {
 //                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
 //                    }
+                    }
                 }
+
             }
         }
     };
