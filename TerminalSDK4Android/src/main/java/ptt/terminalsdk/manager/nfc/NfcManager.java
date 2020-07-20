@@ -17,6 +17,11 @@ import java.util.Set;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginStateMachine;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyZfyBoundPhoneMessageHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.R;
 import ptt.terminalsdk.bean.NfcBaseBean;
@@ -57,7 +62,7 @@ public class NfcManager implements INfcManager {
 
     //nfc传输数据的字符串
     private String transmitDataStr = "";
-
+    public static boolean SONDINT = true;
     public NfcManager(Application context) {
         this.context = context;
     }
@@ -70,6 +75,15 @@ public class NfcManager implements INfcManager {
         setTransmitData(null);
         //更新录像的状态
         updateVideoState(false);
+    }
+
+    //记录执行绑定切换的账户的时候不提示声音
+    public synchronized static void setSoundBoolean(boolean temp){
+        SONDINT = temp;
+    }
+
+    public synchronized static boolean getSoundBoolean(){
+        return SONDINT;
     }
 
     /**
@@ -257,6 +271,8 @@ public class NfcManager implements INfcManager {
             ToastUtil.showToast(context.getString(R.string.nfc_transmit_data_error_invalid_format));
             return;
         }
+        //如果当前账户能绑定账户不一致的时候就得先进行切换账户再进行绑定
+
         List<Integer> code = baseBean.getCode();
         NfcDataBean data = baseBean.getData();
         if (code == null || code.isEmpty() || data == null) {
@@ -268,6 +284,22 @@ public class NfcManager implements INfcManager {
         if(beanOld!=null){
             savePerformBeanOld(beanOld);
         }
+
+        //检测绑定的是否为相同账户
+//        if(!checkLoginEquals(data,beanOld)){
+//            logger.info(LOGGER_TAG + "parseData-检测是否有绑定动作");
+//            boolean success = false;
+//            for (int item:code){
+//                if (item == 1){
+//                    success = true;
+//                    break;
+//                }
+//            }
+//            if (!success){
+//                logger.info(LOGGER_TAG + "parseData-添加绑定");
+//                code.set(0,1);
+//            }
+//        }
         //保存执行的命令
         NfcPerformBean bean = new NfcPerformBean();
         LinkedHashMap<Integer, Boolean> map = new LinkedHashMap<>();
@@ -278,6 +310,25 @@ public class NfcManager implements INfcManager {
         bean.setData(data);
         savePerformBean(bean);
         performBusiness();
+    }
+
+    public boolean checkLoginEquals(NfcDataBean data,NfcPerformBean beanOld){
+        if (data != null){
+            int no = data.getNo();
+            int gno = data.getgNo();
+            logger.info(LOGGER_TAG + "checkLoginEquals-相同账户登录"+no+"  "+gno);
+            if (beanOld != null && beanOld.getData() != null){
+                LoginStateMachine loginStateMachine = MyTerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine();
+                int beanOldNo = beanOld.getData().getNo();
+                int beanOldGno = beanOld.getData().getgNo();
+                boolean loginState = MyTerminalFactory.getSDK().getParam("LOGIN_STATE",false);
+                logger.info(LOGGER_TAG + "LoginStateMachine-相同账户登录"+beanOldNo+"  "+beanOldGno+"  "+loginStateMachine.getCurrentState());
+                if (loginState && no == beanOldNo && gno == beanOldGno && loginStateMachine != null && loginStateMachine.getCurrentState() == LoginState.LOGIN){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -595,13 +646,28 @@ public class NfcManager implements INfcManager {
     private void performBind(NfcBusinessType type, NfcDataBean data) {
         try {
             if (data != null) {
-                //更新执行的状态
-                updatePerformBusinessState(type);
-                TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
-                    String warningId = getWarningId(data);
-                    TerminalFactory.getSDK().getRecorderBindManager().requestBind(data.getNo(), uniqueNo, data.getgNo(), warningId);
-                });
+
+                NfcPerformBean old = getPerformBeanOld();
+                //如果是相同账户且为登录状态就不用再次绑定
+                if(checkLoginEquals(data,old) && type.getCode() != NfcBusinessType.BIND_WARNING.getCode()){
+                   logger.info(LOGGER_TAG + "performBind-相同账户登录状态不发送绑定直接提示绑定成功");
+                    //直接提示绑定成功
+                    //绑定成功之后，执法记录仪收到通知，退出默认账号，登录绑定账号
+                   // DataUtil.saveRecorderBindBean(new RecorderBindBean(memberUuid, groupNo, isTempGroup, alarmNo));
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyZfyBoundPhoneMessageHandler.class,true,true);
+                }else{
+                    //更新执行的状态
+                    updatePerformBusinessState(type);
+                    NfcManager.setSoundBoolean(true);
+                    //
+                    //如果当前用户已经是绑定成功的状态不进行再次绑定直接返回绑定成功
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
+                        String warningId = getWarningId(data);
+                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(data.getNo(), uniqueNo, data.getgNo(), warningId);
+                    });
+                }
+
             }
         } catch (Exception e) {
             e.printStackTrace();

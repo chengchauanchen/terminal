@@ -21,6 +21,7 @@ import org.apache.zectec.http.message.BasicNameValuePair;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -251,10 +252,15 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			// 建立实际的连接
 			connection.connect();
 			// 定义 BufferedReader输入流来读取URL的响应
-			in = new BufferedReader(new InputStreamReader(connection.getInputStream(),"UTF-8"));
-			String line;
-			while ((line = in.readLine()) != null) {
-				result += line;
+			InputStream inputStream = connection.getInputStream();
+			if (inputStream != null){
+				in = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
+				String line;
+				if (in != null){
+					while ((line = in.readLine()) != null) {
+						result += line;
+					}
+				}
 			}
 			logger.info("发送了一个get请求：url="+url+"\n 收到的信息为："+result);
 		} catch (Exception e) {
