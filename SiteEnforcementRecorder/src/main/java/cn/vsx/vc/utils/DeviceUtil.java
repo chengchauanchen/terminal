@@ -31,6 +31,7 @@ public class DeviceUtil {
     public static final String TYPE_BITSTART_I7 = "A7 for arm64";
     public static final String TYPE_CL310A = "CL310A";
     public static final String TYPE_H40 = "H40";
+    public static final String TYPE_TB8766P1_BSP_1G = "tb8766p1_bsp_1g";
 
     private static IHardwareAIDLHandler hardwareAIDLHandler;
     private static int infraRedState;
@@ -242,5 +243,13 @@ public class DeviceUtil {
      */
     public static boolean isH40(){
         return TextUtils.equals(TYPE_H40,Build.MODEL);
+    }
+
+    /**
+     * 是否是H40
+     * @return
+     */
+    public static boolean isTB8766P1_BSP_1G(){
+        return TextUtils.equals(TYPE_TB8766P1_BSP_1G,Build.MODEL);
     }
 }
