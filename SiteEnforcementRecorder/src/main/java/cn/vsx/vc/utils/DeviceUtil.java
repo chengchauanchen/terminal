@@ -32,7 +32,7 @@ public class DeviceUtil {
     public static final String TYPE_CL310A = "CL310A";
     public static final String TYPE_H40 = "H40";
     public static final String TYPE_TB8766P1_BSP_1G = "tb8766p1_bsp_1g";
-
+    public static final String TYPE_C3 = "C3";
     private static IHardwareAIDLHandler hardwareAIDLHandler;
     private static int infraRedState;
 

@@ -45,6 +45,11 @@ public class KeyUtil {
                     key = new TB8766P1_BSP_1Gkey();
                 }
                 break;
+            case DeviceUtil.TYPE_C3:
+                if(key == null){
+                    key = new C3();
+                }
+                break;
             default:
                 if(key == null){
                     key = new DefaultKey();

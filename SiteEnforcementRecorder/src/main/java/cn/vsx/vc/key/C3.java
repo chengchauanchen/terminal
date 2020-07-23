@@ -7,24 +7,25 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
 
 /**
- * CL40
+ * C3
  *  PTT:  22
  * 拍照：27
  * 录像：21
  * sos:    24
  * 录音：25
  */
-public class CL40 extends BaseKey {
-    public  final String TAG = "CL40---";
+public class C3 extends BaseKey {
+    public  final String TAG = "C3---";
     //组呼
-    private static final int KEY_CODE_PTT = 22;
+    private static final int KEY_CODE_PTT = 20;
     //上报图像和录像
     private static final int KEY_CODE_VIDEO = 21;
     //录音
-    private static final int KEY_CODE_AUDIO = 25;
+    private static final int KEY_CODE_AUDIO = 22;
     //菜单和上传日志
-    private static final int KEY_CODE_MENU_AND_UPLOAD = 24;
+    private static final int KEY_CODE_MENU_AND_UPLOAD = 23;
 
+    private static final int KEY_CODE_MENU_PHOTO =131;
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
@@ -66,7 +67,7 @@ public class CL40 extends BaseKey {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
-            case KeyEvent.KEYCODE_CAMERA:
+            case KEY_CODE_MENU_PHOTO:
                 //拍照按键
                 photoButton();
                 return true;
