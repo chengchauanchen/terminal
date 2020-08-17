@@ -115,6 +115,7 @@ import cn.vsx.vc.utils.DeviceUtil;
 import cn.vsx.vc.utils.FragmentUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.PhotoUtils;
+import cn.vsx.vc.utils.ScrrenUtils;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.broadcastreceiver.BatteryBroadcastReceiver;
@@ -313,6 +314,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         registerHeadsetPlugReceiver();
+        ScrrenUtils.getInstance().openBacklight("1");
     }
 
     @Override
@@ -342,7 +344,25 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         //清楚所有通知
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
+        if (mMediaStream == null) {
+            if (svLive.getSurfaceTexture() != null) {
+                initMediaStream(svLive.getSurfaceTexture());
+            }
+        }
+//        if (mMediaStream!=null){
+//            Camera camera = mMediaStream.getCamera();
+//            camera.startPreview();
+//        }
+        if (mMediaStream!=null){
+            if (svLive.getSurfaceTexture() != null) {
+                initMediaStream(svLive.getSurfaceTexture());
+            }
+        }
 
+
+        if (svLive.getSurfaceTexture() != null) {
+            initMediaStream(svLive.getSurfaceTexture());
+        }
         enableReaderMode();
 
         FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
@@ -357,7 +377,12 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     public void onPause() {
         super.onPause();
         disableReaderMode();
+//        if (mMediaStream!=null){
+//            Camera camera = mMediaStream.getCamera();
+//            camera.startPreview();
+//        }
     }
+
 
     @Override
     public void doOtherDestroy() {
@@ -1392,6 +1417,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     public void onBackStackChanged() {
         resetCurrentFragment();
     }
+
 
 
     private final class SurfaceTextureListener implements TextureView.SurfaceTextureListener {

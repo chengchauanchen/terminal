@@ -252,4 +252,12 @@ public class DeviceUtil {
     public static boolean isTB8766P1_BSP_1G(){
         return TextUtils.equals(TYPE_TB8766P1_BSP_1G,Build.MODEL);
     }
+
+    /**
+     * 是否是H40
+     * @return
+     */
+    public static boolean isC3(){
+        return TextUtils.equals(TYPE_C3,Build.MODEL);
+    }
 }

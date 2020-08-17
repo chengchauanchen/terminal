@@ -1065,7 +1065,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             default:
                 break;
         }
-        return degrees+(DeviceUtil.isH40()||DeviceUtil.isTB8766P1_BSP_1G()?90:0);
+        return degrees+(DeviceUtil.isH40()||DeviceUtil.isTB8766P1_BSP_1G()||DeviceUtil.isC3()?90:0);
     }
 
     protected class PushCallback implements InitCallback {

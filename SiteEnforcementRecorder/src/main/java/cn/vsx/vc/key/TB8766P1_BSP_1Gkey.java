@@ -1,14 +1,12 @@
 package cn.vsx.vc.key;
 
-import android.content.IntentFilter;
+
+import android.os.Build;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import org.apache.log4j.Logger;
-
-import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.receiver.KeyEventFromCL310AReceiver;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.ScrrenUtils;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
 
@@ -30,6 +28,9 @@ public class TB8766P1_BSP_1Gkey extends BaseKey {
     private static final int KEY_CODE_AUDIO = 25;
     //菜单和上传日志
     private static final int KEY_CODE_MENU_AND_UPLOAD = 24;
+
+    //菜单和上传日志
+    private static final int KEY_CODE_HOME = 4;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -64,6 +65,10 @@ public class TB8766P1_BSP_1Gkey extends BaseKey {
                         uploadLog();
                     }
                 }
+
+                return true;
+            case KeyEvent.KEYCODE_BACK:
+               ScrrenUtils.getInstance().openBacklight("2");
                 return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -98,6 +103,13 @@ public class TB8766P1_BSP_1Gkey extends BaseKey {
                     menuKey();
                 }
                 menuKeyIsLongPress = false;
+                return true;
+            case KeyEvent.KEYCODE_BACK:
+                //短按是菜单键
+//                if (!powerSupplymenuKeyIsLongPress) {
+//                    ScrrenUtils.getInstance().openBacklight("2");
+//                }
+//                powerSupplymenuKeyIsLongPress = false;
                 return true;
         }
         return super.onKeyUp(keyCode, event);
