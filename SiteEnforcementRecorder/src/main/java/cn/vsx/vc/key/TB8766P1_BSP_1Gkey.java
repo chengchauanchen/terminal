@@ -71,7 +71,7 @@ public class TB8766P1_BSP_1Gkey extends BaseKey {
                ScrrenUtils.getInstance().openBacklight("2");
                 return true;
         }
-        return super.onKeyDown(keyCode, event);
+        return true;
     }
 
     @Override
@@ -112,6 +112,6 @@ public class TB8766P1_BSP_1Gkey extends BaseKey {
 //                powerSupplymenuKeyIsLongPress = false;
                 return true;
         }
-        return super.onKeyUp(keyCode, event);
+        return true;
     }
 }

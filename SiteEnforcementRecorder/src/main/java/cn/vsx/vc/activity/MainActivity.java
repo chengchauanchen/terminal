@@ -246,7 +246,9 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         //停止上报最长时长的倒计时
         cancelLivingStopAlarmAlarmManager();
         myHandler.removeMessages(HANDLE_LIVING_STOP_TIME_DELAY_TIME);
-
+        if (DeviceUtil.isTB8766P1_BSP_1G()){
+            ScrrenUtils.getInstance().openBacklight("1");
+        }
 //        //初始化红外的开关的状态
 //        initInfraRedState();
     }
@@ -314,7 +316,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         registerHeadsetPlugReceiver();
-        ScrrenUtils.getInstance().openBacklight("1");
     }
 
     @Override
@@ -340,7 +341,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         onRecordAudioDenied = false;
         onLocationDenied = false;
         onCameraDenied = false;
-
         //清楚所有通知
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
@@ -377,12 +377,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     public void onPause() {
         super.onPause();
         disableReaderMode();
-//        if (mMediaStream!=null){
-//            Camera camera = mMediaStream.getCamera();
-//            camera.startPreview();
-//        }
     }
-
 
     @Override
     public void doOtherDestroy() {
@@ -1417,7 +1412,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     public void onBackStackChanged() {
         resetCurrentFragment();
     }
-
 
 
     private final class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
