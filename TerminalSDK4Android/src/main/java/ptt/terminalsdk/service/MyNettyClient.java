@@ -187,7 +187,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     public void connect(){
         try{
             super.connect();
-        }catch(InterruptedException e){
+        }catch(Exception e){
             e.printStackTrace();
         }
     }

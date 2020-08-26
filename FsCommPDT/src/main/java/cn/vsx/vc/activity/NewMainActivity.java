@@ -1133,7 +1133,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
         //上传没有上传的文件信息
-        manager.uploadFileTreeBean(null);
+        manager.uploadFileTreeBean(null,false);
         //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
         manager.checkStartExpireFileAlarm();
         if(!FloatWindowManager.getInstance().checkPermission(this)){
