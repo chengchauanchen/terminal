@@ -197,34 +197,6 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		return null;
 	}
 
-	@Override
-	public String postFiles(String url, List<File> files, Map<String, String> paramsMap) {
-		try{
-			HttpPost httppost = new HttpPost(url);
-			logger.info("文件服务器地址为" + url);
-			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			for(String str : paramsMap.keySet()){
-				builder.addPart(str, new StringBody(paramsMap.get(str), ContentType.TEXT_PLAIN));
-			}
-			int count = 0;
-			for (File file: files) {
-				builder.addBinaryBody("file"+count, file);
-				count++;
-			}
-
-			DefaultHttpClient client = getHttpClient(timeOut);
-			httppost.setEntity(builder.build());
-			HttpResponse response = client.execute(httppost);
-			if (null != response) {
-				byte[] responseArray = EntityUtils.toByteArray(response
-						.getEntity());
-				return new String(responseArray, DEFAULT_ENCODING);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 	private DefaultHttpClient getHttpClient(int timeOut) {
 		BasicHttpParams httpParams = new BasicHttpParams();
 		HttpConnectionParams.setSoTimeout(httpParams, timeOut);
