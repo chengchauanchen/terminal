@@ -1480,7 +1480,7 @@ public class ReceiveHandlerService extends Service{
                 FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
                 //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
                 //上传没有上传的文件信息
-                manager.uploadFileTreeBean(null);
+                manager.uploadFileTreeBean(null,false);
             }
         }
     };
@@ -1495,7 +1495,7 @@ public class ReceiveHandlerService extends Service{
                 FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
                 //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
                 //上传没有上传的文件信息
-                manager.uploadFileTreeBean(null);
+                manager.uploadFileTreeBean(null,false);
             }
         }
     };
